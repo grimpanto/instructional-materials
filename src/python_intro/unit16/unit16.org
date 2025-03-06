@@ -1,0 +1,80 @@
+
+
+#+TITLE: Python \hfill Unit 16\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \setminted{escapeinside=´´}
+
+* Kommandozeilenverarbeitung - 3
+#+BEGIN_EXAMPLE
+Shooter Number One
+
+Usage:
+  shooter ship new <name>...
+  shooter ship <name> move <x> <y> [--speed=<kn>]
+  shooter ship shoot <x> <y>
+  shooter mine (set|remove) <x> <y> [--moored|--drifting]
+  shooter -h | --help
+  shooter --version
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  --speed=<kn>  Speed in knots [default: 10].
+  --moored      Moored (anchored) mine.
+  --drifting    Drifting mine.
+#+END_EXAMPLE
+
+* SelectionSort - 1
+- Idee
+  1. Lege neue Ergebnisliste an
+  2. Finde das kleinste Element in der Liste.
+  3. Hänge dieses Element an die Ergebnisliste
+  4. entferne es aus der Liste
+  5. wenn die Liste noch nicht leer ist, gehe zu Schritt 1) zurück.
+- Name
+  - Auswahl des jeweils kleinstem Elementes aus der Liste
+- Beispiel
+  - =[15, 2, 43, 17, 4, 8, 47]=
+  - =[2​]=, =[15, 43,17,4,8,47]=
+  - =[2,4]=, =[43,17,15,8,47]=
+  - ...
+
+* SelectionSort - 2
+- Prinzip
+  a. Finde Position $j_0$ des kleinsten Elementes von
+     $a[0​],...,a[n-1]$ und verstausche $a[0​]$ mit $a[j_0]$.
+  b. Finde Position $j_1$ des kleinsten Elementes von
+     $a[1​],...,a[n-1]$ und vertausche $a[1​]$ mit
+     $a[j_1]$.
+     - das ist das Element mit dem zweitkleinstem Schlüssel unter
+       allen n Elementen
+  c. Das wird solange durchgeführt bis alle Elemente an ihrem
+     richtigen Platz stehen.
+- Frage: Wo ist da die Ergebnisliste?
+  - Geht auch /mit/ Ergebnisliste
+  - je nach Programmiersprache mit Array (je nach Aufgabenstellung:
+    effizienter)
+
+* SelectionSort - 3
+#+begin_src python
+def selection(seq):
+    n = len(seq)
+    for i in range(n-1): # i von 0 bis n-2
+        min = i
+        for j in range(i+1,n): # j von i+1 bis n-1
+            if seq[j] < seq[min]:
+                min = j
+        seq[min], seq[i] = seq[i], seq[min]
+    return seq
+#+end_src

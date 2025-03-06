@@ -1,0 +1,144 @@
+#+TITLE: Erstellen von Libraries unter Linux
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* =mathutils.h=
+#+header: :exports code :tangle src/mathutils.h :main no
+#+begin_src C++
+#ifndef MATHUTILS_H
+#define MATHUTILS_H
+double my_sqrt(double);
+#endif
+#+end_src
+
+* =mathutils.cpp=
+#+header: :exports code :tangle src/mathutils.cpp :main no
+#+begin_src C++
+#include <cmath>
+
+#include "mathutils.h"
+
+double my_sqrt(double x) {
+    return std::sqrt(x);
+}
+#+end_src
+
+* =main.cpp=
+#+header: :exports code :tangle src/main.cpp :main no
+#+begin_src c++
+#include <iostream>
+
+#include "mathutils.h"
+
+using namespace std;
+
+int main() {
+    cout << my_sqrt(2) << endl;
+}
+#+end_src
+
+* Statische Library
+1. Übersetzen der Module
+   #+begin_src sh
+   $ g++ -c mathutils.cpp
+   $ g++ -c main.cpp
+   $ ls *.o
+   main.o  mathutils.o
+   $ 
+   #+end_src
+2. Executable erstellen (ohne Library)
+   #+begin_src sh
+   $ g++ -o go main.o mathutils.o
+   #+end_src
+3. Starten
+   #+begin_src sh
+   $ go
+   1.41421
+   #+end_src
+
+* Statische Library -- 2
+4. [@4] Library erstellen
+   #+begin_src sh
+   $ ar crv libmathutils.a mathutils.o
+   a - mathutils.o
+   #+end_src
+5. Linken
+   - Variante 1
+     #+begin_src sh
+     g++ -o go main.o libmathutils.a
+     #+end_src
+   - Variante 2
+     #+begin_src sh
+     g++ -o go main.o -L. -lmathutils
+     #+end_src
+
+* Symbole einer Library
+1. Symbole auslesen
+   #+begin_src sh
+   nm libmathutils.a 
+
+   mathutils.o:
+            U _GLOBAL_OFFSET_TABLE_
+            U sqrt
+   00000000 T __x86.get_pc_thunk.ax
+   00000000 T _Z7my_sqrtd
+   #+end_src
+
+2. "demangle"
+   #+begin_src sh
+   $ c++filt _Z7my_sqrtd
+   my_sqrt(double)
+   #+end_src
+
+* Dynamische Library
+1. Verwendete dynamische Libraries anzeigen
+   #+begin_src sh
+   $ ldd go
+   linux-gate.so.1 (0xb7780000)
+   libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb75d6000)
+   libm.so.6 => /usr/lib/libm.so.6 (0xb74da000)
+   libgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0xb74bd000)
+   libc.so.6 => /usr/lib/libc.so.6 (0xb72e8000)
+   /lib/ld-linux.so.2 => /usr/lib/ld-linux.so.2 (0xb7782000)
+   #+end_src
+
+2. Library erstellen
+   #+begin_src sh
+   $ g++ -shared -fPIC -o libmathutils.so mathutils.o
+   #+end_src
+   - =-fPIC= ... position independent code
+
+* Dynamische Library -- 2
+3. [@3] Executable erstellen
+   #+begin_src sh
+   $ g++ -o go main.o libmathutils.so
+   #+end_src
+   
+4. u.U.:
+   #+begin_src sh
+   $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+   #+end_src
+
+5. Benützte Libraries anzeigen:
+   #+begin_src sh
+   $ ldd go
+   linux-gate.so.1 (0xb771b000)
+   libmathutils.so => ./libmathutils.so (0xb7711000)
+   libstdc++.so.6 => /usr/lib/libstdc++.so.6 (0xb756e000)
+   libm.so.6 => /usr/lib/libm.so.6 (0xb7472000)
+   libgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0xb7455000)
+   libc.so.6 => /usr/lib/libc.so.6 (0xb7280000)
+   /lib/ld-linux.so.2 => /usr/lib/ld-linux.so.2 (0xb771d000)
+   #+end_src

@@ -1,0 +1,217 @@
+
+
+#+TITLE: Python \hfill Unit 4\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Boolsche Ausdrücke - 1
+#+BEGIN_SRC python
+>>> 5.5 > 2
+True
+>>> 2 - 1 >= 1 and 1 < 1
+False
+>>> 1 < 1 or 42 % 2 == 0
+True
+>>> not 5 > 3
+False
+>>> True ^ True
+False
+#+END_SRC
+
+* Boolsche Ausdrücke - 2
+#+BEGIN_SRC python
+>>> bool(1)
+True
+>>> bool(5)
+True
+>>> bool(-7.2)
+True
+>>> bool(0)
+False
+>>> bool(0.0)
+False
+>>> bool("abc")
+True
+>>> bool("")
+False
+#+END_SRC
+
+* Boolsche Ausdrücke - 3
+#+BEGIN_SRC python
+>>> int(True)
+1
+>>> int(False)
+0
+>>> float(True)
+1.0
+>>> str(True)
+'True'
+#+END_SRC
+
+* =if= - Anweisung - 1
+#+BEGIN_SRC python
+x = int(input("x="))
+y = int(input("y="))
+if x == y:
+    print("x == y")
+elif x < y:
+    print("x < y")
+else:
+    print("x > y")
+#+END_SRC
+
+* =if= - Anweisung - 2
+#+BEGIN_SRC python
+>>> if 1:
+...     print("Hi, how are you?")
+... 
+Hi, how are you?
+>>> if "":
+...     print("Never ever!")
+...
+>>>
+#+END_SRC
+
+* Funktion definieren - 1
+#+BEGIN_SRC python
+>>> def print_name():  # Funktionsdefinition
+...     print("Maxi")
+...
+>>> print_name()  # Funktionsaufruf
+Maxi
+>>> def print_name():
+...     print("Maxi")
+...     print("Mustermann")
+...
+>>> print_name()
+Maxi
+Mustermann
+>>>
+#+END_SRC
+
+* Funktion definieren - 2
+#+BEGIN_SRC python
+>>> first_name = "Maxi"
+>>> last_name = "Mustermann"
+>>> def print_name():
+...     print(first_name)
+...     print(last_name)
+...
+>>> print_name()
+Maxi
+Mustermann
+>>> print_name
+<function print_name at 0xb6f366ec>
+#+END_SRC
+
+* Funktion definieren - 3
+#+BEGIN_SRC python
+>>> a = 3
+>>> b = 4
+>>> def sum():
+...     res = a + b
+...     print(res)
+...
+>>> sum()
+7
+>>> print(res)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'res' is not defined
+#+END_SRC
+
+* Funktion definieren - 4
+#+BEGIN_SRC python
+>>> res = 0
+>>> sum()
+7
+>>> res
+0
+>>>
+#+END_SRC
+
+* Funktion definieren - 5
+#+BEGIN_SRC python
+>>> res = 0
+>>> def acc():
+...     res = res + x
+...     return res
+...
+>>> x = 3
+>>> acc()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 2, in acc
+UnboundLocalError: local variable 'res' referenced before assignment
+#+END_SRC
+
+* Funktion definieren - 6
+#+BEGIN_SRC python
+>>> res = 0
+>>> def acc():
+...     global res  # pfui!
+...     res = res + x
+...
+>>> x = 3
+>>> acc()
+>>> res
+3
+>>> x = 4
+>>> acc()
+>>> res
+7
+#+END_SRC
+* Short-circuit evaluation - 1
+#+BEGIN_SRC python
+>>> def f(b):
+...     print("inside f")
+...     return b
+... 
+>>> def g(b):
+...     print("inside g")
+...     return b
+... 
+>>> f(True) and g(False)
+inside f
+inside g
+False
+>>> f(False) and g(True)
+inside f
+False
+#+END_SRC
+* Short-circuit evaluation - 2
+#+BEGIN_SRC python
+>>> f(False) or g(True)
+inside f
+inside g
+True
+>>> f(True) or g(False)
+inside f
+True
+#+END_SRC
+* Boolsche vs. Bit-Operatoren
+#+BEGIN_SRC python
+>>> f(False) & g(True)
+inside f
+inside g
+False
+>>> f(True) | g(False)
+inside f
+inside g
+False
+>>> f(True) ^ g(True)
+inside f
+inside g
+False
+#+END_SRC
+

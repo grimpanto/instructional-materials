@@ -1,0 +1,253 @@
+#+TITLE: Softwareentwicklungsprozesse
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Tätigkeiten -- SW-Entwicklungsproz.
+\vspace{1em}
+- Anforderungsanalyse (engl. requirements engineering)
+  - Erfassung und Beschreibung der Anforderungen
+  - Anforderungsdokument oder Lastenheft (Auftraggeber)
+  - Pflichtenheft (akkordiert zw. Auftraggeber und Auftragnehmer)
+  - Welche Funktionaliät soll das System aufweisen?
+- Analyse (engl. analysis)
+  - Systemelemente und deren Beziehungen zur Umwelt
+  - Ist-Zustand vs. Sollzustand
+  - Wie ist die Domäne aufgebaut?
+- Entwurf (engl. design)
+  - Architekturdokument
+  - Wie wird die Software gebaut?
+- Implementierung (engl. implementation)
+- Testen
+- Deployment (dt. Einsatz)
+
+* Softwareentwicklungsprozesse
+- Wasserfallmodell
+- Rational Unified Process (RUP)
+  - Open Unified Process (OpenUP)
+    - angelehnt an RUP (von Eclipse)
+  - Agile Unified Process (AUP)
+- V-Modell XT
+- XP (eXtreme Programming)
+- Test Driven Delepment (TDD)
+- Scrum
+- Kanban
+
+* RUP - Prinzipien (best practices)
+- Iterative Softwareentwicklung                    
+- Projektbegleitendes Qualitätsmanagement          
+- Komponentenbasierte Architektur \lto Testen      
+- Visuelle Modellierung \lto UML                   
+- Kontrolliertes Änderungsmanagement               
+- Anforderungsmanagment
+
+* RUP - Phasen
+1. Inception (dt. Anfang, Beginn, Gründung)
+
+   Konzeption, Ausarbeitung einer Vision, eines klaren Zieles
+
+2. Elaboration (dt. Ausarbeitung)
+
+   Erstellung einer Architektur, Ausarbeitung der Use Cases
+
+3. Construction
+
+   Entwicklung und Testen
+
+4. Transition
+
+   Übergabe und Auslieferung
+
+* RUP - Tätigkeiten
+- Business Modelling (dt. Geschäftsprozessmodellierung)
+  Dokumentation und Optimierung der Geschäftsprozesse
+- Requirements Engineering (dt. Anforderungsanalyse)
+- Analysis & Design (dt. Analyse und Entwurf)      
+- Implementation (dt. Umsetzung)
+- Test
+- Deployment
+   
+* RUP - Übersicht
+[[./Development-iterative.png]]
+
+Quelle: de.wikipedia.org
+
+* Produktvision
+- Zielgruppen
+- Bedürfnisse und Probleme der Zielgruppe
+- Skizze des Produktes, das die Bedürfnisse und Probleme löst.
+  - Kann 3-5 Key-Features enthalten
+- wird im Zuge von Scrum verwendet
+
+* Systemidee
+- Eckdaten der Systemidee:
+  - ca. halbe Seite
+  - sollte auf einen "Produktkarton" aufdruckbar sein und dementsprechend
+    präsentiert werden können
+- Inhalt der Systemidee:
+  - Name des Produktes
+  - beschreibt was mit dem System erreicht werden soll
+  - enthält eine Auflistung der 5-15 wichtigsten Eigenschaften und Leistungsmerkmale
+  - enthält Randbedingungen (SW & HW Anforderungen, Finanzen, Termine,
+    organisatorische und personelle Voraussetzungen,...)
+
+* Anforderung
+- Anforderung beschreibt ein oder mehrere
+  - Eigenschaften oder Verhaltensweisen,
+  - die stets erfüllt sein müssen
+- Art, d.h. Unterteilung in:
+  - funktional
+  - nichtfunktional
+  
+* Nichtfunktionale Anforderungen
+- Benutzbarkeit
+- Performance
+- Zuverlässigkeit
+- Wartbarkeit
+- Administrierbarkeit
+- Rahmenbedingungen
+
+* Aufbau von Anforderungen
+- Name
+- Art
+- Beschreibung
+- Stabilität: absolut stabil, stabil, instabil, flüchtig
+- Verbindlichkeit: Pflicht, Wunsch, Absicht, Vorschlag
+- Priorität: hoch, mittel, niedrig
+- Detailbeschreibung: Motivation, Ursache, Hintergrund, Ansprechpartner,
+  Unterlagen, Beispiele, Randbedingungen,...
+- Verweise, Änderunghistorie, Bemerkungen
+  
+* Anwendungsfall
+- Stellt strukturierte Beschreibung der Interaktion mit dem System dar
+- siehe UML Anwendungsfalldiagramm!
+- Arten von Anwendungsfällen (engl. use case)
+  - Geschäftsanwendungsfälle
+    - geschäftlicher Ablauf ohne systemtechnische Umsetzung
+    - \ar Geschäftsprozessmodellierung
+  - Systemanwendungsfall
+    - beschreibt Interaktion mit System (HW, SW)
+- Text!
+  
+* Aufbau eines Anwendungsfalles
+\vspace{1em}
+- Name
+- Kurzbeschreibung
+- Akteure
+- Auslöser
+- Ergebnisse
+- Hauptablauf
+- Eingehende Daten, Ausgehende Daten
+- Ausnahmen, Fehlersituationen
+- Vorbedingungen, Nachbedingungen
+- Offene Punkte, Änderungshistorie, Bemerkungen
+- Anhänge wie Diagramme, ext. Dokumente
+- meist auch: Aktivitätsdiagramme
+
+* Beispiel eines Anwendungsfalles
+- Name :: Termin erfassen
+- Kurzbeschreibung :: Der Benutzer erstellt einen Termin mit einem Datum, einer
+     Uhrzeit, einer Liste der Teilnehmer und einem Text
+- Akteure :: Benutzer
+- Hauptablauf ::
+  1. Datum und Zeit werden ausgewählt und müssen in der Zukunft liegen
+  2. Gewählter Termin wird mit den Teilnehmern auf Kollisionen überprüft
+  3. Der Kalender wird aktualisiert
+  4. Die Teilnehmer werden per E-Mail bzw. Fax verständigt
+- Nachbedingungen :: keine Überschneidungen der Termine für die angegebenen Teilnehmer
+
+* User-Stories
+- Aufbau: =Als <Rolle> möchte ich <Ziel/Wunsch>, um <Nutzen>=
+  - kürzere Version: =Als <Rolle> möchte ich <Ziel/Wunsch>=
+- Beispiel:
+  
+  \vspace{0.5em}
+  "Als Benutzer möchte ich einen Termin erfassen, um zwei Tage
+  im Voraus erinnert zu werden."
+* Lizenzen
+- Closed-Source
+- Open-Source
+  - copyleft
+    - Veränderung oder Integration in eigenen Quellcode \to selbe Lizenz
+    - bedeutet keine Abwesenheit von Copyright, im Gegenteil
+      Copyright ist notwendig (wer hat...)!
+  - permissive
+    - Software kann (auch abgeändert) unter jeder beliebigen Lizenz verwendet werden
+    - Beispiele: BSD, Apache, MIT
+- Public Domain
+  - Frei von Urheberrechten (Copyright)
+    - in Kontinentaleuropa nicht möglich?!
+
+* Lizenzen -- Copyleft
+- Veränderung oder Integration in eigenen Quellcode \to selbe Lizenz
+- starkes copyleft, wie z.B. GPL: Verkauf oder Einbindung in andere
+  (eigene) SW, dann Quellcode muss zur Verfügung gestellt werden
+  - extrem starkes copyleft, wie z.B. AGPL (Affero GPL): Verwendung der
+    Software über Netzwerk, dann Quellcode muss weitergegeben werden!
+- schwaches copyleft, wie z.B. LGPL (Lesser GPL): Quelloffene SW kann in
+  proprietärer SW genutzt werden, solange Benutzer diese selbständig verwenden
+  kann \to dynamisches (oder statisches) Linken. Die Lizenz des proprietären Teiles
+  muss nicht unter die Open-Sourze-Lizenz gestellt werden.
+  - Installationsanleitungen, damit Benutzer SW mit eigener Version
+    linken kann.
+
+* Lizenzen -- Versionsproblematik
+- Software unterschiedlicher Lizenzen oder Lizenzversionen sind
+  meist schwer miteinander zu kombinieren
+  - Da oft verlangt wird, dass die gesamte Software unter
+    eine Lizenz gestellt wird (auch bzgl. der Versionen,
+    wie z.B. GPLv2 vs. GPLv3)

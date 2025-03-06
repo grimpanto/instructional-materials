@@ -1,0 +1,56 @@
+<html>
+<head>
+    <title>Tes</title>
+    <style>
+       :valid { color:red; }
+    </style>
+</head>
+<body>
+  <div id='donauturm' data-height='252'></div>
+  <script>
+  var building = document.getElementById('donauturm');
+  var height = parseInt(building.dataset.height);
+  building.dataset.height = height + 1 + 'm';
+  alert(building.dataset.height);
+
+  var d = [1, 2, 3];
+  delete d[1];
+  d["a"] = true;
+  console.log(d.toString());
+  console.log(d);
+  console.log(d.length);
+  for (var i in d) console.log(d[i]);
+  console.log("XXX");
+  for (var i=0; i < d.length; i++) console.log(d[i]);
+  console.log("XXX");
+
+  for (i in ["a", "b", "c"])
+  console.log(i);
+/*  console.log(Object.prototype);
+  console.log(Object.prototype.__proto__);
+  console.log(Object.prototype.constructor);
+  console.log(Object.__proto__);
+  console.log(Object.__proto__.__proto__);
+  console.log(Object.__proto__.__proto__.__proto__);
+  console.log(Object.__proto__.prototype); */
+/*    function Point(x, y) {
+       this.x = x;
+       this.y = y;
+    }
+    var p1 = new Point(1, 1);
+    var p2 = Object.create(p1);
+    console.log(Object.getPrototypeOf(p1) === Point.prototype);
+    console.log(p2.constructor === Point);
+    console.log(Point.prototype);
+    console.log(p2.constructor.prototype === Point.prototype);
+    console.log(Point.prototype);
+
+    Point.prototype.dist0 = function() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    var o1 = {x:1, y:2};
+*/
+  </script>
+</body>
+</html>

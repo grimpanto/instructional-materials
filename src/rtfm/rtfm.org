@@ -1,0 +1,70 @@
+#+TITLE: RTFM
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* RTFM
+- ``Read the fucking manual''
+- „Lies das verdammte Handbuch“, auch in der (eventuell auch nur
+  vorgeblich) höflicheren Variante „read the fine manual“ („Lies das gute
+  Handbuch“) möglich. (Unter anderem) im IT-Bereich gilt es als unhöflich, sich
+  bei Problemlösungen ausschließlich auf die Hilfe anderer zu verlassen,
+  anstatt zuerst selbst nach einer Lösung zu suchen. Daher ist dieses Akronym
+  eine Aufforderung, speziell bei entsprechend einfachen Problemen zunächst
+  selbst zu versuchen, diese zu lösen (eben mit Hilfe von Handbüchern,
+  Dokumentationen etc.), bevor man andere um Rat fragt.
+
+
+#+latex: \scriptsize
+[[https://de.wikipedia.org/wiki/Liste_von_Abk%C3%BCrzungen_(Netzjargon)#R]]
+

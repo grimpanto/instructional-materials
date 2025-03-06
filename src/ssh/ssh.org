@@ -1,0 +1,378 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill SSH
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \usepackage{pifont}  % necessary for "ding"
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{☛}{{\ding{43}}}
+#+LATEX_HEADER: \newunicodechar{✔}{{\ding{52}}}
+#+LATEX_HEADER: \newunicodechar{✘}{{\ding{55}}}
+#+LATEX_HEADER: \newunicodechar{◆}{{\ding{169}}}
+
+# http://www.jfranken.de/homepages/johannes/vortraege/ssh3.de.html
+# https://robotmoon.com/ssh-tunnels/
+
+* SSH -- Secure Shell
+- Protokoll & Anwendungen
+- Sicherheitsdienste
+  - Geheimhaltung ✔
+  - Integrität ✔
+  - Authentifizierung ✔
+  - Zugriffskontrolle (✔)
+    - indirekt über Zugriffskontrolle des Servers
+  - Nicht-Zurückweisung ✘
+    - einseitig und indirekt über Logging-Mechanismen
+      des Servers (falls vorhanden)
+
+* SSH - OpenSSH
+Programme: umfangreiche Konfiguration \to =man ssh=, =man sshd=,...
+- Clients: =ssh=, =scp=, =sftp=, =sshfs=
+  1. Kommandozeilenargumente
+  2. =~/.ssh/config=
+  3. =/etc/ssh/ssh_config=
+- Server: =sshd=
+  1. Kommandozeilenargumente
+  2. =/etc/ssh/sshd_config=
+- Unix: OpenSSH 7 (Protokoll Version 2)!
+- Windows: =putty=, =winscp=
+
+* Geheimhaltung
+\vspace{1em}
+- symmetrische Verschlüsselung
+  - Schlüsselaustausch mittels Diffie-Hellman \to Session Key \to perfect forward security (PFS)
+    - PFS \to Session Key nicht aus Langzeitschlüssel regenerierbar!
+  - verschiedene Algorithmen: Server bietet an, Client wählt!
+    #+begin_src sh
+    ssh -Q cipher
+    #+end_src
+
+    | 3des-cbc                      |
+    | aes128-cbc                    |
+    | aes192-cbc                    |
+    | aes256-cbc                    |
+    | ...                           |
+- Optionen (von =ssh=-Clients)
+  - =-c= \ldots{} Liste von Cipher-Spezifikationen (getrennt durch =​,​=)
+
+* Integrität
+\vspace{1em}
+- Message Authentication Code (MAC)
+  - verschiedene Algorithmen
+    #+begin_src sh
+    ssh -Q mac
+    #+end_src
+
+    | ...                      |
+    | hmac-sha1                |
+    | hmac-sha1-96             |
+    | hmac-sha2-256            |
+    | hmac-sha2-512            |
+    | hmac-md5                 |
+    | ...                      |
+    | umac-128-etm@openssh.com |
+- Optionen (von =ssh=-Clients)
+  - =-m= \ldots{} Liste von MACs
+
+* Authentifizierung
+\vspace{1em}
+1. GSSAPI
+   - Generic Security Service API (IETF Standard)
+   - Schnittstelle zu Sicherheitsdienst
+     - \to Kerberos (verteilte Authentifizierung)
+2. Host-basiert
+   - =/etc/hosts.equiv=, Benutzernamen am Client und Server gleich
+   - =~/.rhosts=: host + username
+   *+* Hostkey vom Client in =~/.ssh/known_hosts=
+3. Public Key
+4. Challenge-Response
+   - z.B. mit Google Authenticator
+5. Passwort
+
+* Authentifizierung - 2
+- Account muss zugreifbar sein
+  - nicht gesperrt (=/etc/passwd=)
+  - Benutzer nicht in =DenyUsers= (\to =/etc/ssh/sshd_config=)
+  - Gruppe nicht in =DenyGroups=
+
+* Login Vorgang
+\vspace{1em}
+1. Ausgabe des letzten Login-Vorganges und =/etc/motd=
+2. Zugriffszeit loggen
+3. kein Zugriff wenn =/etc/nologin= (außer =root=) \to Inhalt wird ausgegeben
+4. Wechsel auf *normale* Benuzterprivilegien!
+5. /Umgebungsvariable/ setzen
+   - wenn erlaubt (=PermitUserEnvironment= in =/etc/sshd_config=), dann
+     Umgebungsvariable gemäß =~/.ssh/environment=!
+6. Wechsel ins Home-Verzeichnis
+7. =~/.ssh/rc= ausführen
+   - wenn erlaubt \to =PermitUserRC=
+8. Shell oder Kommando ausführen
+
+* =known_hosts= - Datei
+- Server: jeder Client, der sich mittels host-basierter Authentifizierung
+  authentifizieren will benötigt einen Hostkey.
+  - \to K_pub in:
+    - =/etc/ssh/known_hosts=
+- Client: jeder Server besitzt Hostkey.
+  - \to K_pub in:
+    - =/etc/ssh/known_hosts=
+    - =~/.ssh/known_hosts=
+- Abfrage eines K_pub
+  - =ssh-keyscan host=
+    - =ssh-keyscan ifssh.htlwrn.ac.at=
+    
+* =known_hosts= - Client
+1. Server überträgt Host-Key an Client
+2. Client überprüft =known_hosts=
+   - nicht enthalten \to Benutzer kontaktieren!
+   - enthalten
+     - gleich \to OK
+     - nicht gleich \to Benutzer kontaktieren!
+       (möglicherweise Server spoofing)
+\to =ssh-keygen -lv -f ~/.ssh/known_hosts=
+- -l ... zeigt Fingerprint
+- -v ... verbose \to ASCII art des Keys
+- -f ... file \to Angabe der Datei
+
+* Anwendungen
+- Entfernter Zugriff
+- Entfernte Ausführung
+- Entferntes Kopieren
+- Dateiserver
+- Entferntes Dateisystem
+- Port forwarding
+- VPN
+  - Layer 2 & Layer 3
+  - für temporäre VPNs (da overhead)
+
+* Entfernter Zugriff
+- \to Systemadministration!
+- =ssh username@hostname=
+  - =ssh ko@ifssh.htlwrn.ac.at=
+- Escape-Kommandos: =<Enter>~= gefolgt von
+  - =.= \ldots{}{} beendent Sitzung (inkl. aller Tunnels)
+  - =&= \ldots{}{} versetzt ssh in den Hintergrund
+  - =<Ctrl>-z= \ldots{}{} zeitweiliges Aussetzen (suspend) (\to =fg=)
+  - =#= \ldots{}{} zeigt alle Verbindungen über die gerade getunnelt wird
+  - =?= \ldots{}{} Hilfemenü
+- Optionen
+  - =-p PORT= \ldots{} anstatt defaultmäßig 22
+
+* Entfernte Ausführung
+- Starten von Anwendungen auf entfernten Hosts
+- =ssh username@hostname command arguments=
+  - =ssh ko@ifssh.htlwrn.ac.at ls public/nvs5=
+  - d.h. wie entfernter Zugriff, also mit Shell als Kommando
+- keine Benutzerangabe \to lokaler Benutzer
+- noch nie mit Server verbunden \to =known_hosts=
+- Optionen
+  - =-t= \ldots{} Pseudo-Terminal \to interaktive Programme
+    - =ssh -t ko@ifssh.htlwrn.ac.at vim test.txt=
+
+* Entferntes Kopieren
+- =scp source dest=
+- zwischen localhost und remote host
+  - =scp local.txt ko@ifssh.htlwrn.ac.at:=
+  - =scp ko@ifssh...at:public/remote.txt .=
+- zwischen zwei remote hosts
+  - =scp ko@ifssh...at:public/nvs5/remote.txt ko@ifssh...at:remote.txt=
+- Optionen
+  - =-r= \ldots{} rekursives Kopieren
+  - =-p= \ldots{} (preserve) gleiche Änderungszeit, Zugriffszeit und Modus
+    wie Quelldatei
+  - =-C= \ldots{} Komprimierung (alle Anwendungen!)
+
+* Funktionalität eines Dateiservers
+- interaktiv
+- Verzeichnisse auflisten, navigieren, Dateien löschen, umbenennen
+  (verschieben) Verzeichnisse anlegen, zum/vom Server kopieren (auch mit
+  fortsetzen der Übertragung), Besitzer und Rechte ändern
+- =sftp username@hostname=
+  - =sftp ko@ifssh.htlwrn.ac.at=
+  - =ls=, =cd=, =get=, =put=,..., =help=
+- Optionen
+  - =-a= \ldots{} unterbrochene Übertragung fortsetzen
+  - =-b file= \ldots{} führt Inhalt der Datei im Batch aus
+  - =-p= und =-r= \ldots{} wie bei =scp=
+
+* Entferntes Dateisystem
+- Einbinden eines entfernten Verzeichnisses in den lokalen Verzeichnisbaum
+  (engl. mount)
+- =sshfs username@hostname:dir mountpoint=
+  - =sshfs ko@ifssh.htlwrn.ac.at:public/nvs5 nvs5=
+  - lokales Verzeichnis muss existieren
+- unmounting: =fusermount -u mountpoint=
+  - =fusermount -u nvs5=
+
+* Port forwarding
+- lokalen Port forwarden
+- dynamischen Port forwarden
+- entfernten Port forwarden
+
+* Lokaler Port
+\vspace{1em}
+- lokalen Port zu entfernten Host über Gateway per SSH
+- =ssh -L lport:host:hostport sshgateway=
+  - =ssh -L 1234:www.htlwrn.ac.at:80 ko@ifssh.htlwrn.ac.at=
+    - Namensauflösung von =www.htlwrn.ac.at= am =ifssh.htlwrn.ac.at=!
+- Optionen
+  - =-g= ... entfernte Rechner können auf lokalen Port des lokalen
+    Rechners zugreifen
+  - =-N= ... führt keine entfernte Kommandos aus, d.h. auch keine Shell
+- Anwendung: Zugriff auf entfernten Host
+  - mittels sicherer Kommunikation
+  - zu Umgehung einer Beschränkung (Firewall)
+
+* Tunnel verschachteln
+- Tunnel von =hostB= \to =hostC=
+  - auf =hostB=
+    - =ssh -gL 2222:hostD:22 hostC=  
+- Tunnel von =hostA= \to =hostD= über =hostB= & =hostC=
+  - auf =hostA=
+    - =ssh -p 2222 -gL 3333:server:3333 hostB=
+- =client= verbindet sich zu =hostA=, Port 3333
+  - und erlangt Verbindung zu =server=, Port 3333
+- Anwendung: Kein direkter Tunnel möglich, daher Umweg über anderen Tunnel
+
+* Dynamischer Port
+- vom lokalen Port zu beliebigen Hosts über Gateway per SSH
+  - wird zu SOCKS Proxy
+- =ssh -D lport sshgateway=
+  a. =ssh -C -D 9999 ko@ifssh.htlwrn.ac.at=
+  b. Firefox: Preferences \to Advanced \to Connection \to Settings
+     - /Manual proxy configuration/ \to checked
+     - /Use this proxy server for all protocols/ \to unchecked
+     - alle bis auf SOCKS leeren
+     - SOCKS: /localhost/ und /9999/
+  c. Firefox: DNS ebenfalls über Proxy
+     - =about:config= \to =network.proxy.socks_remove_dns= \to =true=
+  
+* Entfernter Port
+\vspace{1em}
+- entfernten Port vom Gateway über lokalen Host auf anderen Host
+  und Port weiterleiten
+- =ssh -R rport:host:hostport sshgateway=
+  - =ssh -R 8080:edvoexam.htlwrn.ac.at:80 ko@ifssh.htlwrn.ac.at=
+    - \to Webbrowser auf =ifssh.htlwrn.ac.at= starten und =localhost:8080= \to
+      Intranetwebsite zugreifbar
+  - =ssh -R 2222:edvoexam.htlwrn.ac.at:22 ko@ifssh.htlwrn.ac.at=
+    - \to =ssh -p 2222 localhost= auf =ifssh.htlwrn.ac.at= \to SSH Zugriff auf
+      =edvoexam=!
+- Anwendung: Zugriff auf Intranet obwohl kein Zugriff von außen
+  erlaubt!
+  - /wenn du gerne entlassen werden willst.../
+
+* Passwörter vs. Keys
+- Passwörter
+  - brechbar, wenn Server kompromittiert (Zugriff auf Hashes)
+  - "sniffable"
+  - etwas was man weiß: werden oft wiederverwendet, oft schwach, schlecht verwaltet
+    (Zettel, einfache Textdateien)
+- Keys
+  - nicht brechbar
+  - nicht "sniffable"
+  - etwas was man hat: gut zu verwalten (mit Passwort)
+    - je ein Key je Server!
+* Public/Private Keypaar
+- Key-Paar generieren
+  - \to =ssh-keygen=
+  - Server generiert ein Key-Paar bei Installation
+    - und wenn Sysadmin...
+- K_pub von Server \to =~/.ssh/known_hosts= am Client
+  - \to =known_hosts - Client=
+- K_pub von Benutzer \to =~/.ssh/authorized_keys= am Server
+  - \to Public Key-basierte Authentifizierung 
+
+* Public/Private Key generieren
+- =ssh-keygen=
+  - \to public und private nach =~/.ssh=
+    - z.B. =id_rsa= und =id_rsa.pub=
+  - Typ =-t rsa=
+  - Länge =-b 2048=
+- RSA mit 4096 Bits und Kommentar zum Identifizieren des Schlüssels
+  - =ssh-keygen -C ko@htlwrn.ac.at -b 4096 -f id_rsa=
+
+* Public Key zum Server
+- Key muss in =~/.ssh/authorized_keys=
+- Manuell
+  a. =scp ~/.ssh/id_rsa.pub ko@ifssh.htlwrn.a.cat:=
+  b. =ssh ko@ifssh.htlwrn.ac.at=
+     a. =mkdir .ssh=
+     b. =chmod 700 .ssh=
+     c. ~cat id_rsa.pub >> ~/.ssh/authorized_keys~
+     d. =rm id_rsa.pub=
+     e. =chmod 600 ~/.ssh/authorized_keys=
+- =ssh-copy-id=
+  - =ssh-copy-id ko@ifssh.htlwrn.ac.at=
+  - =ssh-copy-id -i ~/.ssh/id_rsa.pub ko@ifssh.htlwrn.ac.at=
+
+* Key verwenden
+- =ssh ko@ifssh.htlwrn.ac.at=
+  - \to kein Login mehr notwendig
+- Mehrere Keys...
+  - jeweils generieren und...
+  - verwenden: =ssh -i ~/.ssh/id_rsa ko@htlwrn.ac.at=
+
+* Passphrase für Key
+- =ssh-keygen= mit Passphrase
+  - sicherer, aber...
+  - jedes Mal ist die Passphrase notwendig!
+- =ssh-agent=
+  - speichert /entschlüsselten/ K_priv im Speicher
+  - =ssh-agent=
+    - manuell starten
+    - in Einstellungen wie XFCE, Gnome,...
+  - Privaten Key zum =ssh-agent= hinzufügen:
+    - =ssh-add ~/.ssh/id_rsa=
+  - Anzeigen der privaten Keys vom Agent
+    - =ssh-add -L=
+
+* Anwendungen von =ssh-keygen=
+- Fingerprint von Public Key
+  - =ssh-keygen -l -f id_rsa.pub=
+- Public Key regenerieren
+  - wenn "verloren"
+  - =ssh-keygen -y -f id_rsa > id_rsa.pub=
+- Passphrase ändern
+  - =ssh-keygen -p -f id_rsa=
+* Lokale Datei =config=
+- im =.ssh= Verzeichnis
+- Zum Konfigurieren des Clients (vielfältige Möglichkeiten)
+- Beispiel
+  #+begin_example
+  Host ifssh
+      HostName ifssh.htlwrn.ac.at
+      User ko
+  #+end_example
+  Danach anstatt
+  #+begin_src sh
+  ssh ko@ifssh.htlwrn.ac.at
+  #+end_src
+  folgende Möglichkeit
+  #+begin_src sh
+  ssh ifssh
+  #+end_src
+  
+* Lokale Datei =config= -- 2
+- auch andere Möglichkeiten
+- z.B. Tunnel
+  #+begin_example
+  Host tunnel_to_www_htlwrn
+      HostName ifssh.htlwrn.ac.at
+      User ko
+      LocalForward 1234 www.htlwrn.ac.at:80
+  #+end_example

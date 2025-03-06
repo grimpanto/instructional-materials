@@ -1,0 +1,282 @@
+#+TITLE: Aussagenlogik -- 1: Einführung und Syntax
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Allgemeines
+\vspace{1.5em}
+- Anfang in Griechenland: Aristoteles (384-322 v.Chr.)
+- logisches Schließen
+- Syllogismus: logischer Schluss
+  - 2 Prämissen (Voraussetzung, Annahme)
+    - Obersatz
+    - Untersatz
+  - Konklusion (Schlussfolgerung)
+  - Beispiel
+    - Obersatz: Alle Menschen sind sterblich
+    - Untersatz: Alle Griechen sind Menschen
+    - Konklusion: Alle Griechen sind sterblich
+- Allgemein: Argument ist Folge von Aussagensätze, im speziellen
+  - mehrere Prämissen
+  - eine Konklusion
+
+* Arten der Logik
+\vspace{1em}
+- Klassische Logiken
+  - Aussagenlogik
+  - Prädikatenlogik (1. Stufe)
+  - Prädikatenlogik höherer Stufe
+- Nichtklassische Logiken
+  - mehrwertige Logiken
+    - z.B., wahr, falsch, unbekannt
+  - Fuzzy-Logik
+    - Wenn die Körpertemperatur /erhöht/...
+  - Modale Logiken
+    - Es ist /möglich/, dass...
+    - Es ist /notwendig/, dass...
+  - Temporale Logiken
+    - vorher, nachher, in 3 Wochen,...
+
+* Anwendungen der Logik in der IF
+- Herleiten von neuen Erkenntnissen
+- Beweisen von Sätzen
+- Umformung und Vereinfachung von logischen Ausdrücken
+- Schaltkreisentwurf
+- Datenbanken
+- Künstliche Intelligenz
+
+* Prinzipien der klassische Logiken
+- Prinzip der Zweiwertigkeit (Bivalenzprinzip)
+
+  Jede Aussage hat genau einen von zwei Wahrheitswerten,
+  nämlich /wahr/ oder /falsch/.
+- Extensionalitätsprinzip
+
+  Der Wahrheitswert jeder zusammengesetzten Aussagen ist
+  eindeutig durch die Wahrheitswerte ihrer Teilaussagen
+  bestimmt.
+
+* Beschreibung der Aussagenlogik
+\vspace{1em}
+- Teilgebiet der klassischen Logik
+  - befasst sich mit Aussagen
+  - jede Aussage: eine von zwei Wahrheitswerten
+    - Prinzip der Zweiwertigkeit
+  - Wahrheitswert von zusammengesetzen Aussagen
+  - Verknüpfung mittels /Junktoren/
+  - Ausgehend von *strukturlosen* Elementaraussagen
+    - bestimmbar aus Wahrheitswerten der Teilaussagen
+  - Extensionalitätsprinzip
+- Beispiel
+  - Alle Schüler sind faul und alle Lehrer sind faul.
+    - Elementaraussage 1: Alle Schüler sind faul.
+    - Verküpfung (Junktor): und
+    - Elementaraussage 2: Alle Lehrer sind faul.
+
+* Aussage
+\vspace{1em}
+- sprachliches Konstrukt: wahr oder falsch
+- Beispiele
+  - 4 ist eine gerade Zahl.
+  - 2 ist größer als 4.
+  - Ich heiße Günter.
+  - Ich heiße Maxi.
+  - Ich heiße weder Maxi noch Günter.
+  - Hier gibt es viele Autos.
+  - Heute ist Dienstag.
+  - Die Straße ist nass.
+- Gegenbeispiele
+  - Wann wurde Aristoteles geboren?
+  - Schon wieder du!
+
+* Aussagenform
+- Aussageformen enthalten Variable
+  - Kontext
+- Beispiele
+  - Ich, du,... \lto Person
+  - Heute, Morgen,... \lto Zeit
+  - Hier, Dort,... \lto Ort
+
+* Natürliche Sprache
+- historisch gewachsen
+- Verständigung zwischen Menschen.
+- gesprochen oder schriftlich verwendet.
+- Redundanz: \lto fehlende Buchstaben, ganze Wörter
+- Beispiele
+  - Deutsch, Chinesisch
+  - Körpersprache
+- Eigenschaften
+  - nicht exakt
+  - mehrdeutig
+  - verändern sich
+
+* Beispiel
+#+begin_center
+\Large
+"Ich sah den Mann auf dem Berg mit dem Fernrohr"
+#+end_center
+
+* Interpretation 1
+- ((Ich sah den Mann) auf dem Berg) mit dem Fernrohr
+  [[./ich_mann_berg_fernrohr1.png]]
+
+* Interpretation 2
+- (Ich sah (den Mann auf dem Berg)) mit dem Fernrohr
+  [[./ich_mann_berg_fernrohr2.png]]
+
+* Interpretation 3
+- (Ich sah den Mann) (auf dem Berg mit dem Fernrohr)
+  [[./ich_mann_berg_fernrohr3.png]]
+
+* Interpretation 4
+- Ich sah ((den Mann auf dem Berg) mit dem Fernrohr)
+  [[./ich_mann_berg_fernrohr4.png]]
+
+* Interpretation 5
+- Ich sah (den Mann (auf dem Berg mit dem Fernrohr))
+  [[./ich_mann_berg_fernrohr5.png]]
+
+* Weitere (problematische) Beispiele
+\vspace{1em}
+- Otto ist blond und 1.80m groß \lto\\
+  Otto ist blond und Otto ist 1.80m groß
+- Otto und Paul sind Geschwister \lto\\
+  Otto ist ein Geschwister (!)
+- Otto und Fritzi sind verheiratet \lto\\
+  Otto ist verheiratet\\
+  Fritzi ist verheiratet
+  - miteinander?
+- Heute Abend gehe ich ins Kino oder ins Theater.
+  - exklusives oder!
+- Ich habe kein Geld nicht.
+  - Im österreichischen Dialekt: doppelte
+    Verneinung \lto Verstärkung der Verneinung!
+
+* Beispiele für Argumente
+- Alle Menschen sind sterblich\\
+  Sokrates ist ein Mensch\\
+  Also: Sokrates ist sterblich\\
+  (deduktiv gültig; vom Allgemeinen zum Besonderen)
+- Anfänger haben im Allgemeinen Schwierigkeiten mit der Logik\\
+  Maxi ist ein Anfänger\\
+  Also: Maxi hat Schwierigkeiten mit der Logik\\
+  (nicht deduktiv gültig; vom Besonderen zum Allgemeinen)
+
+* Deduktiv gültige Beispiele
+- Alle Katzen sind Tiere\\
+  Alle Löwen sind Katzen\\
+  Also: Alle Löwen sind Tiere\\
+  (vom Allgemeinen zum Allgemeinen)
+- Wenn Otto der Mörder ist, war er am Tatort\\
+  Otto war nicht am Tatort\\
+  Also: Otto ist nicht der Mörder\\
+  (vom Besonderen zum Besonderen)
+- Otto ist nicht blond\\
+  Otto ist Schwede\\
+  Also: Nicht alle Schweden sind blond\\
+  (vom Besonderen zum Allgemeinen)
+
+* Nicht deduktiv gültige Beispiele
+- Fast alle Schweden sind blond\\
+  Otto ist ein Schwede\\
+  Also: Otto ist blond\\
+  (vom Allgemeinen zum Besonderen)
+- Beim ersten Wurf ist eine Sechs gefallen\\
+  Beim zweiten Wurf ist eine Sechs gefallen\\
+  ...\\
+  Beim neunten Wurf ist eine Sechs gefallen\\
+  Also: Beim zehnten Wurf ist eine Sechs gefallen\\
+  (vom Besonderen zum Besonderen)
+
+* Formalisierung der Aussagen
+\vspace{1em}
+- George Boole (1848)
+- Verknüfung von Aussagen
+- mit einfachen Operatoren
+  - und, oder, nicht, wenn...dann,...
+- Aussage: entweder wahr oder falsch
+- Beispiele
+  - Aussagen:
+    - Es regnet
+    - Die Straße ist nass
+  - Verknüpfungen:
+    - Es regnet und die Straße ist nass.
+    - Wenn es regnet, dann ist die Straße nass.
+    - Wenn die Straße nicht nass ist, dann regnet es nicht.
+    - Wenn es nicht regnet, dann ist die Straße nicht nass.
+
+* Umfang der Aussagenlogik
+- Syntax der Aussagenlogik
+  - Was sind Formeln?
+  - Welche Formeln sind syntaxtisch korrekt?
+  - Was sind Junktoren?
+- Semantik der Aussagenlogik
+  - Bedeutung einer Formel?
+  - Welche Formeln sind allgemeingültig (immer wahr)?
+  - Welche Formeln sind unerfüllbar (immer falsch)?
+- Verfahren und Methoden, die überprüfen, ob eine
+  Formel allgemeingültig oder unerfüllbar ist.
+
+* Syntax der Aussagenlogik (AL)
+- Grundzeichen der AL
+  - Aussagenvariable: $p$, $q$, $r$,... wenn nötig mit Indizes $p_1$, $p_2$,...
+  - aussagenlogische Operatoren (Junktoren): $\neg$, \conj, \disj,
+    \imp, \biimp
+  - Hilfszeichen: (, )
+- Definition\\
+  $A$ ist genau dann eine aussagenlogische Formel von AL, wenn eine
+  der beiden folgenden Bedingungen erfüllt ist:
+  - $A$ ist ein Aussagenvariable (atomare Formel)
+  - $B$ und $C$ sind Formeln von AL und $A$ ist gleich $\neg B$,
+    $B \conj C$, $B \disj C$, $B \imp C$ oder $B \biimp C$.
+

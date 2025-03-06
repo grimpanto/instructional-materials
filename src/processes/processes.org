@@ -1,0 +1,549 @@
+
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Prozesse
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Prozess
+- Programm besteht aus Anweisungen
+- Prozess (POSIX: portable operating system interface)
+  - entsteht bei der Ausführung eines Programmes
+  - hat einen oder mehrere Threads
+  - hat eigenen virtuellen Adressraum (\to MMU)
+  - hat Rechte auf Ressourcen (Dateien, Geräte)
+  - hat keinen Zugriff auf Ressourcen eines anderen Prozesses
+    (Hauptspeicher, offene Dateien, benutzte Geräte)
+- Kenndaten
+  - PID und PPID, UID und GID, EUID und EGID
+  - PRI, Zustand (running, runable, sleeping, stopped, traced),...
+
+* Prozess -- 2
+Gründe für Parallelisierung auf Prozessebene
+- Entwicklungsaufwand gering
+  - wenn mehrfaches Starten eines Prozesses als Parallelisierung ausreicht
+- Verteilung auf mehrere Rechner einfach
+  - aber keine Abhängigkeiten erforderlich
+- Robustheit
+  - durch Speicherschutz (auch gegen Angriffe)
+
+* Prozess -- 3
+- Eltern-Kind-Beziehung
+  - Jeder Prozess hat einen Elternprozess (außer dem "init"-Prozess)
+  - Jeder Prozess kann mehrere Kindprozesse haben
+- Basiskommunikation mit Umwelt
+  - Umgebungsvariablen
+  - Kommandozeilenargumente
+    - \to =argc=, =argv=
+  - =stdin=, =stdout=, =stderr=
+    - \to =cin=, =cout=, =cerr=
+  - Exit-Code
+    - =return= von =main=, =exit=
+  - Signale
+
+* Prozess -- 4
+Prozess besteht aus
+- Textsegment (Programmcode):  =.text=
+  - schreibgeschützt
+- Datensegment (Benutzerdaten)
+  - initialisiert, schreibgeschützt: =.rodata=
+  - initialisiert, nicht schreibgeschützt: =.data=
+  - nicht initialisiert: =.bss=
+  - heap
+- Stacksegment
+- Shared-Memory-Segment
+
+* PID & PPID
+#+header: :exports code :results output :tangle src/pid.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // pid.cpp
+// not part of standard C; part of POSIX.1
+// therefore it is not named: <cunistd>
+#include <unistd.h>
+
+using namespace std;
+
+int main() {
+    cout << "pid: " << getpid() << endl;
+    cout << "ppid: " << getppid() << endl;
+    cout << "uid: " << getuid() << endl;
+    cout << "euid: " << geteuid() << endl;
+}
+#+end_src
+
+#+RESULTS:
+: pid: 3277
+: ppid: 5874
+: uid: 1000
+: euid: 1000
+
+* Prozesse und Shell unter Linux
+- Vordergrund vs. Hintergrund (meist =&=)
+- =ps=
+  - =ps=
+  - =ps -e= ... alle Prozesse
+  - =ps -f= ... "full format"
+  - =ps -L= ... mit Threads
+- =pstree=
+- =top= bzw. =htop=
+
+* Prozesse und Shell unter Linux -- 2
+- =jobs=
+  - =CTRL-Z= ... =kill -TSTP xxx=
+- =bg=
+  - =bg %1=
+  - =bg xxx= ... =kill -CONT xxx=
+- =kill=
+  - =kill xxx= ... beenden (wie =kill -TERM xxx=)
+  - =kill -KILL xxx= ... keine Widerrede!
+
+* Starten eines Prozesses
+#+header: :exports both :results output :tangle src/clone.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // clone.cpp
+// not part of standard C → *not* <cunistd>
+#include <unistd.h>  // fork
+using namespace std;
+int main() {
+    cout << "just before forking...";
+    fork();
+    cout << "after fork()!" << endl;
+}
+#+end_src
+
+#+RESULTS:
+: just before forking...after fork()!
+: just before forking...after fork()!
+
+* Starten eines Prozesses -- 2
+\vspace{1em}
+- =fork()= dupliziert Prozess!
+  - inklusive Puffer, deshalb flushen:
+    #+header: :exports both :results output :tangle src/clone2.cpp :flags -std=c++20
+    #+begin_src C++
+    #include <iostream>  // clone2.cpp
+    #include <unistd.h>
+    using namespace std;
+    int main() {
+        cout << "just before forking..."<< endl;
+        fork();
+        cout << "after fork()!" << endl;
+    }
+    #+end_src
+
+    #+RESULTS:
+    : just before forking...
+    : after fork()!
+    : after fork()!
+
+* Starten eines Prozesses -- 3
+#+header: :exports code :results output :tangle src/fork.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // fork.cpp
+#include <unistd.h>  // sleep
+#include <cstdlib>  // quick_exit
+using namespace std;
+int main() {
+    auto pid{fork()};
+    if (pid == 0) {
+        cout << "child is waiting... " << flush;
+        sleep(10);  cout << "done" << endl;
+        quick_exit(EXIT_SUCCESS);
+    } else {
+        cout << "child pid is " << pid << endl;
+    }
+    cout << "parent terminates" << endl;
+}
+#+end_src
+
+* Starten eines Prozesses -- 4
+\vspace{1em}
+- Ausgabe
+  : child pid is 28227
+  : parent terminates
+  : child is waiting...
+  : <after 10 seconds>
+  : done
+- Semantik von =fork=
+  - Kindprozess: Duplikat inkl. Register, offener Dateien,...
+  - beide Prozesse liefern Rückgabewert von =fork=
+    - Kindprozess erhält 0
+    - Vaterprozess erhält pid des Kindprozesses
+  - Textsegment wird nicht kopiert
+  - Daten-, Stack- und Heapsegment: Copy on Write
+- =quick_exit=: Destruktoren von Obj. mit Lebensdauer
+  automatisch, statisch, threadlokal \to *kein* Aufruf!
+
+* Starten eines Prozesses -- 5
+#+header: :exports code :results output :tangle src/waitpid.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // waitpid.cpp
+#include <unistd.h>
+#include <cerrno>  // errno
+#include <cstdlib>  // exit
+#include <sys/wait.h>  // waitpid
+using namespace std;
+int main() {
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        cerr << "forking failed: " << errno<< endl;
+        exit(EXIT_FAILURE);
+    }
+#+end_src
+
+* Starten eines Prozesses -- 6
+#+header: :exports code :results output :tangle src/waitpid.cpp :flags -std=c++20 :main no
+#+begin_src C++
+    if (pid == 0) {
+        cout << "child process here!" << endl;
+        sleep(3);
+        quick_exit(EXIT_SUCCESS);
+    } else {
+        cout << "child pid is " << pid << endl;
+        cout << "waiting for child..." << endl;
+        int status;
+        waitpid(pid, &status, 0); // 0...options
+        cout << "child terminated w/ exit code "
+             << status << endl;
+        exit(EXIT_SUCCESS);
+    }
+}
+#+end_src
+
+* Starten eines Prozesses -- 7
+Ausgabe:
+
+: child pid is 30587
+: waiting for child...
+: child process here!
+: child terminated w/ exit code 0
+
+* Exit codes
+#+header: :exports none :results none :tangle src/exit_codes.cpp :flags -std=c++20 :main no
+#+begin_src C++
+#include <iostream>  // waitpid.cpp
+#include <unistd.h>
+#include <cerrno>  // errno
+#include <cstdlib>  // exit
+#include <sys/wait.h>  // waitpid
+using namespace std;
+int main() {
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        cerr << "forking failed: " << errno<< endl;
+        exit(EXIT_FAILURE);
+    }
+#+end_src
+\vspace{1.8em}
+#+header: :exports code :results output :tangle src/exit_codes.cpp :flags -std=c++20 :main no
+#+begin_src C++
+    if (pid == 0) {
+        quick_exit(123);  // <---
+    } else {
+        cout << "waiting for child..." << endl;
+        int status;
+        waitpid(pid, &status, 0); // 0...options
+        cout << "child terminated w/ exit code "
+             << status << endl;
+        exit(EXIT_SUCCESS);
+    }
+}
+#+end_src
+
+#+begin_example
+waiting for child...
+child terminated w/ exit code 31488
+#+end_example
+
+* Exit codes -- 2
+#+header: :exports none :results none :tangle src/exit_codes2.cpp :flags -std=c++20 :main no
+#+begin_src C++
+#include <iostream>  // waitpid.cpp
+#include <unistd.h>
+#include <cerrno>  // errno
+#include <cstdlib>  // exit
+#include <sys/wait.h>  // waitpid
+using namespace std;
+int main() {
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        cerr << "forking failed: " << errno<< endl;
+        exit(EXIT_FAILURE);
+    }
+#+end_src
+\vspace{1.8em}
+\small
+#+header: :exports code :results output :tangle src/exit_codes2.cpp :flags -std=c++20 :main no
+#+begin_src C++
+if (pid == 0) {
+    quick_exit(123);  // <---
+} else {
+    cout << "waiting for child..." << endl;
+    int status;
+    waitpid(pid, &status, 0); // 0...options
+    if (int s{WIFEXITED(status)}; s)
+        cout << "child terminated w/ exit code "
+             << WEXITSTATUS(status) << endl;
+    else
+        cout << "term. neither by exit nor by return"
+             << endl;
+    exit(EXIT_SUCCESS);
+} }
+#+end_src
+
+#+begin_example
+waiting for child...
+child terminated w/ exit code 123
+#+end_example
+
+* Exit codes -- 3
+Es werden Zusatzinformationen im Statuscode abgelegt,
+wenn dieser ungleich 0 ist!
+- =WIFEXITED(status)= ... \neq0, wenn normal beendet
+- =WEXITSTATUS(status)= ... der Statuscode selber
+- =WIFSIGNALED(status)= ... \neq0, wenn mit einem Signal beendet
+- =WTERMSIG(status)= ... die Nummer des Signals
+- ... siehe man page von =waitpid()=
+
+* Semantik des Elternprozesses
+- Ruft Elternprozess =waitpid= nicht auf, dann
+  - bleibt Kindprozess als so genannter "Zombie"
+    bestehen, wenn sich dieser vor dem Elternprozess
+    beendet.
+- Beendet sich Elternprozess vor Kind, dann
+  - bezeichnet man den Kindprozess als "orphaned" (verwaist)
+  - "init"-Prozess mit PID 1 übernimmt diesen Kindprozess
+    als Elternprozess
+  - beendet sich dann Kindprozess \to "init" wird =waitpid=
+    aufrufen, d.h. kein Zombie!
+
+* Zombie
+\vspace{1em}
+#+header: :exports code :results output :tangle src/zombie.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // zombie.cpp
+#include <unistd.h>
+#include <cstdlib>
+using namespace std;
+int main() {
+    auto pid{fork()};
+    if (pid == 0) { quick_exit(EXIT_SUCCESS); }
+    cout << "child: " << pid << endl;
+    sleep(60);
+}
+#+end_src
+
+: $ zombie&
+: child: 31715
+: $ ps 31715
+:   PID TTY      STAT   TIME COMMAND
+: 31715 pts/2    Z      0:00 [zombie] <defunct>
+
+* Zombie -- 2
+#+header: :exports code :results output :tangle src/zombie2.cpp :flags -std=c++20 :main no
+#+begin_src C++
+#include <iostream>  // zombie2.cpp
+#include <unistd.h>
+#include <cstdlib>
+#include <csignal>  // signal
+#include <sys/wait.h>
+using namespace std;
+pid_t pid;
+
+void signal_handler(int signal) {
+    int status;
+    sleep(10);
+    waitpid(pid, &status, 0);  // auch nullptr möglich
+    cout << "child's end awaited" << endl;
+}
+#+end_src
+
+* Zombie -- 3
+#+header: :exports code :results output :tangle src/zombie2.cpp :flags -std=c++20 :main no
+#+begin_src C++
+int main() {
+    signal(SIGCHLD, signal_handler);
+    pid = fork();  // starts just one child
+    if (pid == 0) { quick_exit(EXIT_SUCCESS); }
+    cout << "child: " << pid << endl;
+    sleep(60);
+}
+#+end_src
+
+: $ zombie2 &
+: child: 29776
+: $ ps 29776
+:   PID TTY      STAT   TIME COMMAND
+: 29776 pts/2    Z      0:00 [zombie2] <defunct>
+: $ child's end awaited
+: Job 1, 'zombie2 &' hat beendet
+
+* Verwaist...
+\vspace{1em}
+#+header: :exports both :results output :tangle src/orphan.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // orphan.cpp
+#include <unistd.h>
+#include <cstdlib>
+using namespace std;
+int main() {
+    auto pid = fork();
+    if (pid == 0) {
+        cout << "parent: " << getppid() << endl;
+        sleep(5);
+        cout << "parent: " << getppid() << endl;
+        quick_exit(EXIT_SUCCESS); }
+    sleep(3);
+}
+#+end_src
+
+#+RESULTS:
+: my parent is: 32075
+: my parent is: 1
+
+* Signale
+#+header: :exports code :results output :tangle src/signal.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // signal.cpp
+#include <unistd.h>
+#include <csignal>
+using namespace std;
+int pid;
+
+void signal_handler(int signal) {
+    cout << "ignoring signal!" << endl;
+}
+
+int main() {
+    signal(SIGTERM, signal_handler);
+    auto i=3;
+#+end_src
+
+* Signale -- 2
+#+header: :exports code :results output :tangle src/signal.cpp :flags -std=c++20 :main no
+#+begin_src C++
+    while (i) {
+        cout << i * 5 << " seconds left..." << endl;
+        sleep(5);  // will be interrupted by signal
+        --i;  }
+    cout << "terminating myself" << endl;
+}
+#+end_src
+
+: $ signal&
+: 15 seconds left...
+: $ kill %1
+: ignoring signal!
+: 10 seconds left...
+: $ 5 seconds left...
+: terminating myself
+: Job 1, 'signal&' hat beendet
+
+* Signale -- 3
+#+header: :exports code :tangle src/killit.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // killit.cpp
+#include <csignal>
+using namespace std;
+int pid;
+
+int main() {
+    int pid;
+    cout << "pid: ";
+    cin >> pid;
+    // use 'raise' for sending signals to
+    // the current running process, otherwise
+    // use 'kill'. Anyway, it's easier to
+    // remember just one system call
+    kill(pid, SIGKILL);
+}
+#+end_src
+
+* Signale -- 4
+Wichtige Signale sind:
+- SIGHUP (1) :: hangup
+- SIGINT (2) :: interrupt (Keyboard; CTRL-C)
+- SIGKILL (9) :: beenden!!
+- SIGSEGV (11) :: Adressbereichsfehler!!
+- SIGTERM (15) :: beenden
+- SIGCHLD (17) :: Ein Kind hat sich beendet!
+
+* =execl=
+\vspace{1.5em}
+#+header: :exports both :results output :tangle src/execl.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // execl.cpp
+#include <unistd.h>  // execl
+using namespace std;
+
+int main() {
+    // path of the executable
+    // name which will be used in process table
+    // 0-terminated list of arguments
+    execl("/usr/bin/date", "date",
+          "--iso-8601", nullptr);
+}
+#+end_src
+
+#+RESULTS:
+: 2015-08-04
+
+liefert -1 zurück, wenn nicht erfolgreich und die globale Variable
+=errno= wird gesetzt!
+
+* Fehler in =C=
+- Im =C=-API werden Fehler oft dadurch angezeigt, dass
+  ein Fehlercode zurückgeliefert wird.
+- Oft wird die globale Variable =errno= mit einem Wert belegt.
+  - =#include <cerrno>=
+- Die zu =errno= gehörige Fehlermeldung kann mittels der
+  Funktion =strerror= ermittelt werden:
+  #+begin_example
+  cerr << strerror(errno) << endl;
+  #+end_example
+  - =#include <cstring>= 
+
+* Umgebungsvariable
+#+header: :exports both :results output :tangle src/printenv.cpp :flags -std=c++20
+#+begin_src C++
+#include <iostream>  // printenv.cpp
+#include <cstdlib>  // getenv
+using namespace std;
+
+int main() {
+    const char* env_shell{getenv("SHELL")};
+    if (env_shell)
+        cout << env_shell << endl;
+    else
+        cout << "SHELL not set" << endl;
+}
+#+end_src
+
+#+RESULTS:
+: /usr/local/bin/fish
+
+* Interprocess Communication (IPC)
+- Pipes
+  - byte-weise
+- FIFO
+  - wie pipe, aber Name
+- File-locking
+- Message Queues
+  - wie FIFO, aber Nachrichten-basiert
+- Semaphore
+- Shared Memory
+- Memory Mapped Files
+- Sockets

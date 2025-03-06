@@ -1,0 +1,273 @@
+#+TITLE: Backtracking
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+# +BEAMER_FRAME_LEVEL: 2
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Einführung
+\vspace{1em}
+- allgemeine Problemlösung für das Finden von Lösungen
+  - nicht durch Berechnung
+  - sondern durch Versuchen und Nachprüfen (/trial and error/)
+- Problem in Teilschritte zerlegen
+  - oft rekursiv zu formulieren
+  - Problem mit Teilproblemen als Baum darstellbar
+  - in diesem Suchbaum ist die Lösung zu suchen
+  - Suchbaum in der Regel *sehr* groß!
+    - Idee ist: Teilbäume abzuschneiden
+- Prinzip
+  - Suche in Richtung Ziel
+  - zeichne Weg auf
+  - stellt sich heraus, dass Weg nicht zielführend (Sackgasse)
+    - eingeschlagenen Weg verwerfen und zurückgehen
+
+* Springerproblem -- Aufgabenstellung
+- geg.: ist ein Schachbrett der Größe $n \times n$
+- ges.: Finden eines Weges sodass ein Springer genau einmal über jedes
+  der $n^2$ Felder springt (soferne dies möglich ist)
+- Also: Positionieren auf Feld (1, 1) und von dort alle Möglichkeiten
+  durchprobieren.
+- Aber: Das sind *sehr* viele Möglichkeiten!
+
+* Analyse der Aufgabenstellung
+\vspace{1em}
+- Feld als zweidimensionales Array oder Liste
+  #+begin_src python
+  n = 5
+  h = [[0] * n for i in range(n)]
+  n2 = n ** 2
+  #+end_src
+- Wege eines Springers
+  #+LaTeX: \footnotesize
+  #+ATTR_LaTeX: :align |c|c|c|c|c|
+  |---+---+---+---+---|
+  |   | 3 |   | 2 |   |
+  |---+---+---+---+---|
+  | 4 |   |   |   | 1 |
+  |---+---+---+---+---|
+  |   |   | S |   |   |
+  |---+---+---+---+---|
+  | 5 |   |   |   | 8 |
+  |---+---+---+---+---|
+  |   | 6 |   | 7 |   |
+  |---+---+---+---+---|
+  #+LaTeX: \normalsize
+- Springen durch Addition von Differenzwerten
+  #+begin_src python
+  a = (2, 1, -1, -2, -2, -1, 1, 2)
+  b = (1, 2, 2, 1, -1, -2, -2, -1)
+  u = x + a[k]  # 0 <= k < 8
+  v = y + b[k]
+  #+end_src
+
+* Analyse der Aufgabenstellung -- 2
+- Bruteforce Algorithmus
+  - Setze Springer am Anfang auf Position (1, 1)...
+  - Alle Möglichkeiten probieren: Wenn außerhalb
+    oder besetzt, dann verwerfen und nächsten probieren.
+  - Wenn alle $n^2$ Felder besucht, dann Lösung
+    gefunden.
+- !!! /d.h. alle Möglichkeiten probieren/ !!!\pause
+  - bei n=5 gibt es 304 Lösungen!
+  - bei n=6 gibt es 524.486 Lösungen!!
+  - bei n=8 gibt es schon 13.267.364.410.532 Lösungen!!!
+  - d.h. praktisch unmöglich!
+- Verbesserung mittels Backtracking!\pause
+  - ...aber selbst für Schachbretter moderater Größe ist dies sinnlos!
+
+* Analyse der Aufgabenstellung -- 3
+\vspace{1em}
+- Weg nicht zielführend, dann eingeschlagenen Weg verwerfen und zurückgehen \to
+  Backtracking
+- Prinzip:
+  #+begin_example
+  Funktion nächsten Zug versuchen:
+    initialisieren der Datenstrukturen
+    wiederholen:
+      nächsten Zug wählen
+      wenn annehmbar:
+        Zug aufzeichnen
+        wenn brett nicht voll:
+          nächsten Zug versuchen
+          wenn nicht erfolgreich:
+            lösche vorhergehenden Zug
+    bis erfolgreich oder keine Züge mehr
+  #+end_example
+              
+* Springerproblem -- eine Lösung
+\vspace{1.5em}
+\footnotesize
+#+begin_src python
+def try_next(i, x, y): # Zug, Pos x, Pos y
+   k = 0
+   res = False
+   while True:
+      u = x + a[k]
+      v = y + b[k]
+      if 1 <= u <= n and 1 <= v <= n:  # zug annehmbar? - 1
+         u1 = u - 1
+         v1 = v - 1
+         if h[u1][v1] == 0:  # zug annehmbar? - 2
+            h[u1][v1] = i  # aufzeichnen
+            if i < n2:  # brett nicht voll
+               res = try_next(i + 1, u, v)
+               if not res:
+                  h[u1][v1] = 0 # nicht erfolgreich: loeschen
+            else:  # fertig => erfolgreich
+               res = True 
+      k += 1
+      if res or k == 8: # erfolgreich oder alle Zuege
+         break          # besser in Kopf von while!
+   return res
+#+end_src
+
+* Allgemeine Struktur
+#+begin_example
+initialisiere Wahl der Kandidaten
+wiederholen:
+  nächsten Kandidaten wählen
+  wenn annehmbar:
+    Kandidaten aufzeichnen
+    wenn Lösung unvollständig:
+      nächsten Schritt versuchen
+      wenn nicht erfolgreich:
+        lösche Aufzeichnung
+bis erfolgreich oder keine weiteren Kandidaten        
+#+end_example
+
+* Implementierung für /eine/ Lösung
+\vspace{1em}
+- Voraussetzungen
+  - expliziter Stufenparameter
+    - der die Tiefe der Rekursion angibt
+    - der eine einfache Bedingung der Terminierung erlaubt ($n$)
+  - # der möglichen Kandidaten in jedem Schritt $=m$
+
+* Implementierung für /eine/ Lösung -- 2
+\vspace{1em}
+\footnotesize
+#+begin_src python
+def try_next(i):
+    k = 0
+    res = False
+    while True:
+        k += 1
+        waehle_k_ten_kandidaten()
+        if annehmbar():
+            if i < n:
+                res = try_next(i + 1)
+                if not res:
+                    loesche_aufzeichnung()
+        if res or k == m:
+            break
+    return res
+
+res = try_next(1)
+if res:
+    print_loesung()
+else:
+    print("Keine Loesung")
+#+end_src
+
+* Implementierung für /alle/ Lösungen 
+\vspace{1em}
+- ges. alle Lösungen eines Problems
+- dann:
+  \footnotesize
+  #+begin_src python
+  def try_next(i):
+      k = 0
+      while True:
+          k += 1
+          waehle_k_ten_kandidaten()
+          if annehmbar():
+              if i < n:
+                  try_next(i + 1)
+              else:
+                  print_solution()
+              loesche_aufzeichnung()
+          if k == m:
+              break
+
+  try_next(1)
+  #+end_src
+
+* Springerproblem -- Alle Lösungen
+\vspace{1em}
+\footnotesize
+#+begin_src python
+def try_next(i, x, y):
+    k = 0
+    while k != 8:  # nicht alle Kandidaten
+        u = x + a[k]
+        v = y + b[k]
+        if 1 <= u <= n and 1 <= v <= n:  # zug annehmbar 1
+            u1 = u - 1
+            v1 = v - 1
+            if h[u1][v1] == 0:  # zug annehmbar 2
+                h[u1][v1] = i
+                if i < n2:  # brett nicht voll
+                    try_next(i + 1, u, v)
+                else:  # eine Lösung gefunden
+                    print_solution(h)
+                h[u1][v1] = 0  # loeschen
+        k += 1
+        
+h[0][0] = 1  # 1. Zug
+try_next(2, 1, 1)
+#+end_src

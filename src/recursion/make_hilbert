@@ -1,0 +1,11 @@
+#!/bin/sh
+ps2eps -f hilbert1.ps
+convert hilbert1.eps hilbert1.png
+ps2eps -f hilbert2.ps
+convert hilbert2.eps hilbert2.png
+ps2eps -f hilbert3.ps
+convert hilbert3.eps hilbert3.png
+ps2eps -f hilbert4.ps
+convert hilbert4.eps hilbert4.png
+ps2eps -f hilbert5.ps
+convert hilbert5.eps hilbert5.png

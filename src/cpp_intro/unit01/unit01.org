@@ -1,0 +1,77 @@
+#+TITLE: Modernes C++ \linebreak \small...für Programmierer \hfill Unit 01: Arbeitsumgebung
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Überblick
+- Texteditor, IDE
+- Übersetzen per Kommandozeile
+- Verschiedene Tools
+
+* Texteditor, IDE, Compiler
+- Texteditor
+  - Sublime, Atom
+  - geany, Notepad++ (nur Windows),...
+  - vi, Emacs
+- IDE
+  - Qt Creator (mit Qt)
+  - Visual Studio (nur Windows)
+  - /Visual Studio Code/ (Win, Lin, Mac)
+  - Netbeans, Eclipse
+- Compiler:
+  - *=g++=*: Version 9.1+
+    - \to =g++ --version=
+  - alternativ: clang
+
+* COMMENT Installation von =g++=
+- Linux \to package manager
+- Mac OSX \to XCode
+- Windows
+  - http://cygwin.com
+    - Installer herunterladen (32-Bit?!)
+    - Pakete auswählen: g++, make, libstdc++
+  - http://tdm-gcc.tdragon.net/
+  - Microsoft SUA: https://technet.microsoft.com/de-at/library/cc771672.aspx
+
+* COMMENT Installation von =clang++=
+- Linux \to package manager
+- Mac OSX \to XCode
+- Windows
+  - http://cygwin.com
+  - Installer herunterladen (32-Bit?!)
+  - Pakete auswählen: Clang, make, libstdc++
+
+* Übersetzen
+\vspace{1em}
+- ausführbar (=clang= \to http://llvm.org)
+  #+BEGIN_EXAMPLE
+  $ g++ -o go -std=c++17 -Wall test.cpp
+  #+END_EXAMPLE
+  - =-o go= ... Name der ausführbaren Datei
+  - =-c= ... nur übersetzen
+  - =-g= ... Debugginginformationen
+  - =-On= ... Optimierung (/n/ = 0,1,2 oder 3)
+  - =-Wall= ... viele Warnungen
+  - =-Wextra= ... nochmals zusätzliche Warnungen
+  - =-Werror= ... alle Warnungen werden Errors
+  - =-Wpedantic= ... Warnungen oder Fehler, wenn kein striktes ISO \cpp
+  - =-std=c++<xx>= ... /xx/ = 11,14, 1z bzw. 17
+  - =-I<dir>= ... zusätzliches Includeverzeichnis
+  - =-L<dir>= ... zusätzlichen Libraryverzeichnis
+  - =-l<lib>= ... linken mit Library /lib/
+
+* Verschiedene Tools
+- /git/, Mercurial
+- /Meson/, /Ninja/ (CMake, qmake,..., Make)
+- /gdb/, (lldb), /valgrind/
+- Doxygen (\to docu), cppcheck
+- (Jenkins, buildbot)

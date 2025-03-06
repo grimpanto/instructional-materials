@@ -1,0 +1,313 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Zustandsabhängige Steuerung
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* =unique_lock=
+\vspace{1.3em}
+- Destruktor gibt Lock frei, wenn gelockt
+  - kann auch manuell freigegeben werden!
+- kann verschoben werden
+  - besitzt daher nicht notwendigerweise den =mutex=
+- ist rekursiv (mit =recursive_mutex=)
+- hat Timeout (mit =timed_mutex=)
+- kann auch angelegt werden
+  - und den Lock übernehmen (=adopt_lock=)
+  - ohne den Lock zu halten (=defer_lock=)
+  - mit dem Versuch den Lock zu bekommen, d.h. blockiert nicht (=try_to_lock=)
+    - \to =try_lock()=
+- Verwendung mit Bedingungsvariable...
+- /nur/ zu verwenden, wenn =lock_guard= nicht ausreicht!!
+
+* =unique_lock= -- 2
+\vspace{1.5em}
+#+header: :exports code :results output :tangle src/uniquelock.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // uniquelock.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int main() {
+    mutex m{};
+    thread t1{[&]() { unique_lock<mutex> ul{m};
+          cout << 't' << '1' << endl;
+          }};  // lock_guard would be sufficient!
+    thread t2{[&]() { unique_lock<mutex> ul{m};
+          cout << 't' << '2' << endl;
+          }};
+    t1.join();  t2.join();
+}
+#+end_src
+
+: t1
+: t2
+
+* =unique_lock= -- 3
+\vspace{1em}
+#+header: :exports code :results none :tangle src/uniquelock2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // uniquelock2.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+using namespace std::literals;
+void f(unique_lock<mutex> ul) {
+    cout<< 'f'<< endl;
+    this_thread::yield();  /* "no effect" */ }
+int main() {
+    mutex m{};
+    thread t1{[&]() {
+      unique_lock<mutex> ul{m};
+      cout << 't' << '1'; f(move(ul));
+      this_thread::sleep_for(10ms);
+      cout << 't'; this_thread::sleep_for(10ms);
+      cout << '1' << endl;  }};
+#+end_src
+
+* =unique_lock= -- 4
+\vspace{1em}
+#+header: :exports code :results none :tangle src/uniquelock2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    thread t2{[&]() {
+      unique_lock<mutex> ul{m};
+      cout << 't' << '2'; f(move(ul));
+      this_thread::sleep_for(10ms);
+      cout << 't'; this_thread::sleep_for(10ms);
+      cout << '2' << endl;  }};
+    t1.join();
+    t2.join();
+}
+#+end_src
+
+Folgende Ausgabe möglich:
+
+: t2f
+: t1f
+: tt2
+: 1
+
+* =unique_lock= -- 5
+\vspace{1em}
+#+header: :exports code :results output :tangle src/uniquelock3.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // uniquelock3.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+mutex m1{}; mutex m2{};
+void f(int i) {
+    unique_lock<mutex> ul1{m1, defer_lock};
+    unique_lock<mutex> ul2{m2, defer_lock};
+    lock(ul1, ul2);
+    cout << 'f' << i << endl;
+}
+int main() {
+    mutex m1{}; mutex m2{};
+    thread t1{f, 1};  thread t2{f, 2};
+    t1.join();  t2.join();
+}
+#+end_src
+
+* Problematik -- 4
+Producer/Consumer Problem
+
+- Ein Boss befüllt eine Queue (Warteschlange) mit Arbeitspaketen.
+- Arbeiter entnehmen die Arbeitspakete wieder aus der Queue arbeiten die
+  Arbeitspakete ab.
+- Queue ist begrenzt (\to bounded buffer)
+- Zugriff auf Queue muss synchronisiert werden.
+- Wenn /Queue voll/, dann kann Boss kein weiteres Arbeitspaket einstellen
+  und muss warten.
+- Wenn /Queue leer/, dann kann Arbeiter kein Arbeitspaket entnehmen und
+  muss ebenfalls warten.
+
+* Problematik -- 5 & Lösungen
+\vspace{1em}
+\to Condition synchronization (dt. zustandsabhängige Steuerung) notwendig!
+- Polling
+  - t1: Locken, Flag setzen (Bedingung überprüfen), Lock freigeben,...
+  - t2: Locken, Flag prüfen, Lock freigeben,...
+  - \to Ressourcenverbrauch!
+- Polling mit Warten bis zu einer gewissen Zeitpunkt oder für eine gewisse Dauer
+  - Zeit
+    - zu groß \to zeitliche Verzögerung
+    - zu klein \to Ressourcenverbrauch
+- Thread schlafen legen bis Bedingung eintritt
+  - \to condition variable (Bedingungsvariable)
+
+* Polling mit Warten
+\vspace{1em}
+#+header: :exports code :results output :tangle src/polling.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // polling.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+using namespace std::literals;
+bool flag;
+mutex mtx;
+void wait_for_flag() {
+    unique_lock<mutex> lck{mtx};
+    while (!flag) {
+        lck.unlock();
+        this_thread::sleep_for(100ms);
+        cout << "*" << flush;
+        lck.lock();
+    }
+}
+#+end_src
+
+* Polling mit Warten -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/polling.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+void set_flag() {
+    this_thread::sleep_for(3s);
+    lock_guard<mutex> lck{mtx};
+    flag = true;
+}
+
+int main() {
+    thread t1{wait_for_flag};
+    set_flag();
+    t1.join();
+    cout << endl << "done!" << endl;
+}
+#+end_src
+
+: ******************************
+: done!
+
+* Bedingungsvariable
+\vspace{1em}
+#+header: :exports code :results output :tangle src/condvar.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // condvar.cpp
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <vector>
+using namespace std;
+using namespace std::literals;
+
+struct IntQueue {
+    vector<int> v;  // just for demo purposes
+    mutex mtx;
+    condition_variable not_empty;
+  public:
+    void put(int);
+    int take();
+};
+#+end_src
+
+* Bedingungsvariable -- 2
+#+header: :exports code :results output :tangle src/condvar.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+void IntQueue::put(int elem) {
+    lock_guard<mutex> lck{mtx};
+    v.push_back(elem);
+    not_empty.notify_one();
+}
+
+int IntQueue::take() {
+    unique_lock<mutex> lck{mtx};
+    not_empty.wait(lck, [this]{ return v.size();});
+    int elem{v.front()};
+    v.erase(v.begin());
+    return elem;
+}
+#+END_SRC
+
+* Bedingungsvariable -- 3
+\vspace{1em}
+#+header: :exports code :results output :tangle src/condvar.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    IntQueue s;
+    s.put(1);
+    s.put(2);
+    cout << s.take() << endl;
+    cout << s.take() << endl;
+    thread t{[&]() { cout << s.take() << endl; }};
+    this_thread::sleep_for(3s);
+    s.put(3);
+    t.join();
+}
+#+end_src
+
+: 1
+: 2
+: 3   // after 3 seconds
+
+* Bedingungsvariable -- 4
+\vspace{1.3em}
+- =condition_variable= (=unique_lock= erforderlich!)
+- =notify_one= bzw. =notify_all=
+  - Lock muss nicht gehalten werden!
+  - Irgendeiner bzw. alle wartenden Threads
+    - kein wartender \to geht verloren: "lost wake-up"
+- =void wait()=; mit Prädikatsfunktion: =bool wait_for()=, =bool wait_until()=
+  - muss gelockt sein! Thread geht schlafen & unlocken
+  - Wenn Prädikatsfunktion angegeben, dann äquivalent zu
+    #+BEGIN_SRC C++
+    while (!pred()) wait(lck);
+    #+END_SRC
+  - Wenn benachrichtigt | Timeout | "spurious wakeup", dann
+    - Thread wird aufgeweckt und Lock wird erworben
+    - Wenn Bedingung falsch \to schlafen legen & unlocken
+    - "spurious wakeup" \to no side effects, please!
+    - Rückgabe des Wahrheitswertes der Bedingung (wenn abgelaufen, dann =false=)
+* Lost Wakeup
+\vspace{1em}
+#+header: :exports code :results output :tangle src/lost_wakup.cpp :flags -std=c++17 -lpthread :main no
+#+begin_src C++
+#include <iostream>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+
+using namespace std;
+
+mutex mtx;
+condition_variable data_ready;
+
+void waiting_for_work(){
+    cout << "waiting..." << endl;
+    unique_lock<mutex> lck(mtx);
+    data_ready.wait(lck);  // 1
+    cout << "running " << endl;
+}
+#+end_src
+
+* Lost Wakeup -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/lost_wakup.cpp :flags -std=c++17 -lpthread :main no
+#+begin_src C++
+void set_data_ready(){
+    cout << "data prepared!" << endl;
+    data_ready.notify_one();  // 2
+}
+
+int main() {
+    thread t1{set_data_ready};
+    thread t2{waiting_for_work};
+    t1.join();
+    t2.join();
+}
+#+end_src
+
+#+begin_example
+data prepared!
+waiting...
+#+end_example

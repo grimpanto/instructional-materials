@@ -1,0 +1,130 @@
+
+
+#+TITLE: Python \hfill Unit 8\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Menge - 1
+#+BEGIN_SRC python
+>>> even = set()
+>>> even
+set()
+>>> len(even)
+2
+>>> bool(even)
+False  # leer!
+>>> even.add(0)
+{0}
+>>> bool(even)
+True  # nicht leer!
+>>> even.add(2)
+>>> even
+{0, 2}
+#+END_SRC
+
+* Menge - 2
+#+BEGIN_SRC python
+>>> 0 in even
+True
+>>> 1 in even
+False
+>>> even2 = {2, 0, 2}
+>>> even2
+{0, 2}
+>>> even == even2
+True
+>>> even2.add(2)
+>>> even == even2
+True
+>>> len(even2)
+2
+#+END_SRC
+
+* Teilmengen und Übermengen
+#+BEGIN_SRC python
+>>> {1, 3, 5} <= {5, 1, 3}
+True
+>>> {1, 3} <= {2, 5, 1, 3}
+True
+>>> {1, 3, 7} <= {2, 5, 1, 3}
+False
+>>> {1, 3, 5} < {5, 1, 3}
+False
+>>> {1, 3, 5} > {5, 3}
+True
+#+END_SRC
+
+* Vereinigung und Durchschnitt
+#+BEGIN_SRC python
+>>> {1, 2, 3} | {2, 3, 4}
+{1, 2, 3, 4}
+>>> {1, 2, 3} | set()
+{1, 2, 3}
+>>> {1, 2, 3} & {2, 3, 4}
+{2, 3}
+>>> {1, 2, 3} & set()
+set()
+#+END_SRC
+
+* Differenz, symmetrische Differenz
+#+BEGIN_SRC python
+>>> {1, 2, 3} - {2, 3, 4}
+{1}
+>>> {2, 3, 4} - {1, 2, 3}
+{4}
+>>> {1, 2, 3} ^ {2, 3, 4}
+{1, 4}
+>>> {1, 2, 3} - {2, 3, 4} | {2, 3, 4} - {1, 2, 3}
+{1, 4}
+#+END_SRC
+
+* Mengen in =for= Schleifen
+#+BEGIN_SRC python
+>>> for e in {0, 1, 2, 3}:
+...     print(e ** 2)
+...
+0
+1
+4
+9
+#+END_SRC
+
+* Modul - 1
+#+BEGIN_SRC python
+>>> __name__
+'__main__'
+>>> import math
+>>> math.__name__
+'math'
+#+END_SRC
+
+* Modul - 2
+#+BEGIN_SRC python
+def sum(a, b):
+    return a + b
+
+if __name__ = "__main__":
+    a = input("a= ")
+    b = input("b= ")
+    print(sum(a, b))
+#+END_SRC
+
+* Exceptions
+#+BEGIN_SRC python
+>>> try:                                                                                                                            
+...     1 / 0                                                                                                                       
+... except ZeroDivisionError:                                                                                                    
+...     print("Oops")
+... 
+Oops
+#+END_SRC

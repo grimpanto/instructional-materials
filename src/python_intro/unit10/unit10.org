@@ -1,0 +1,135 @@
+
+
+#+TITLE: Python \hfill Unit 10\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* =for= - 1
+#+BEGIN_SRC python
+def fak(n):
+    res = 1
+    for i in range(2, n+1):
+        res = res * i
+    return res
+#+END_SRC
+#+BEGIN_EXAMPLE
+>>> print(fak(0), fak(1), fak(2))
+1 1 2
+>>> fak(3)
+6
+>>> fak(4)
+24
+>>> fak(5)
+120
+#+END_EXAMPLE
+
+* =for= - 2
+#+BEGIN_SRC python
+>>> for e in ("banana", "apple", "orange"):
+...     print(e)
+...
+banana
+apple
+orange
+>>> for e in ((1, "banana"), (3, "apple"), (2, "orange")):
+...     print(e[0], e[1])
+...
+1 banana
+3 apple
+2 orange
+#+END_SRC
+
+* =for= - 3
+#+BEGIN_SRC python
+>>> for cnt, fruit in ((1, "banana"), (3, "apple"), (2, "orange")):
+...     print(cnt, fruit)
+...
+1 banana
+3 apple
+2 orange
+#+END_SRC
+
+* =for= - 4
+#+BEGIN_SRC python
+>>> for c in "abcde":
+...     print(c)
+...
+a
+b
+c
+d
+e
+#+END_SRC
+
+* Langzahlarithmetik
+#+BEGIN_SRC python
+>>> fak(200)
+7886578673647905035523632139321850
+6229513597768717326329474253324435
+9449963403342920304284011984623904
+1772121389196388302576427902426371
+0506192662495282993111346285727076
+3317237396988943922445621451664240
+2540332918641312274282948532775242
+4240757390324032125740557956866022
+6031904170324062351700858796178922
+2227896237038973747200000000000000
+00000000000000000000000000000000000
+#+END_SRC
+
+* =None=
+#+BEGIN_SRC python
+>>> None
+>>> print(None)
+None
+>>> bool(None)
+False
+>>> def f():
+...     print(42)
+...
+>>> res = f()
+42
+>>> print(res)
+None
+#+END_SRC
+
+* Module - 1
+#+BEGIN_SRC python
+>>> import math
+>>> math
+<module 'math' from '/usr/lib/python3.4/lib-dynload/math.cpython-34m.so'>
+>>> type(math)
+<class 'module'>
+>>> dir(math)
+['__doc__', '__file__', '__loader__', '__name__',
+'__package__', '__spec__', 'acos', 'acosh',
+'asin', 'asinh', 'atan', 'atan2', 'atanh', 'ceil',
+'copysign', 'cos', 'cosh', 'degrees', 'e',...]
+#+END_SRC
+
+* Module - 2
+#+BEGIN_SRC python
+>>> import math
+>>> pi
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'pi' is not defined
+>>> math.pi
+3.141592653589793
+>>> from math import pi
+>>> pi
+3.141592653589793
+>>> from math import sqrt as squareroot
+>>> squareroot(4)
+2.0
+#+END_SRC

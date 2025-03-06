@@ -1,0 +1,240 @@
+#+LaTeX_CLASS: beamer
+#+TITLE: Robocode
+#+SUBTITLE: 2011-06-25, 2017-06-27
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:2 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\overline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+
+
+* Überblick
+** Was
+- *Programmierspiel*
+- Roboter werden programmiert
+- ...in Java
+- ...und kämpfen gegeneinander
+- eigene Entwicklungsumgebung
+** Installation und Start
+- Installation
+  #+begin_src sh
+  java -jar robocode-x.x.x.x-setup.jar
+  #+end_src
+- Robocode ausführen
+  #+begin_src sh
+  ~/robocode/robocode.sh
+  #+end_src
+** Aufbau eines Roboters
+- Unterbau (Body)
+  - trägt die Kanone mit dem Radar
+  - vorwärts bzw. rückwärts fahren
+  - nach links bzw. rechts drehen
+- Gun (Kanone)
+  - ist am Body montiert
+  - nach links bzw. rechts drehen
+- Radar
+  - montiert auf der Kanone!
+  - nach links bzw. rechts drehen
+  - generiert =onScannedRobot= Ereignisse (Event)
+** Aufbau eines Roboters -- 2
+#+ATTR_LaTeX: :width 7cm :placement [H]
+[[./Anatomy.jpg]]
+* Spielphysik
+** Koordinaten und Richtungen
+- Kartesisches Koordinatensystem: =(0, 0)= links unten
+- Einheit: Pixel, aber Gleitkommazahl!
+- Roboter können Spielfeld nicht verlassen
+- Richtungen
+  - im Uhrzeigersinn
+  - 0 deg (Grad) schaut nach Norden, 90 nach Osten,...
+  - Richtungen im Überblick
+    #+ATTR_LaTeX: :width 5cm :placement [H]
+      [[./Directions.png]]
+** Zeit, Geschwindigkeit, Beschl., Weg
+time, velocity, acceleration, distance
+- Zeit wird in /ticks/ gemessen
+- Jeder Roboter bekommt 1 tick je Runde (turn)
+- 1 tick = 1 turn
+- Beschleunigung: 1 pixel/turn/turn
+- Verzögerung (Bremsen): 2 pixel/turn/turn
+- Geschwindigkeit: $v = at$ (Maxium: 8 pixel/turn)
+- Weg: $s = vt$
+** Max. Rotation
+- ... des Roboters: (10 - 0.75 * abs(velocity)) deg / turn
+- ... der Kanone: 20 deg / turn\\
+  - zusätzlich zur Rotation des Roboters
+- ... des Radars: 45 deg / turn
+  - zusätzlich zur Rotation der Kanone
+** Bullets
+- Schaden: 4 * firepower
+  - Wenn firepower > 1, dann:
+    - zusätzlicher Schaden: 2 * (firepower - 1)
+- Geschwindigkeit: 20 - 3 * firepower
+- GunHeat: 1 + firepower/5
+  - gunHeat > 0: kein Feuern möglich
+  - gunHeat wird um 0.1 je Turn weniger
+- gewonnene Power bei Treffer: 3 * firepower
+** Kollisionen
+- mit anderen Robotern: jeder 0.6
+- mit der Wand (nur bei AdvancedRobots):
+  $0.5 \cdot \text{abs}(\text{velocity}) - 1$
+  - aber nicht kleiner als 0)
+** Ablauf
+1. Ansicht wird neu gezeichnet
+2. Jeder Roboter führt seinen Programmcode aus (bis Aktion, dann Pause)
+3. Zeit wird aktualisiert (time = time + 1)
+4. Alle Bullets bewegen sich und es wird auf Kollisionen überprüft
+5. Jeder Roboter bewegt sich
+   (gun, radar, heading, acceleration, velocity, distance)
+6. Jeder Roboter führt Scans aus
+7. Jeder Roboter führt Aktion aus
+8. Jeder Roboter fragt Ereignisse ab (event queue)
+* Programmierung
+** Neuer Roboter
+1. Robocode: Robot \to Editor
+2. Robot Editor: File \to New Robot
+3. Name beginnt mit Großbuchstaben, z.B.: SimpleRobo
+4. Paketname beginnt üblicherweise mit Kleinbuchstabe, z.B.: ko
+** Sourcecode
+#+begin_src java
+package ko;
+import robocode.*;
+
+public class SimpleRobo extends JuniorRobot {
+    public void run() {
+	   // Initialization should be put here:
+	   // body, gun, radar, bullet, scan_arc
+	   setColors(orange,blue,white,yellow,black);
+
+	   while(true) { // replace the next 4 lines!
+		  ahead(100);
+		  turnGunRight(360);
+		  back(100);
+		  turnGunRight(360);
+	   }
+    }
+#+end_src
+** Sourcecode 2
+\vspace{1em}
+#+begin_src java
+    public void onScannedRobot() {
+	    // Power zwischen 0.1 (min) und 3 (max)
+        // -> scannedDistance, scannedAngle,
+        //   scannedBearing, scannedEnergy
+	    fire(1);
+    }
+
+    public void onHitByBullet() {
+        // modified instanc variables -> see doc!
+	    back(10);
+    }
+
+    public void onHitWall() {
+	   back(20);
+    }	
+}
+#+end_src
+** JuniorRobot
+- einfachster Roboter
+- Instanzvariablen zum Zugriff auf Eigenschaften
+  - z.B.: =scannedBearing= ... Winkel zum nähesten Roboter relativ zum Body
+    - bearing ... Peilung
+- Viele Befehle blockieren bis abgeschlossen
+- ...und benötigen einen turn
+- ...aber: andere wie setzen der Farben geht sofort und benötigt keine Zeit
+  
+** Grundbefehle
+- =turnRight(double degree)=, =turnLeft(double degree)=
+- =ahead(double distance)=, =back(double distance)=
+- =turnGunRight(double degree)=, =turnGunLeft(double degree)=
+- =turnRadarRight(double degree)=, =turnRadarLeft(double degree)=
+
+blockieren!
+
+** Drehungen...
+- =setAdjustGunForRobotTurn(boolean flag)= ... wenn =true=, dann bleibt Gun in der
+  selben Richtung, wenn sich Roboter dreht
+- =setAdjustRadarForRobotTurn(boolean flag)= ... wenn =true=, dann bleibt Radar in
+  der selben Richtung, wenn sich Robotor (und Gun) dreht
+- =setAdjustRadarForGunTurn(boolean flag)= ... wenn =true=, dann bleibt Radar
+  in der selben Richtung, wenn sich Gun dreht
+
+** Informationsabfrage
+- =getX()= und =getY()=  
+- =getHeading()=, =getGunHeading()=, =getRadarHeading()=
+- =getBattleFieldWidth()=, =getBattleFieldHeight()=
+
+** Feuern und Events
+- Feuern
+  - =fire(double)= bzw. =fireBullet(double)= (gleiches Verhalten in JuniorRobot)
+    - bis zu Energieeinheiten können beim Feuern verwendet werden
+- Events
+  - Radar ist beim Drehen und Bewegen immer aktiv
+  - =onScannedRobot()= ... Radar hat Roboter erkannt
+  - =onHitByBullet()= ... getroffen!
+  - =onHitRobot()= ... Zusammenstoß mit anderem Roboter
+  - =onHitWall()= ... Zusammenstoß mit Wand
+
+** Übersetzen und ausführen
+- Javaprogramm muss in Zwischencode übersetzt werden
+- dann Battle erstellen
+- Vorgang:
+  1. Robot Editor: Compiler \to Compile
+  2. Robocode: Battle \to New
+  3. Roboter hinzufügen
+  4. \to Start Battle
+  5. Wenn fertig, dann Resultate ansehen...
+- Neue (fremde) Roboter in das folgende Verzeichnis kopieren:
+  =~/robocode/robots/<package>=
+** Start
+- Los geht's!
+- Weitere Doku: =~/robocode/javadoc/index.html=

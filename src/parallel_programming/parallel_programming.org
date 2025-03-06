@@ -1,0 +1,380 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Parallele Programmierung
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Einführung
+- Aufteilung der Problemstellung in Teilprobleme
+- nebenläufige Abarbeitung der Teilprobleme
+- Heute meist
+  - hohe Datenparallelität, d.h. viele kleine Teilprobleme \to /Beschleunigung/
+    einer Aufgabe
+  - große Anzahl von Anwendern, d.h. Anzahl der Anfragen auf viele Rechner
+    verteilen, die alle dieselbe SW abarbeiteten \to unabhängige Aufgaben
+    /gleichzeitig/ bearbeiten
+
+* Anwendungen
+- Baustatik, Maschinenbau, Medizin, Chemie, Biologie, Militär, Physik
+- Crashtestsimulationen im Fahrzeugbau, Strömungssimulationen in der
+  Luftfahrttechnik, Wettervorhersage, Rendern in der Computergraphik, Suche in
+  Bildinhalten (Personen, Gegenstände,...), Suchen in großen Problemräumen und
+  in großen Datenbeständen (Brute-force in Kryptographie, Graphensuche wie in
+  Logistik, Schach,... Google, social media,...), DNA-Sequenzanalyse,
+  Vorhersage von Erdbeben und Vulkanausbrüchen, Generierung von
+  Animationsfilmen, Erkennung und Verarbeitung menschlicher Sprache
+
+* Situation
+- Mooresches Gesetz:
+  #+begin_quote
+  Die Anzahl der Transistoren pro Chip verdoppelt sich etwa alle zwei Jahre.
+  #+end_quote
+  - letzten 50 Jahre: ok
+  - nächsten 10-20 Jahre: wahrscheinlich ok
+- Wirth'sches Gesetz sagt aus, dass Software schneller langsamer
+  wird, als Hardware schneller.
+  - Variante von Bill Gates
+    #+begin_quote
+    The speed of software halves every 18 months.
+    #+end_quote
+  \to Anforderungen werden immer größer!
+
+* Situation -- 2
+\vspace{1em}
+- Taktfrequenzen
+  - verdoppelten sich in den 1990er-Jahre alle 18 bis 20 Monate
+  - Seit 2000-2005 nicht mehr!
+  - Maximal 4GHz (im Desktop und Serverbereich)
+  - "Frequency Wall"
+    - höhere Frequenz \to Spannung höher \to Verlustleistung höher
+  - "Power Wall"
+    - Verlustleistung \to Wärme kann nicht mehr abgeführt werden
+  - Existierende, nicht parallelisierte SW profitiert nicht
+    mehr automatisch von der Leistungsteigerung der HW
+    (d.h. durch Steigerungen der Taktfrequenz)
+    #+begin_quote
+    the free lunch is over (Herb Sutter, 2005)
+    #+end_quote
+
+* Lösungsansätze
+- Problemraum vereinfachen \to Algorithmus anpassen\pause
+- Algorithmen optimieren\pause
+- Implementierung verbessern
+  - Facebook
+    - =<string>= meist inkludierter Header
+    - 18% der CPU-Zeit in =std=
+    - Optimierung von =std::string= \to =fbstring=\newline
+      Methode =size()=:
+      | =g++ string= | =fbstring= |
+      |------------+----------|
+      | 1.6ns      | 0.9ns    |
+      \pause
+      \to Gewinn: 1% Performance!!!
+* Lösungsansätze -- 2
+- Schnellere Hardware \to Kosten\pause
+- Spezielle Hardware, z.B.
+  - Angepasste Schaltungen
+    - FPGA (field programmable gate array): kleine Stückzahlen, niedrige
+      Entwicklungskosten, schnelle Anpassung
+    - ASIC (application-specific integrated circuit): Kosten ab mittleren
+      Stückzahlen geringer
+  - DSP-Prozessoren
+  - Graphikprozessoren (GPU)\pause
+- Aufteilen in Teilprobleme \to parallele Abarbeitung
+
+* Parallelisierung?
+- Welche Teilaufgaben lassen sich überhaupt abspalten?
+- Lassen sich nicht zerlegbare Algorithmen umformulieren,
+  sodass eine Zerlegung möglich ist?
+- Wie groß ist der Anteil der zerlegbaren Teilaufgaben
+  der Gesamtaufgabe?
+- Welche Zeiteinsparung ist erreichbar?
+- Ist der Nutzer bereit die Kosten zu tragen?
+  - Hardware
+  - Software
+    - Die Entwicklungskosten sind /viel/ höher!
+    - Man muss die HW gut kennen und die SW daraufhin anpassen.
+
+* Möglichkeiten der Parallelisierung
+- Zerlegung der Gesamtaufgabe in Teilaufgaben, sodass mehrere
+  Prozessoren die Teilaufgaben parallel abarbeiten können.
+- Zerlegung in Teilaufgaben, die hintereinanader ausgeführt
+  werden
+  - Gesamtzeit der Lösung einer Gesamtaufgabe wird nicht kürzer
+  - Durchsatz bei der Lösungen vieler Aufgaben höher
+- Zerlegung in Teilaufgaben, die hintereinander ausgeführt
+  werden, aber die mit spezieller HW (meist parallel)
+  gelöst werden
+
+* Parallelität in der HW
+- Prozessorarchitektur
+  - Pipelining
+  - Superskalarität
+  - HW-seitiges Multithreading
+  - Vektoreinheiten
+  - Coprozessoren
+- Rechnerarchitektur
+  - Multicore-Prozessoren (!)
+  - Multiprozessorsysteme
+  - Cluster
+
+* Pipelining
+1. Befehl aus Arbeitsspeicher (engl. fetch)
+2. Befehl dekodieren (engl. decode) und ggf. Daten
+   aus Registern oder dem Arbeitsspeicher laden
+3. Befehl ausführen (engl. execute)
+4. Ergebnis in Register oder Arbeitsspeicher schreiben (engl. write back)
+
+* Pipelining -- 2
+| Befehl 1 | fetch | decode | execute | write   |         |
+| Befehl 2 |       | fetch  | decode  | execute | write   |
+| Befehl 3 |       |        | fetch   | decode  | execute |
+| ...      |       |        |         |         |         |
+
+Abhängigkeiten zwischen Befehlen \to Wartezyklen bis Ergebnis
+- Datenabhängigkeit
+- Abhängigkeiten im Kontrollfluss (z.B. bedingte Sprunganweisungen)
+
+* Pipelining -- Optimierungen
+  \vspace{1.5em}
+- Umordnungen
+  - durch Compiler
+    #+begin_src C++
+    x = 1;
+    y = 2;
+    z = 3 * x + 2;
+    #+end_src
+  - durch Prozessor
+  - Probleme durch bedingte Verzweigungen
+    - u.U. Rücknahme von Instruktionen
+- Prefetching: Laden von Daten aus dem Hauptspeicher
+  weit vor der Benutzung (\to Out-of-Order ... OoO)
+  - U.U. Verwerfen der Ergebnisse und Rücksetzen der Register
+  - \to Angriffsvektor: Fehlspekulationen haben Nebeneffekte
+    - z.B. Spectre-1: Längenüberprüfung von Feldern, Daten werden im vorhinein
+      gelesen, dann liegt Ergebnis der Längenprüfung vor, aber: Daten bleiben
+      im Cache!
+
+* Superskalarität
+superskalare Prozessoren enthalten mehrere gleichartige
+Funktionseinheiten
+
+- Rechenwerke für Ganzzahl- und Gleitkommaarithmetik
+- Lade- und Speichereinheiten
+
+Damit können mehrere Befehle parallel ausgeführt
+werden (wenn keine Abhängigkeiten)
+
+* HW-seitiges Multithreading
+- mehrere Threads \to Wartezeiten, z.B. bei Hauptspeicherzugriffen
+- daher in der Zwischenzeit Befehle eines anderen Threads ausführen
+- dazu: mehrere Registersätze!
+- wird auch Hyper-Threading genannt
+- HW-Threads erscheinen dem Benutzer wie echte Kerne
+- Performancegewinn ca. 10-20%
+
+* CPU-Info in Linux
+#+BEGIN_SRC sh
+$ lscpu
+Architecture:          i686
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                4
+On-line CPU(s) list:   0-3
+Thread(s) per core:    2
+Core(s) per socket:    2
+Socket(s):             1
+...
+#+END_SRC
+* Vektoreinheiten
+- ein Befehl verarbeitet mehrere Daten gleichzeitig
+  - z.B. Vektoraddition
+  - z.B. Verarbeitung mehrerer Pixel eines Bildes
+- Intel MMX (1997)
+  - 64-Bit-Register: 8 Bytes oder 4 16-Bit-Wörter oder
+    2 32-Bit-Wörter
+- Intel SSE (SSE2, SSE3,...)
+  - 128 bzw. 256-Bits, d.h. auch Gleitkommazahlen
+
+* Vektoreinheiten -- 2
+- Flynnsche Klassifikation
+  - SISD ... single instruction, single data
+    - klassische Von-Neumann Architektur
+  - SIMD ... single instruction, multiple data
+    - Vektorprozessoren
+  - MISD ... multiple instructions, single data
+    - theoretischer Natur
+  - MIMD ... multiple instructions, multiple data
+    - Multicore- und Multiprozessorsysteme
+
+* Coprozessoren
+- FPU (floating point unit), heute in der CPU
+- GPU (graphics processing unit)
+  - werden zunehmend für numerische Berechnungen verwendet \to GPGPU (general
+    purpose computation on graphics processing units)
+- Spezielle Coprozessoren
+  - Dekodieren von Videos
+  - Ver- und Entschlüsseln
+
+* Rechnerarchitektur
+\vspace{1.5em}
+- Einteilung bzgl. Aufbau
+  - homogen: alle Rechner/Prozessoren/Kerne gleich
+  - heterogen: verschiedenartige Rechner/Prozessoren/Kerne,
+    z.B. Graphikkern in CPU
+- Speicherarchitekturen
+  - UMA (uniform memory access): alle Prozessoren/Kerne: Zugriff auf gleichen
+    Hauptspeicher
+  - NUMA: jeder Prozessor: eigener Speicher, Zugriff auf fremden Speicher:
+    Verbindungsnetzwerk (Faktor 2!)
+- Rechnerarchitektur
+  - Multicore vs. Multiprozessor
+  - Cluster-Architektur: heterogen/homogene Rechner verbunden über Netzwerk
+- \to Shared memory vs. Message passing
+
+* NUMA
+  [[./numa_architecture.png]]
+  \center\tiny Quelle: Tiefen des Internets
+
+* Speicherhierarchie
+\vspace{1em}
+- Prozessorregister (Prozessortakt, KiB, ~0.5ns)
+- Cache (bis zu einigen Dutzend Taktzyklen abhängig vom Level, 1-30ns) (Desktop und Server)
+  - Level 1 Cache (je Kern, aufgesplittet in Befehlscache und Datencache, von
+    128KiB bis 480KiB je Cache, ~1ns)
+  - Level 2 Cache (je Kern, von 1MiB bis 3.5MiB, ~3-7ns)
+  - Level 3 Cache (je Prozessor, von 8MiB bis 37.5MiB, ~30ns)
+- Arbeitsspeicher (Hunderte Taktzyklen, GiB, ~100ns)
+- NUMA-Speicher
+- SSD I/O (25\mu{}s-150\mu{}s)
+- Disk-Speicher (TiB, 1-10ms)
+- zum Vergleich: RTT EU \to US: 150ms
+
+* Beispiele
+\vspace{1.5em}
+- Google
+  - unterschiedliche Anforderungen:
+    möglichst schnelles Lösen einer Aufgabe
+    vs. möglichst viele Benutzeranfragen bearbeiten
+  - Zeitpunkt ????: Gesamtenergieverbrauch 600MW
+  - 2008: mehrere Hunderttausend Server
+    - 36 Datencenter
+    - 150 Racks pro Datencenter
+    - 40 Server pro Rack
+    \vspace{0.1em}
+    - \to mehr als 200000 Server! ...und jeden Tag mehr!!!
+
+* Beispiele -- 2
+- NSA
+  - Rechenzentrum in Utah
+    - 60 MW Einspeisung, 250W/Mainboard \to 150000 Rechner
+  - mind. 3 Rechenzentren!
+\vspace{1em}
+- Supercomputer in Wuxi, Jiangsu, China: 93.0146 PFLOPS
+  = 93014.6 TFLOPS = 93014600 GFLOPS
+    - bei 15.37 MW!
+- Desktop: Intel Core i7, 3.2GHz, 4 Kerne ca. 45 GFLOPS
+
+* Parallelität in der SW
+\vspace{1em}
+- Prozesse und Threads
+- Parallelisierende Compiler
+  - OpenMP :: Open Multi-Processing, Erweiterung zu C, \cpp und FORTRAN.
+       Parallelisierung der Schleifen auf Thread-Basis
+  - CilkPlus :: basierend auf C und \cpp. Parallelisierung
+       der Schleifen auf Thread-Basis
+  - OpenCL :: basierend auf C, um heterogene Prozessoren
+       zu programmieren (meist CPU & GPU).
+- Parallele Bibliotheken
+  - TBB :: Threading Building Blocks, \cpp Bibliothek,
+       \to Multicore-Software effizient entwickeln.
+  - MPI :: Message Passing Interface, C, \cpp, Fortran, Java, C#, Python.
+       API, Nachrichten zwischen parallelen Prozessen
+
+* Amdahlsches Gesetz
+\vspace{1.5em}
+- beschreibt die Grenzen der Parallelisierbarkeit
+  - Programm: sequentieller und paralleler Anteil
+    
+    \vspace{0.5em}\hspace{2em}
+    #+ATTR_LATEX: :width 5cm :center nil
+    [[./par_seq.pdf]]
+    \vspace{0.5em}
+  - egal wie gut wir parallelisieren (unabhängig von der # der Prozessoren):
+    das parallele Programm ist nicht schneller als der sequentielle Anteil
+- paralleler Anteil $P$ (in Prozent durch 100), z.B. 75% kann parallelisiert
+  werden \to $P=0.75$
+- Beschleunigung (engl. speedup) eines Programmes mit N Kernen: $S(N) =
+  \frac{T_1}{T_N} \le N$
+- Herleitung von $S(N)$:
+  $S(N) = \frac{T_s + T_p}{T_s + \frac{T_p}{N}} = \frac{T(1-P) + T
+  P}{T(1-P)+\frac{T P}{N}} = \frac{1}{(1-P) + \frac{P}{N}} \le \frac{1}{1-P} =
+  S_{max}$
+- z.B. $P = 0.75, S_{max} = 4$
+
+* Amdahlsches Gesetz -- 2
+\vspace{2em}
+#+begin_center
+[[./amdahlslaw.png]]
+
+\tiny Quelle: Wikipedia
+#+end_center
+
+* Amdahlsches Gesetz -- 3
+- zu pessimistisch: u.U. größerer Cache \to Verbesserung der Leistung (da u.U.
+  gesamter Code im Cache)
+- zu optimistisch: Koordination, Synchronisation und Kommunikation nicht in
+  Betracht gezogen
+
+  \vspace{0.5cm}
+  Erweiterung um diesen Anteil:
+  #+begin_center
+  $S(N) = \frac{1}{(1-P) + o(N) + \frac{P}{N}}$
+  #+end_center
+
+* Nebenläufigkeit (engl. concurrency)
+\vspace{1em}
+- verbesserter Durchsatz \to mehr (Teil-)Aufgaben je Zeiteinheit
+  - Taskparallelität (engl. task parallelism): Aufteilung der Gesamtfunktion in
+    verschiedene Teilfunktionen und jeder Thread bearbeitet eine Teilfunktion.
+  - Datenparallelität (engl. data parallelism): Aufteilung der zu bearbeitenden
+    Daten in verschiedene Datenpakete und jeder Thread bearbeitet ein
+    Datenpaket (gleiche Funktion!)
+- verbessertes Antwortzeitverhalten: I/O-intensive Anwendungen warten
+  oft auf Ein- bzw. Ausgabe \to Prozess (anderer Thread) kann
+  andere Aufgabe erledigen (z.B. GUI, Webserver,...)
+- bessere Programmstruktur \to Separation of concerns ("Trennung von Belangen")
+
+* Nebenläufig vs. parallel
+- Die Anweisungen zweier Prozesse werden parallel bearbeitet, wenn die
+  Anweisungen unabhängig voneinander zur gleichen Zeit ausgeführt
+  werden.
+  - \to 2 Kerne oder 2 Prozessoren notwendig
+- Zwei Prozesse heißen nebenläufig, wenn ihre Anweisungen unabhängig
+  voneinander abgearbeitet werden (können).
+  - \to auch auf einem Kern (Prozessor) möglich (preemptive multitasking)
+- \to parallel /ist/ nebenläufig
+
+* Anforderungen an die Entwicklung
+- Effizienz der Softwareentwicklung
+  - parallele SW ist komplexer \to Aufwand!
+  - Programmiersprachen, z.B. Python vs. =C++=
+    - "Performance speed is no longer the primary worry. Time to market speed
+      is." -- Hui Ding ([[https://thenewstack.io/instagram-makes-smooth-move-python-3/][Instagram]] engineer)
+  - Bsp: Python als Programmiersprache bei [[https://thenewstack.io/instagram-makes-smooth-move-python-3/][Instagram]] (6/2017)
+    - 95 Millionen Photos und Videos
+    - 600 Millionen registrierte Benutzer, davon 400 Millionen aktiv je Tag!
+- Portierbarkeit
+  - meistens abhängig von HW
+- Skalierbarkeit
+  - Steigerung der parallel arbeitenden Prozessor(kerne)

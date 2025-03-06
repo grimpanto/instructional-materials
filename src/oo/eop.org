@@ -1,0 +1,26 @@
+
+- abstract entity ... individuelles Ding, das ewig und unveränderbar ist
+  - Beispiele: Farbe blau oder die Zahl 13
+- concrete entity ... individuelles Ding, das entsteht und wieder verschwindet
+  - nicht nur physische entities sondern auch rechtliche, finanzielle oder politische
+  - Beispiele: Sokrates, USA
+- attribute ... eine Übereinstimmung zwischen abstract entity und concrete entity beschreibt
+  irgendeine Eigenschaft, Bewertung oder Qualität eines concrete entity.
+  - Farbe der Augen von Sokrates oder Anzahl der Staaten in den USA
+- identity ... beschreibt die Identität eines sich verändernden Dings über die Zeit
+  - Attribute eines concrete entity können sich ändern ohne die Identität zu ändern
+- snapshot ... eines conrete entity ist komplette Ansammlung aller dessen Attribute
+  zu einem bestimmten Zeitpunkt
+- abstract species ... beschreibt gemeinsame Eigenschaften von essentiell
+  äquivalenten abstract entities.
+  - Beispiele: Natürliche Zahl, Farbe
+- concrete species ... beschreibt gemeinsame Eigenschaften von essentiell
+  äquivalenten concrete entities.
+  - Beispiele: Mensch, US
+
+
+- datum ... sequence of 0s and 1s
+- value type ... Übereinstimmung zwischen species und einer Menge von datums
+- 
+
+- value type is a type that is defined by its state, and its state alone

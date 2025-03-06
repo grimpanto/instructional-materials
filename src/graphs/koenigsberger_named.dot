@@ -1,0 +1,14 @@
+
+graph koenigsberger {
+    A -- B [label=1, constraint=false];
+    A -- B [label=2];
+    B -- C [label=3, constraint=false];
+    B -- C [label=4];
+    A -- D [label=5, constraint=false];
+    B -- D [label=6 constraint=false];
+    C -- D [label=7 constraint=false];
+    { rank=same;
+        B;
+        D;
+    }
+}

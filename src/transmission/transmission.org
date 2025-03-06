@@ -1,0 +1,43 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Nachrichtenübertragung
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Nachrichtenübertragung
+- Nachrichtenübertragung
+  - zwischen /zwei/ Kommunikationspartnern,
+  - die /direkt/ physikalisch über ein Medium miteinander oder
+  - logisch über einen Kanal miteinander verbunden sind.
+- d.h. Punkt-zu-Punkt Verbindung
+
+* Kommunikationsmodell
+\vspace{1em}
+[[./communication_model.pdf]]
+- Quelle (engl. source) ... erzeugt Nachrichten (\to Netzprozess)
+- Sender (engl. transmitter) ... kodiert Nachrichten, wandelt in Signale
+- Übertragungssystem (engl. transmission system, auch Übertragungsstrecke) ...
+  überträgt Signale (z.B. über elektrischen Leiter)
+- Empfänger (engl. receiver) ... wandelt Signale in Nachrichten (inkl.
+  Fehlersicherungsmechanismen)
+- Senke (engl. source) ... verarbeitet Nachrichten (\to Netzprozess)
+
+* Kommunikation -- Technische Sicht
+[[./data_transmission.pdf]]
+- DEE ... Datenendeinrichtung (engl. Data Terminal Equipment, DTE) (\to Host, in
+  Rechnernetzen)
+- DÜE ... Datenübertragungseinrichtung 
+
+* Übertragungsmedien  

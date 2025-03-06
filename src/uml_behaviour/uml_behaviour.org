@@ -1,0 +1,135 @@
+#+TITLE: UML -- Verhaltensdiagramme
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Anwendungsfalldiagramm
+- use case diagram
+- Stellt das erwartete Verhalten in einer strukturellen
+  Darstellung dar
+- Es wird die Systemgrenze, die beteiligten Akteure
+  und die Anwendungsfälle in einem Diagramm gezeigt
+- Akteure sind außerhalb des Systems benutzen dieses
+  - Akteure sind Rollen und können
+    - Menschen
+    - andere Systeme sein
+
+* Anwendungsfalldiagramm -- 2
+\vspace{1em}
+#+attr_latex: :height 7cm
+[[./usecase.png]]
+
+* Anwendungsfall
+- Stellt strukturierte Beschreibung der Interaktion mit dem System dar
+- Arten von Anwendungsfällen (engl. use case)
+  - Geschäftsanwendungsfälle
+    - geschäftlicher Ablauf ohne systemtechnische Umsetzung
+    - \ar Geschäftsprozessmodellierung
+  - Systemanwendungsfall
+    - beschreibt Interaktion mit System (HW, SW)
+- Text!
+- \to Folien =swdev_process=
+
+* Aktivitätsdiagramm
+- activity diagram
+- Dient zur Festlegung der prozeduralen Verarbeitung und spezifiziert
+  neben dem Kontroll- auch den Datenfluss.
+- Aktivität wird durch einen Graphen beschrieben
+  - Knotenarten sind: Aktionsknoten, Kontrollknoten, Objektknoten
+
+* Aktivitätsdiagramm -- 2
+\vspace{1em}
+#+attr_latex: :height 6cm
+[[./activity.png]]
+
+* Zustandsdiagramm
+- state machine diagram
+- Beschreibt das Verhalten eines Elementes (meist einer Klasse)
+  indem die möglichen Zustände samt Zustandsübergängen (Transitionen) dargestellt
+  werden
+- 2 Arten
+  - Verhaltensautomat (behavioral state machine)
+  - Protokollautomat (protocol state machine)
+
+* Zustandsdiagramm -- 2
+- Transitionsspezifikation
+  - in EBNF (ISO Variante)!
+  - Transition
+    \small
+    #+begin_example
+    Transition = [Ereignis]
+                 ['(' Argument {',' Argument} ')']
+                 ['[' Bedingung ']']
+                 ['/' (Aktivität | {SendeKlausel}-)]
+    #+end_example
+    \normalsize
+  - Sende-Klausel
+    \small
+    #+begin_example
+    SendeKlausel = [Empfänger '.'] Nachricht
+                   ['(' Argument {',' Argument} ')']
+    #+end_example
+
+* Zustandsdiagramm -- 3
+\vspace{2em}
+\footnotesize
+Seminarverwaltung
+\vspace{-2em}
+#+attr_latex: :height 7.5cm
+[[./statemachine2.png]]
+

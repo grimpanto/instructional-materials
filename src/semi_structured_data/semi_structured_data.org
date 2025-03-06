@@ -1,0 +1,162 @@
+#+TITLE: Semistrukturierte Daten
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Semistrukturierte Daten
+- strukturierte Daten
+  - Begriff bezieht sich meist auf relationales Datenmodell
+  - Strukturierung in Relationen, d.h. jedes Tupel hat den
+    gleichen Aufbau
+- semistrukturierte Daten
+  - Daten nicht nach dem relationalen Datenmodell
+  - Schema nicht notwendigerweise vorhanden
+  - tragen einen Teil der Strukturinformation mit sich
+
+* Anwendungen & Formate
+- Anwendungen
+  - flexible und unregelmäßige Daten
+  - viele optionalen Werte
+  - unterschiedliche Datentypen
+- Formate
+  - XML
+  - JSON
+  - YAML
+  - CSV
+
+* JSON
+- JavaScript Object Notation
+- Unterstützung für "alle" Programmiersprachen vorhanden
+- Anwendungen
+  - Konfiguration
+  - Datenspeicherung
+  - Kommunikation
+    - JSON-RPC
+    - AJAJ (Asynchronous JavaScript and JSON)
+
+* Definition in BNF
+#+begin_example
+<object> ::= {} | { <members> }
+<members> ::= <pair> | <pair>,<members>
+<pair> ::= <string> : <value>
+<array> ::= [] | [ <elements> ]
+<elements> ::= <value> | <value>,<elements>
+<value> ::= <string> | <number> | <object> |
+            <array> | true | false | null
+#+end_example
+
+* Beispiel
+#+begin_src javascript
+{
+  "key1" : 1,
+  "key2" : "abc",
+  "key3" : null,
+  "key4" : [-1, true, [false, 2.5e-10, {}]],
+  "key5" : { "key6" : { "key7" : "a\tb\tc\n"}}
+}
+#+end_src
+
+* Erweiterungen
+- JSON Pointer
+  - zum Identifizieren eines Wertes innerhalb eines JSON-Dokuments
+- Beispiel
+  - JSON-Dokument
+    #+begin_src javascript
+    {
+      "foo" : ["bar", "baz"],
+      "pi" : 3.1416
+    }
+    #+end_src
+  - =/foo= \to =["bar", "baz"]=
+  - =/foo/0= \to ="bar"=
+  - =/foo/1= \to ="baz"=
+  - =/pi= \to =3.1416=
+
+* Erweiterungen -- 2
+- JSON Schema
+  - zum Beschreiben des Formats von JSON-Dokumenten
+- Beispiel
+  - Schema
+    #+begin_src javascript
+    {
+      "$schema" : "http://json-schema.org/schema#",
+      "allof" : [
+        { "type" : "number" },
+        { "type" : "string" }
+      ]
+    }
+    #+end_src
+  - gültige JSON-Dokumente
+    - 42
+    - -1
+    - 2.5e8
+    - "abc"
+
+* CSV
+- RFC 4180
+- Jede Zeile enthält einen Datensatz (getrennt durch =CRLF=)
+- Letzte Zeile kann mit einem =CRLF= abgeschlossen sein
+- Eine Headerzeile kann vorhanden sein und enthält
+  die Namen der Felder; gleiche Anzahl wie in Records (SOLL)
+- Innerhalb jedes Records dürfen mehrere Felder enthalten
+  sein (getrennt durch ein =,=)
+- Jedes Feld kann in ="= eingeschlossen sein
+- Felder die ein =CRLF=, ein ="= oder ein =,= enthalten sollen
+  in ="= eingeschlossen sein
+- Wenn ="= in einem Feld vorkommen, dann mittels einem
+  weiteren ="= maskieren

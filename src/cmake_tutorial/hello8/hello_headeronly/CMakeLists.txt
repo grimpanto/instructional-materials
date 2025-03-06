@@ -1,0 +1,4 @@
+
+add_library(say_hello_headeronly INTERFACE)
+target_include_directories(say_hello_headeronly INTERFACE include)
+

@@ -1,0 +1,28 @@
+
+graph bauer {
+    bgcolor="transparent"
+    BWKZ_ -- WK_BZ;
+    BWK_Z -- WK_BZ;
+    BWK_Z -- W_BKZ;
+    BWK_Z -- K_BWZ;
+    BWZ_K -- W_BKZ;    
+    BWZ_K -- Z_BWK;
+    BZK_W -- K_BWZ;
+    BZK_W -- Z_BWK;
+    BZ_WK -- Z_BWK;
+    BZ_WK -- _BWKZ;
+    { rank=same;
+        BWKZ_;
+        BWK_Z;
+        BWZ_K;
+        BZK_W;
+        BZ_WK;
+    }
+    { rank=same;
+        WK_BZ;
+        W_BKZ;
+        K_BWZ;
+        Z_BWK;
+        _BWKZ;
+    }
+}

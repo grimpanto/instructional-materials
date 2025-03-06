@@ -1,0 +1,140 @@
+#+TITLE: UML Überblick
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* UML
+\vspace{1em}
+- Unified Modeling Language
+- (hauptsächlich) graphische Modellierungssprache
+- wird verwendet im Zuge der
+  - Anforderungsspezifikation
+  - Analyse
+  - Entwurf
+  - Implementierung
+- Anwendung
+  - Spezifikation
+  - Codegenerierung
+  - Dokumentation
+  - \to Kommunikation
+    - zwischen Entwicklern
+    - mit den Stakeholdern (z.B. Auftraggeber)
+- spezifiziert von OMG (Object Management Group)
+  - dzt. Version 2.5.1
+    - ca. 800 Seiten!
+
+* Grundlegende Begriffe
+- Modell
+  - Repräsentation eines Teiles der realen Welt (Abstraktion)
+    - d.h. es werden die relevanten Aspekte beschrieben
+- View
+  - Modell in der Regel komplex \to verschiedene Sichtweisen
+- Notation
+  - Eine View wird in einer Notation (oft Diagramm) dargestellt
+
+* Diagrammarten
+\vspace{1.5em}
+- mittlerweile insgesamt 19 (!) Diagrammarten
+  - aber: die meisten werden /nicht/ verwendet
+    - [[http://www.drdobbs.com/architecture-and-design/uml-25-do-you-even-care/240163702]]
+- Strukturdiagramme
+  - zeigen wie das System /aufgebaut/ ist
+    - zeigen die Elemente (Subsysteme, Artifikate, Komponenten, Pakete, Klassen,...)
+    - zeigen wie die Elemente zusammenhängen
+- Verhaltensdiagramme
+  - zeigen welche /Funktionalität/ das System aufweisen soll
+    - zeigen welche Funktionen das Gesamtsystem haben soll
+    - zeigen wie der Ablauf einzelner Funktionen aussieht
+    - zeigen wie die Objekte (also Instanzen einer Klasse) funktionieren
+    - zeigen wie mehrere Objekte zusammen interagieren
+    - zeigen zeitliche Zusammenhänge
+
+* Diagrammarten -- 2
+- Strukturdiagramme
+  - Klassendiagramm (Class Diagram)
+  - Objektdiagramm (Object Diagram)
+  - Paketdiagramm (Package Diagram)
+  - Einsatz- und Verteilungsdiagramm (Deployment Diagram)
+  - Komponentendiagramm (Component Diagram)
+  - ...
+- Verhaltensdiagramme
+  - Anwendungsfalldiagramm (Use Case Diagram)
+  - Aktivitätsdiagramm (Activity Diagram)
+  - Zustandsdiagramm (State Diagram)
+  - Sequenzdiagramm (Sequence Diagram)
+  - Kommunikationsdiagramm (Communication Diagram)
+  - ...
+
+* Geschichte
+\vspace{1em}
+[[./uml_history.png]]
+Quelle: wikipedia
+
+* Teilspezifikationen
+- Infrastructure Specification
+  - Grundlage der Spezifikation
+  - \to Klasse, Assoziation, Attribut
+- Superstructure Specification
+  - baut auf Infrastructure Specification auf
+  - definiert die Modellelemente der UML
+    - z.B. Aktivität oder Anwendungsfall
+- Object Constraint Language
+  - mit dieser können Bedingungen für ein Modell definiert werden
+- Datagram Interchange
+  - damit Tools (verschiedener Hersteller) Modelle austauschen
+    können

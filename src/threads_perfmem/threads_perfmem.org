@@ -1,0 +1,477 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Threads: Performance & Speicher
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Threadpools
+- Parallelisierung oftmals zahlreicher, kleiner Aufgaben (engl. tasks)
+- jeder Task in eigenem Thread \to teuer!
+  - auch Starten von Threads kostet!
+    - \to Wiederverwendung von Threads
+  - Context switch kostet!
+    - \to je Kern ein Thread...
+- Threadpools
+  - Angaben
+    - Anzahl der Threads, die bei Beginn erzeugt werden
+    - maximale und minimale # an Thread
+    - Größe der Queue
+  - Abarbeitung von Aufgaben bis Threadpool beendet
+  - z.B. bei Webservern oder Rechenaufgaben
+
+* Lastverteilung
+\vspace{1em}
+- OS kann Threads zwischen Kernen verschieben
+  - kostet Zeit
+  - auch wg. Caches nicht gut (muss nachgeladen werden)
+    - kleinste Verwaltungseinheit ist Cache-Zeile
+    - Caches müssen aktualisiert werden!
+- Mindestens so viele Threads wie Kerne
+  - mehr Threads \to Überbelegung (engl. oversubscription)
+- viele blockierende Threads \to mehr Threads
+  - ansonsten Unterbelegung (engl. undersubscription)
+- Annahme: 4 Threads unterschiedlicher Prioritäten
+  - 4 Kerne: alles ok
+  - 1 Kern: \pause in Abhängigkeit des Scheduler \to niedrig prioritisierte
+    verhungern (engl. starvation)
+
+* Optimale # an parallelen Threads?
+#+header: :exports both :results output :tangle src/hwthreads.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // hwthreads.cpp
+#include <thread>
+using namespace std;
+int main() {
+    int hw_threads{thread::hardware_concurrency()};
+    if (hw_threads) {
+        cout << hw_threads << endl;
+    } else {
+        cout << "no info available" << endl; }}
+#+end_src
+
+#+RESULTS:
+: 8
+
+... Intel i7-8550U: 4 Kerne mit je 2 Threads
+
+* single-threaded vs. multi-threaded
+- Wann ist es sinnvoll zu parallelisieren?
+- Wann nicht?
+
+* Addieren -- single-threaded
+\vspace{1em}
+#+header: :exports code :results output :tangle src/sum_single.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream> // sum_single.cpp
+#include <chrono>
+#include <algorithm>
+#include <random>
+#include <vector>
+using namespace std;
+using ull = unsigned long long;
+constexpr ull size{100000000};
+
+int main() {
+    mt19937 engine;  // always the same
+    uniform_int_distribution<> dis(1,10);
+
+    vector<int> values;  values.reserve(size);
+    for (ull i{0}; i < size ; ++i)
+        values.push_back(dis(engine));
+#+end_src
+
+* Addieren -- single-threaded -- 2
+#+header: :exports code :results output :tangle src/sum_single.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    ull acc{0};
+
+    auto start = chrono::system_clock::now();
+    acc = accumulate(begin(values),end(values),0);
+    chrono::duration<double> dur =
+        chrono::system_clock::now() - start;
+
+    cout << "Time: " << dur.count() << "s" << endl;
+    cout << "Result: " << acc << endl;
+}
+#+end_src
+
+#+begin_example
+Time: 1.1698s
+Result: 549996948
+#+end_example
+
+* Addieren -- multi-threaded
+\vspace{1em}
+#+header: :exports code :results output :tangle src/sum_multiple.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream> // sum_multiple.cpp
+#include <chrono>
+#include <random>
+#include <vector>
+#include <mutex>
+#include <thread>
+using namespace std;
+using ull = unsigned long long;
+constexpr ull size{100000000};
+constexpr ull b1{25000000};
+constexpr ull b2{50000000};
+constexpr ull b3{75000000};
+constexpr ull b4{100000000};
+
+mutex mtx;
+#+end_src
+
+* Addieren -- multi-threaded -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/sum_multiple.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+void sum(ull& acc, const vector<int>& values,
+         ull beg, ull end) {
+    for (auto it = beg; it < end; ++it) {
+        lock_guard<std::mutex> lg(mtx);
+        acc += values[it]; }
+}
+int main() {
+    mt19937 engine;
+    uniform_int_distribution<> dis(1,10);
+
+    vector<int> values; values.reserve(size);
+    for (long long i{0}; i < size; ++i)
+      values.push_back(dis(engine));
+
+    ull acc{0};
+#+end_src
+
+* Addieren -- multi-threaded -- 3
+#+header: :exports code :results output :tangle src/sum_multiple.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    auto start = chrono::system_clock::now();
+
+    thread t1(sum, ref(acc), ref(values), 0, b1);
+    thread t2(sum, ref(acc), ref(values), b1, b2);
+    thread t3(sum, ref(acc), ref(values), b2, b3);
+    thread t4(sum, ref(acc), ref(values), b3, b4);
+    t1.join();  t2.join();  t3.join();  t4.join();
+
+    chrono::duration<double> dur =
+      chrono::system_clock::now() - start;
+
+    cout << "Time: " << dur.count() << "s" << endl;
+    cout << "Result: " << acc << endl;
+}
+#+end_src
+
+* single- vs. multi-thread. -- 2
+\vspace{1.3em}
+- Linux, 2 Kerne je 2 Threads, gcc 5.3.0
+  |           | single-threaded | multi-threaded |
+  |-----------+-----------------+----------------|
+  | ohne Opt. | 1.1698s         | 17.5945s       |
+  | max. Opt. | 0.0490417s      | 11.0846s       |
+- \pause Verbesserungspotenzial
+  - atomare Variable (anstatt =lock_guard=, siehe später!)
+    -
+      #+begin_src C++
+      atomic<ull>& acc; acc += values[it];
+      #+end_src
+    Verbesserung gegenüber =lock_guard=...\pause Faktor 3-4! \pause
+  - =atomic= mit =fetch_add= & =memory_order_relaxed=
+    -
+      #+begin_src C++
+      atomic<ull>& acc;
+      acc.fetch_add(values[it],
+                    memory_order_relaxed)
+      #+end_src
+    Verbesserung gegenüber =lock_guard=...\pause Faktor 7-8!
+  \to single-threaded ca. 30 Mal schneller als
+  schnellste multi-threaded Variante!!
+
+* Verbesserung -- nicht so naiv!
+\vspace{1.3em}
+besser so wenig wie möglich synchronisieren!
+#+header: :exports none :results output :tangle src/sum_multiple_min_sync.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream> // sum_multiple_min_sync.cpp
+#include <chrono>
+#include <random>
+#include <vector>
+#include <mutex>
+#include <thread>
+using namespace std;
+using ull = unsigned long long;
+constexpr ull size{100000000};
+constexpr ull b1{25000000};
+constexpr ull b2{50000000};
+constexpr ull b3{75000000};
+constexpr ull b4{100000000};
+
+mutex mtx;
+#+end_src
+
+#+header: :exports code :results output :tangle src/sum_multiple_min_sync.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+void sum(ull& acc, const vector<int>& values,
+         ull beg, ull end) {
+    ull acc_tmp{0};
+    for (auto it = beg; it < end; ++it)
+        acc_tmp += values[it];
+    lock_guard<std::mutex> lg(mtx);
+    acc += acc_tmp;
+}
+#+end_src
+
+#+header: :exports none :results output :tangle src/sum_multiple_min_sync.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    mt19937 engine;
+    uniform_int_distribution<> dis(1,10);
+
+    vector<int> values; values.reserve(size);
+    for (long long i{0}; i < size; ++i)
+      values.push_back(dis(engine));
+
+    ull acc{0};
+#+end_src
+
+#+header: :exports none :results output :tangle src/sum_multiple_min_sync.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    auto start = chrono::system_clock::now();
+
+    thread t1(sum, ref(acc), ref(values), 0, b1);
+    thread t2(sum, ref(acc), ref(values), b1, b2);
+    thread t3(sum, ref(acc), ref(values), b2, b3);
+    thread t4(sum, ref(acc), ref(values), b3, b4);
+    t1.join();  t2.join();  t3.join();  t4.join();
+
+    chrono::duration<double> dur =
+      chrono::system_clock::now() - start;
+
+    cout << "Time: " << dur.count() << "s" << endl;
+    cout << "Result: " << acc << endl;
+}
+#+end_src
+
+\pause \vspace{-1.5ex}
+
+: Time: 0.0420116s
+: Result: 549996948
+
+\vspace{-1ex}
+\to wie single-threaded!!
+
+\vspace{.5ex} Anstatt lokaler Variable: thread-lokale Variable oder Promise
+(beide siehe später) (aber auch nicht schneller)
+
+* Datenaustausch
+- prinzipieller Austausch von Daten über Objekte und Variable
+  (engl. shared memory programming)
+- Thread muss nicht immer aktuelle Daten "sehen"
+  - da Speicherinhalt in Register (und noch nicht zurückgeschrieben)
+  - Problem auch auf Single-Core-System
+- Konflikte können auftreten!
+
+* Speichermodell (Memory Model)
+- formale Spezifikation der Lese- und Schreiboperationen
+- notwendig, für die Semantik von multi-threaded Programmen
+- behandelt
+  - Reihenfolge
+  - Atomarität
+- hat Auswirkungen auf
+  - Programmierung
+  - Performance
+  - Portabilität
+
+* Speichermodell -- 2
+#+begin_example
+                a == 0 && b == 0
+               
+               Thread 1 | Thread 2
+                 x = a; |  y = b;
+                 b = 2; |  a = 1;
+#+end_example
+
+* Speichermodell -- 3
+#+begin_example
+                a == 0 && b == 0
+
+               Thread 1 | Thread 2
+                 x = a  |
+                 b = 2  |
+                        |  y = b
+                        |  a = 1
+
+                x == 0 && y == 2
+#+end_example
+
+* Speichermodell -- 4
+#+begin_example
+                a == 0 && b == 0
+
+               Thread 1 | Thread 2
+                 x = a  |
+                        |  y = b
+                        |  a = 1
+                 b = 2  |
+
+                x == 0 && y == 0
+#+end_example
+
+* Speichermodell -- 5
+\vspace{2em}
+#+begin_example
+                a == 0 && b == 0
+
+               Thread 1 | Thread 2
+                 b = 2; |
+                        |  y = b;
+                        |  a = 1;
+                 x = a; |
+
+                x == 1 && y == 2
+#+end_example
+
+#+beamer: \pause
+
+#+begin_center
+- Optimierungen der Pipeline durch Compiler & Prozessor!
+- *Veränderung auch über Caches möglich* (wenn Daten vor Verwendung geladen)
+- *Auch in Java und C# möglich!*
+#+end_center
+
+* Speichermodell -- 6
+- Ohne Unterstützung daher kein Austausch von Daten zwischen Threads möglich!
+- /Speichermodell/ legt fest wann Werte von anderen Threads gesehen werden
+- Java, C# und C++ haben jetzt ein definiertes Speichermodell
+- /Sequenzielle Konsistenz/ als Speichermodell
+  - kein Umsortierungen erlaubt
+  - Schreibeoperationen atomar und sofort für alle Threads sichtbar
+  - aber: Performance...
+  - deshalb: Speichermodell basierend auf Speicherbarrieren
+
+* Speicherbarrieren
+(engl. memory barrier, memory fence)
+- Full Fence: kein Verschieben über Barriere
+- Store Fence: kein Verschieben von Schreiboperationen
+- Load Fence: detto für Leseoperation
+- Acquire Fence: keine Operationen dürfen nach vorne verschoben werden
+- Release Fence: keine Operationen dürfen nach hinten verschoben werden
+
+* Speicherbarrieren -- 2
+\vspace{1em}
+#+begin_example
+               Thread 1 | Thread 2
+                 x = a; |
+                 b = 2; | d = 4;
+        lock.release(); | ...
+                 ...    | lock.acquire();
+                 c = 3; |  y = b;
+                        |  a = 1;
+#+end_example
+
+#+beamer: \pause
+#+begin_center
+- =c= könnte nach vorne geschoben werden
+- =d= könnte nach hinten geschben werden
+- wird in der Anwendungsprogrammierung nicht verwendet, aber...
+  #+beamer: \pause
+  - Verständnis!
+  - Verwendung in Implementierung von Synchronisationsmechanismen!
+#+end_center
+
+* Schlüsselwort =volatile=
+- Bedeutung in =C= und =C++=
+  - nur für Zugriff auf HW gedacht (engl. memory mapped I/O)
+    - Wert wird direkt in den Speicher geschrieben
+    - Kein Wegoptimieren oder Umordnen erlaubt
+    - keine atomare Aktion (schreiben bzw. lesen)
+  - nicht für Kommunikation zwischen Threads verwenden!
+    - \to Performance wird sinken und keine Sicherheit
+- Bedeutung in =C#= und =Java=
+  - Zugriff auf eine Variable nach der Acquire/Release Semantik!
+
+* COMMENT Schlüsselwort =static=
+=static= Variable werden innerhalb eines Scopes thread-safe
+(z.B. einer Funktion) initialisiert!
+
+#+header: :exports code :results none :tangle src/threadstatic.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // threadstatic.cpp
+#include <string>
+#include <thread>
+using namespace std;
+
+double config(string key) {
+    static map<string, string> mapping{};
+}
+#+end_src
+
+* Schlüsselwort =thread_local=
+\vspace{1em}
+#+header: :exports code :results none :tangle src/threadlocal.cpp :flags -std=c++1y -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // threadlocal.cpp
+#include <string>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+// not synchronized in each thread -> performance!
+thread_local unsigned int cnt{10};
+mutex cout_mtx;
+
+void cnt_chars(const string& str, const int id) {
+    // no race cond, cnt belongs to this thread
+    cnt += str.size();
+    lock_guard<std::mutex> lock(cout_mtx);
+    cout << "t" << id << ": " << cnt << endl;
+}
+#+end_src
+
+* Schlüsselwort =thread_local= -- 2
+\vspace{1em}
+#+header: :exports code :results none :tangle src/threadlocal.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    string str{"abcdefghi"};
+    thread t1{cnt_chars,
+              str.substr(0, str.size() / 2), 1};
+    thread t2{cnt_chars,
+        str.substr(str.size() / 2, str.size()), 2};
+    {
+        std::lock_guard<std::mutex> lock(cout_mtx);
+        std::cout << "main: " << cnt << endl;
+    }
+    t1.join();  t2.join();
+}
+#+END_SRC
+
+: main: 10
+: t2: 15
+: t1: 14
+
+* False Sharing
+- Problem beim Zugriff auf Caches (Teil der Speicherhierarchie)
+  - bedeutet: "scheinbar gemeinsame Nutzung"
+- kleinste Einheit ist Cache-Zeile (ca. 32 bis 256 Bytes)
+- mehrere Kerne können gleichzeitig Kopien derselben Zeile
+  im lokalen Cache
+- Änderung einer Zeile \to Invalidierung und Aktualisierung der anderen Caches!
+- Modifikation verschiedener Daten der in gleicher Zeile...
+  - Änderung und daher Invalidierung und Aktualisierung
+  - obwohl nicht notwendig
+  - \to Ping Pong!
+
+* False Sharing -- 2
+\vspace{2em}
+#+attr_latex: :height 5cm
+[[./pingpoing.pdf]]

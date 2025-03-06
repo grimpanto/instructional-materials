@@ -1,0 +1,84 @@
+#+TITLE: Verteilte Systeme \linebreak \small\hfill Softwarearchitektur
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \usepackage{pifont}  % necessary for "ding"
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{☛}{{\ding{43}}}
+#+LATEX_HEADER: \newunicodechar{✔}{{\ding{52}}}
+#+LATEX_HEADER: \newunicodechar{✘}{{\ding{55}}}
+#+LATEX_HEADER: \newunicodechar{◆}{{\ding{169}}}
+
+* SW-Architektur und Entwurf
+- SW-Architektur
+  #+begin_quote
+  The software architecture of a program or computing system is the *structure* or
+  structures of the system, which comprise *software elements*, the externally visible *properties*
+  of those elements, and the *relationship* among them.\newline
+  \mbox{ } \hfill \textup{Paul Clements}
+  #+end_quote
+- Verwendung von funktionierenden Lösungsansätzen
+  - SW-Architektur-Patterns
+  - Design-Patterns
+  - Idioms
+
+* SW-Architektur-Patterns
+\vspace{1.5em}
+- \to relevante Patterns in "Systemarchitektur"
+- /monolithic/
+  - Monolithisches System
+    - untrennbare Einheit
+    - unabhängig von anderen Systemen
+    - single-tiered: UI, Database access, Business logic
+  \vspace{-0.3em}
+- /component-based/
+  - Komponente
+    - kann mehrfach verwendet werden, d.h. kann in selber SW mehrfach eingesetzt werden
+    - ist nicht kontextabhängig, d.h. verwendbar in "beliebigen" Situationen
+    - lässt sich mit anderen Komponenten verbinden
+    - ist gekapselt
+    - kann unabhängig eingesetzt werden und unterliegt eigener Versionierung,
+      d.h. eigenständige Ressource
+  - \to SOA, Microservice, JEE, .Net,...
+
+* SW-Architektur-Patterns -- 2
+- /layered/
+  - Abstraktionen in Schichten
+  - vs. monolithisches System
+- /event-driven/
+  - Verarbeitung von Zustandsänderungen
+  - event generator, event queue, event dispatcher, event handler
+  - Implementierungen
+    - main-loop und callback
+    - observer pattern
+    - delegates
+    - signal-slot
+
+* SW-Architektur-Patterns -- 3    
+- /shared nothing/
+  - jeder Thread/Prozess/Node ist unabhängig
+  - kein gemeinsamer Speicher, Massenspeicher,...
+  - z.B. Webserver SW
+  - \to Skalierbarkeit
+  - z.B. Actor Model
+- /blackboard/
+  - gemeinsame Datenstruktur, die zum Lösen eines Problems genutzt wird
+  - sukzessives Ablegen von Daten der Threads/Prozesse/Nodes (Teillösungen) in
+    einer hierarchischen/strukturierten Form
+  - Methapher: Flipchart/Tafel mit Experten
+  - kommt aus der AI
+

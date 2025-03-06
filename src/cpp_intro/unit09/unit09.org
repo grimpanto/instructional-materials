@@ -1,0 +1,910 @@
+#+TITLE: Modernes C++\linebreak \small...für Programmierer \hfill Unit 09: Klassen 2
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX_HEADER:\usepackage{wasysym}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \newcommand{\cppXI}{C++11\xspace}
+#+LATEX: \newcommand{\cppXIV}{C++14\xspace}
+#+LATEX: \newcommand{\cppXVII}{C++17\xspace}
+
+* Überblick
+- Vererbung
+- Destruktor
+- abstrakte Klassen und Methoden
+- Interfaces
+- Explizites Überschreiben
+- Ableitung und Überschreiben verhindern
+- =noexcept=
+- Virtuelle Konstruktoren
+- Spezielle Methoden
+
+* Vererbung
+- =public=
+  - =public= und =protected= ebenfalls in abgeleiteter Klasse
+    =public= und =protected=
+  - für Spezifikationsvererbung (Subtypbeziehung)!!!
+- =protected=
+  - =public= und =protected= in abgeleiteter Klasse =protected=
+- =private=: default!
+  - =public= und =protected= in abgeleiteter Klasse =private=
+  - für Implementierungsvererbung
+    - Implementierung von Komposition: Instanz der Basisklasse ist
+      als Teil der Instanz der Subklasse zu sehen
+
+* Vererbung -- 2
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/inheritance1.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance1.cpp
+using namespace std;
+struct Person {
+    string doing() { return "nothing"; } };
+struct Teacher : public Person {
+    string name;
+    Teacher(string name) : name{name} {};
+    string doing() { return "teaching"; } };
+int main() {
+    Person p;
+    cout << p.doing() << endl;
+    Teacher t{"ko"};
+    cout << t.doing() << endl;
+    p = t;  // slicing!
+    // now: t converted to p => no "name" any more!
+    cout << p.doing() << endl; }
+#+end_src
+
+\pause
+
+: nothing
+: teaching
+: nothing
+
+* Vererbung -- 3
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/inheritance2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance2.cpp
+using namespace std;
+struct Person {
+    string doing() { return "nothing"; } };
+struct Teacher : public Person {
+    string name;
+    Teacher(string name) : name{name} {};
+    string doing() { return "teaching"; } };
+int main() {
+    Person p;
+    cout << p.doing() << endl;
+    Teacher t{"ko"};
+    cout << t.doing() << endl;
+    Person* pp{&t};
+    cout << pp->doing() << endl; }
+#+end_src
+
+\pause
+
+: nothing
+: teaching
+: nothing
+
+* Vererbung -- 4
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/inheritance3.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance3.cpp
+using namespace std;
+struct Person {
+    virtual string doing() { return "nothing"; } };
+struct Teacher : public Person {
+    string name;
+    Teacher(string name) : name{name} {};
+    string doing() { return "teaching"; } };
+int main() {
+    Person p;
+    cout << p.doing() << endl;
+    Teacher t{"ko"};
+    cout << t.doing() << endl;  // inline possible
+    Person* pp{&t};
+    cout << pp->doing() << endl;  }  // not inlined!
+#+end_src
+
+\pause
+
+: nothing
+: teaching
+: teaching
+
+* Virtual function table (vtable)
+[[./vtables.png]]
+\footnotesize
+Quelle: https://pabloariasal.github.io/2017/06/10/understanding-virtual-tables/
+
+* Vererbung -- 5
+\vspace{1em}
+\small
+#+header: :exports both :results output :tangle src/inheritance4.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance4.cpp
+using namespace std;
+struct Person {
+    Person() { print_type(); }
+    virtual void print_type() {
+        cout << "Person" << endl; }
+};
+struct Teacher : public Person {
+    void print_type() {
+        cout << "Teacher" << endl; }
+};
+int main() {
+    Teacher t{};
+}
+#+end_src
+
+#+RESULTS:
+: Person
+\pause
+\to Objekt nicht fertig konstruiert!
+
+* Vererbung -- 6
+\vspace{1.5em}
+\small
+#+header: :exports  both :results output :tangle src/inheritance5.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance5.cpp
+using namespace std;
+struct Number {
+    virtual void print_num(double d) {
+        cout << "is double: " << d << endl; }
+    virtual void print_num(int i) {
+        cout << "is int: " << i << endl; }
+};
+struct SpecialNumber : public Number {
+    void print_num(int i) {
+        cout << "is special int: " << i << endl; }
+};
+int main() {
+    SpecialNumber num;
+    num.print_num(3.5);
+}
+#+end_src
+
+#+RESULTS:
+: is special int: 3
+\pause
+\vspace{-0.9em}
+\to überschreiben... verschiedene Scopes! \pause\hspace{0.5em} =virtual= dbzgl. nutzlos
+
+* Vererbung -- 7
+- Reihenfolge
+  - der Konstruktoren: zuerst Basisklasse, dann aktuelle Klasse
+  - der Destruktoren: "umgekehrt"
+- Konsequenzen von =virtual=
+  - muss in Subklassen nicht angegeben werden
+  - \to =vtable= für jede Klasse und =vpointer= für jede Instanz!
+    - =vtable= im read-only Teil des Prozesses
+- Gründe =virtual= /nicht/ zu verwenden:
+  - Performance
+  - Größe der Instanzen
+  - Kontrolle, z.B.: =f()= ruft =g()= in Klasse =X= auf und =g()= ist
+    nicht =virtual=, dann wird garantiert =X::g()= aufgerufen
+    (und nicht ein =g()= einer Subklasse von =X=)
+  - meist kein "inlining" möglich
+  - "API-Probleme"
+
+* Vererbung -- 8
+- Container (der Standardbibliothek)
+  - speichern Kopien
+    - Vererbung \to /slicing/
+      #+begin_src C++
+      Person p;
+      Teacher t;
+      vector<Person> vp;
+      vp.push_back(p);
+      vp.push_back(t);  // !!!
+      #+end_src
+  - Pointer
+    - ok, aber nicht empfohlen
+  - SmartPointer!
+
+* Vererbung -- 9
+\vspace{1.8em}
+\footnotesize
+#+header: :exports  both :results output :tangle src/inheritance6.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance6.cpp
+using namespace std;
+struct A { int a;
+    virtual void print(string msg) { cout << msg << ' '; }};
+struct B : public A { int b; };
+struct C : public A { int c; };
+struct D : public B, public C {};  // -> dreaded diamond
+int main() {
+    D d;
+    // d.print("Hi");  // error: mehrdeutig!
+    d.B::print("Hi");
+    // cout << d.a << endl;  // error: mehrdeutig!
+    d.B::a = 1;    d.C::a = 2;
+    cout << d.B::a << ' ' << d.C::a << endl;
+    D* pd{new D};
+    // cout << pd << ", " << static_cast<A*>(pd) << endl;
+    //   error: mehrdeutig
+}
+#+end_src
+
+#+RESULTS:
+: Hi 1 2
+
+* Vererbung -- 10
+\vspace{1.8em}
+\footnotesize
+#+header: :exports  both :results output :tangle src/inheritance7.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance7.cpp
+using namespace std;
+struct A { int a;
+    virtual void print(string msg) { cout << msg << ' '; }};
+struct B : public virtual A { int b; };
+struct C : public virtual A { int c; };
+struct D : public B, public C {};
+int main() {
+    D d;  d.print("Hi");  d.B::print("Hi");
+    cout << d.a << endl;
+    d.B::a = 1;    d.C::a = 2;
+    cout << d.B::a << ' ' << d.C::a << endl;
+    D* pd{new D};
+    A* pa{static_cast<A*>(pd)};
+    cout << pd << ", " << pa << ", " << (pd == pa) << endl;
+}
+#+end_src
+
+#+RESULTS:
+: Hi Hi -2010085886
+: 2 2
+: 0x56528a2dde80, 0x56528a2ddea0, 1
+\pause
+\vspace{-1em}
+\to Compiler macht uns Glauben, dass gleich!!!
+
+* Vererbung -- 11
+\vspace{1.5em}
+Speicherlayout
+- nicht virtuell
+  #+begin_example
+  A   A
+  |   |
+  B   C
+   \ /
+    D
+  #+end_example
+  - =B= beinhaltet =A=
+  - =C= beinhaltet =A=
+  - =D= beinhaltet =B= und =C=
+- virtuell
+  #+begin_example
+    A
+   / \
+  B   C
+   \ /
+    D
+  #+end_example
+
+* Vererbung -- 12
+\vspace{1.7em}
+\footnotesize
+#+header: :exports  both :results output :tangle src/inheritance8.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance8.cpp
+using namespace std;
+struct A {
+    virtual void foo()=0;
+    virtual void bar()=0;
+};
+struct B : public virtual A {
+    void foo() { bar(); }};
+struct C : public virtual A {
+    void bar() { cout << "bar" << endl; }};
+struct D : public B, public C {};
+int main() {
+    D d;  B& b{d};  C& c{d};
+    d.foo();  b.foo();  c.foo();
+}
+#+end_src
+
+#+RESULTS:
+: bar
+: bar
+: bar
+\pause
+\vspace{-0.7em}
+\to cross delegation...
+
+
+* Vererbung -- 13
+\vspace{1.5em}
+\footnotesize
+#+header: :exports  both :results output :tangle src/inheritance9.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance9.cpp
+using namespace std;
+struct A {
+    int a;
+    A() : a{42} {}
+    A(int a) : a{a} {} };
+struct B : public virtual A {
+    int b;
+    B() : A{0}, b{1} {} };
+struct C : public B {
+    int c;
+    C() : c{2} {} };
+int main() {
+    C c;
+    cout << c.a << ' ' << c.b << ' ' << c.c << endl;
+}
+#+end_src
+
+#+RESULTS:
+: 42 1 2
+
+\pause
+\vspace{-1em}
+(Default)Konstruktor von =A= wird aufgerufen beim Instanzieren von
+=c=\pause\newline
+\to daher selber aufrufen!
+
+* Vererbung -- 14
+\vspace{2.3em}
+\footnotesize
+#+header: :exports  both :results output :tangle src/inheritance9.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // inheritance9.cpp
+using namespace std;
+struct A {
+    int a;
+    A() : a{42} {}
+    A(int a) : a{a} {} };
+struct B : public virtual A {
+    int b;
+    B() : /* A{0}, */ b{1} {} };  // may stay...
+struct C : public B {
+    int c;
+    C() : A{0}, c{2} {} };
+int main() {
+    C c;
+    cout << c.a << ' ' << c.b << ' ' << c.c << endl;
+}
+#+end_src
+
+#+RESULTS:
+: 0 1 2
+
+* Vererbung -- 15
+Quintessenz?\newline\pause
+
+\hspace*{8em} /Finger weg von so etwas!/
+
+* =noexcept=
+- =noexcept= \equiv =noexcept(true)= \to Zusicherung, dass Funktion keine
+  Exception liefert
+- =noexcept(false)= keine derartige Zusicherung
+  - default, außer bei Destruktoren
+- wenn Exception
+  - wenn =noexcept=, dann: =terminate()=!
+  - wenn =noexcept(false)=, dann: =terminate()=, wenn Exception nicht aufgefangen
+    (im Zuge des /stack unwinding/)
+- Destruktoren (implizit generiert oder nicht) sind default-mäßig =noexcept=!
+
+* =noexcept= -- 2
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/noexcept.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // noexcept.cpp
+using namespace std;
+
+class A {
+  public:
+    // ~A() {  terminate called after throwing an instance of 'int'
+    ~A() noexcept(false) {
+        throw 42;
+    }
+};
+
+void f() { A a; }
+
+int main() {
+    try {
+        f();
+    } catch (...) {
+        cout << "caught" << endl;
+    }
+}
+#+end_src
+
+#+RESULTS:
+: caught
+
+* Destruktor
+\vspace{1em}
+\small
+#+header: :exports code :results none :tangle src/destructor.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // destructor.cpp
+using namespace std;
+struct Resource {
+    ~Resource() {
+        cout << "dtor of Resource" << endl;
+    }
+};
+struct Person {
+};
+struct Teacher : public Person {
+    Resource r;
+};
+int main() {
+    Person* tp{new Teacher{}};
+    delete tp;
+}
+#+end_src
+keine Ausgabe!
+\pause\newline
+\to Destruktor von Person wird aufgerufen (im Standard als UB)!
+
+* Destruktor -- 2
+\vspace{1.5em}
+\small
+#+header: :exports both :results output :tangle src/destructor2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // destructor2.cpp
+using namespace std;
+struct Resource {
+    ~Resource() {
+        cout << "dtor of Resource" << endl;
+    }
+};
+struct Person {
+    virtual ~Person()=default;
+};
+struct Teacher : public Person {
+    Resource r;
+};
+int main() {
+    Person* tp{new Teacher{}};
+    delete tp;
+}
+#+end_src
+
+#+RESULTS:
+: dtor of Resource
+
+* Destruktor -- 3
+\vspace{1em}
+\small
+#+header: :exports code :results none :tangle src/destructor3.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // destructor3.cpp
+using namespace std;
+struct Person {
+    ~Person() noexcept(false) { throw "error"; }
+};
+int main() {
+    { 
+        Person p;
+    }
+    cout << "the end" << endl;
+}
+#+end_src
+
+\footnotesize
+: terminate called after throwing an instance of 'char const*'
+erwartet, nicht wahr?
+
+* Destruktor -- 4
+\vspace{1em}
+\small
+#+header: :exports both :results output :tangle src/destructor4.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // destructor4.cpp
+using namespace std;
+struct Person {
+    ~Person() noexcept(false) { throw "error"; }
+};
+int main() {
+    try {
+        Person p;
+    } catch (...) {
+        cout << "caught" << endl;
+    }
+    cout << "the end" << endl;
+}
+#+end_src
+
+#+RESULTS:
+: caught
+: the end
+
+* Destruktor -- 5
+\vspace{1.3em}
+\footnotesize
+#+header: :exports code :results none :tangle src/destructor5.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // destructor5.cpp
+using namespace std;
+struct Person {
+    ~Person() noexcept(false) { throw "error"; }
+};
+struct Team {
+    Person p;
+    ~Team() noexcept(false) { throw "error2"; }
+};
+int main() {
+    try {
+        Team t;
+    } catch (...) {}
+    cout << "the end" << endl;
+}
+#+end_src
+\vspace{0.1em}
+\footnotesize
+: terminate called after throwing an instance of 'char const*'
+\pause =terminate= wird im Zuge des "stack unwinding" aufgerufen, wenn
+währenddessen Exception geworfen wird!\pause\hspace{0.3em} \to /don't throw
+inside destructors!/
+
+* Destruktor -- 7
+\vspace{1em}
+- Destruktor /sollte/ keine Exception werfen
+- nicht =virtual= und =delete= auf Pointer zu Basisklasse \to UB
+- Faustregel: Destruktor einer /Basisklasse/ sollte entweder
+  - =virtual= und =public= (außer Klasse =final=) oder
+  - nicht =virtual= und
+    - =protected= sein: Anlegen einer Instanz einer abgeleiteten Klasse möglich
+      (aber: kein =delete pBase= mehr, d.h. Anlegen nur am Stack)
+    - =private= sein: generell kein Anlegen einer Instanz der /Basis/​klasse möglich
+      (aber: z.B. innerhalb als statische Variable in Klasse) 
+
+* abstrakte Klassen und Methoden
+\vspace{1.5em}
+\footnotesize
+#+header: :exports both :results output :tangle src/abstract.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // abstract.cpp
+using namespace std;
+
+class Shape {  // abstract class!
+  public:
+    virtual string print()=0;  // pure virtual (abstract)!
+    virtual ~Shape()=default;
+};
+class Circle : public Shape {
+  public:
+    string print() override {
+        return "I am a circle";
+    }
+};
+int main() {
+    Shape* ptr{new Circle};
+    cout << ptr->print() << endl;
+}
+#+end_src
+
+#+RESULTS:
+: I am a circle
+
+* Interfaces
+\pause
+- gibt es nicht\pause
+- braucht man nicht\pause
+  - eine abstrakte Klasse mit nur abstrakten Methoden!\pause
+- eine Klasse implementiert viele Interfaces?\pause
+  - \to Mehrfachvererbung...!
+  
+* =override=
+\vspace{1.5em}
+\footnotesize
+#+header: :exports both :results output :tangle src/override.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // override.cpp
+using namespace std;
+
+class IntCntr {
+  public:
+    virtual int incr(int i) {
+        cout << "IntCntr" << endl; return i + 1; }
+    virtual ~IntCntr()=default;
+};
+class LongCntr : public IntCntr {
+  public:
+    long incr(long l) {
+        cout << "LongCntr" << endl; return l + 1; }
+};
+int main() {
+    LongCntr lcntr{};
+    IntCntr& icntr{lcntr};
+    icntr.incr(1L);
+}
+#+end_src
+
+#+RESULTS:
+: IntCntr
+
+* =override= -- 2
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/override2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // override2.cpp
+using namespace std;
+class IntCntr {
+  public:
+    virtual int incr(int i) {
+        cout << "IntCntr" << endl; return i + 1; }
+    virtual ~IntCntr()=default;
+};
+class LongCntr : public IntCntr {
+  public:
+    // override only applicable to virtual functions!
+    long incr(long l) override {
+        cout << "LongCntr" << endl; return l + 1; }
+};
+int main() {
+    LongCntr lcntr{};
+    IntCntr& icntr{lcntr};
+    icntr.incr(1L);
+}
+#+end_src
+
+\vspace{-1em}
+\to long int LongCntr::incr(long int)« marked »override«, but does not
+  override\newline
+=override=: nur wenn =virtual=!!!
+
+* =final=
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/final.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // final.cpp
+using namespace std;
+
+class IntCntr {
+  public:
+    // final only applicable to virtual functions!
+    virtual int incr(int i) final {
+        cout << "IntCntr" << endl; return i + 1; }
+    virtual ~IntCntr()=default;
+};
+class LongCntr : public IntCntr {
+  public:
+    virtual int incr(int i) override {
+        cout << "LongCntr" << endl; return i + 1; }
+};
+int main() {
+    LongCntr lcntr{};
+    IntCntr& icntr{lcntr};
+    icntr.incr(1L);
+}
+#+end_src
+
+\vspace{-1em}
+\to virtual function ‘virtual int LongCntr::incr(int)’ overriding final function
+
+* =final= -- 2
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/final2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // final.cpp
+using namespace std;
+
+class IntCntr final {
+  public:
+    virtual int incr(int i) final {
+        cout << "IntCntr" << endl; return i + 1; }
+    virtual ~IntCntr()=default;
+};
+
+class LongCntr : public IntCntr {
+  public:
+    virtual int incr(int i) override {
+        cout << "LongCntr" << endl; return i + 1; }
+};
+int main() {
+    LongCntr lcntr{};
+    IntCntr& icntr{lcntr};
+    icntr.incr(1L);
+}
+#+end_src
+
+#+RESULTS:
+
+\vspace{-1em}
+\to cannot derive from ‘final’ base ‘IntCntr’ in derived type ‘LongCntr’
+
+* Tipps
+- Virtuelle Funktionen sollen genau einen der folgenden Spezifizierer
+  haben:
+  - =virtual=
+  - =override=
+  - =final=
+- Verwende =virtual= nur, wenn es einen guten Grund dafür gibt
+- Verwende =final= nur wenn notwendig
+- Vermeide triviale Setter- und Getter-Methoden
+  - aber beachte: API und ABI Abhängigkeiten!
+    - =f()=, =g()= \to =f()=, =g()=, =h()= \pause \hspace{3em} API & ABI ok!
+    - =f()=, =g()= \to =f()=, =g(int i=0)= \pause \hspace{1em} API \check, ABI \lightning
+- Vermeide =protected= Daten!
+  - bricht Encapsulation und erhöht Abhängigkeit zwischen den Klassen
+
+* Virtuelle Konstruktoren
+\vspace{2em}
+\small
+...gibt es in \cpp nicht!\pause
+\footnotesize
+#+header: :exports code :results none :tangle src/virtualcons.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // virtualcons.cpp
+using namespace std;
+struct Person {
+    virtual Person* clone() const=0;
+    virtual Person* create() const=0;
+    virtual ~Person()=default;
+};
+struct Teacher : public Person {
+    Teacher* clone() const { return new Teacher{*this}; }
+    Teacher* create() const { return new Teacher{}; }
+};
+int main() {
+    Teacher t;
+    Person& p{t};
+    Person* pp{p.clone()};
+    delete pp;
+    pp = p.create();
+    delete pp;
+}
+#+end_src
+
+* Spezielle Methoden
+- Default-Konstruktoren
+- Copy-Konstruktor
+- Copy-Assignment-Operator
+- Move-Konstruktor 
+- Move-Assignment-Operator
+- Destruktor
+
+* Implizite Generierung
+- Spezielle Methoden werden u.U. vom Compiler /implizit/ generiert (dann als =noexcept=)
+  - aber nur, wenn alle entsprechende Operationen der Instanzvariablen und der
+    Superklassen =noexcept= sind.
+- z.B. ein Copy-Konstruktor kann nur generiert werden, wenn
+  die enthaltenen Instanzvariablen kopiert werden können.
+- /user declared/ spezielle Methode, wenn in
+  Klassendeklaration in eine der folgenden Weisen angeführt:
+  - mittels Definition
+  - mittels ~=default~
+  - mittel ~=delete~
+
+* Implizite Generierung -- 2
+- Wenn Compiler eine spezielle Methode nicht deklariert, dann wird
+  diese auch nicht zum Überladen herangezogen.
+  - Eine =delete=​d spezielle Methode nimmt allerdings am Überladen
+    teil.
+  - Beispiel: =T o{std::move(other)};= 
+    - Copy Konstruktor vorhanden \to kein Move Konstruktor vom Compiler \to
+      Copy Konstruktor wird zum Einsatz kommen.
+    - Move Konstruktor =delete=​d \to Move Konstruktor wird vom Compiler gewählt
+      \to Compiler wird Fehler generieren.
+- spezielle Regeln auf den folgenden Folien!
+
+* Implizite Konstruktoren
+- Default-Konstruktor: wenn kein /user declared/ Konstruktor
+- Copy-Konstruktor: wenn kein /user declared/ Copy-Konstruktor
+  - aber: explizit =delete=​d, wenn /user declared/ Move-Konstruktor oder Move-Assignement-Operator
+- Move-Konstruktor: wenn kein /user declared/
+  - Copy-Konstruktor
+  - Copy-Assignment-Operator
+  - Move-Konstruktor
+  - Move-Assignment-Operator
+  - Destruktor
+
+* Implizite Zuweisungsoperatoren
+- Copy-Assignment-Operator: wenn kein /user declared/
+  Copy-Assignment-Operator
+  - aber: explizit =delete=​d, wenn /user declared/ Move-Konstruktor oder Move-Assignement-Operator
+- Move-Assignment-Operator: wenn kein /user declared/
+  - Copy-Konstruktor
+  - Copy-Assignment-Operator
+  - Move-Konstruktor
+  - Move-Assignment-Operator
+  - Destruktor
+  
+* Impliziter Destruktor
+- wenn kein /user declared/ Destruktor
+  - =inline= und =noexcept=!
+  
+* Rule of Five
+Wenn eine der speziellen Elementfunktionen
+- Destruktor
+  - Wenn /user declared/ Destruktor notwendig, dann werden
+    compilergenerierte Copy-Konstruktor,... "falsche" Ergebnisse liefern!
+- Copy-Konstruktor
+- Copy-Assignement-Operator
+- Move-Konstruktor
+- Move-Assignement-Operator
+
+implementiert ist, dann sollen alle implementiert werden!
+
+* Rule of Three
+Wenn eine der folgenden Elementfunktionen (member function)
+
+- Destruktor
+- Copy-Konstruktor
+- Copy-Assignment-Operator
+
+implementiert ist, dann sollen alle implementiert werden!
+
+- vor \cpp11!
+- d.h. heute veraltet
+
+* Rule of Zero
+- Entwickle Klassen so, dass keiner der 5 speziellen Elementfunktionen
+  implementiert werden müssen.
+
+  D.h. Compiler wird die speziellen Elementfunktionen generieren!
+- Faustregel: Immer /Rule of zero/ verwenden!
+  - Ausnahmen bestätigen die Regeln, siehe die folgenden Folien!
+
+* Beispiele
+\vspace{1em}
+- Normale Klasse \to Rule of zero
+- Ressource Klasse
+  \small
+  #+header: :exports code :results none :tangle src/resource.cpp :flags -std=c++17
+  #+begin_src C++
+  #include <iostream>  // resource.cpp
+  using namespace std;
+  struct Resource {
+      Resource() noexcept {}
+      ~Resource() noexcept {}
+      Resource(Resource&& o) noexcept {}
+      Resource& operator=(Resource&& o) noexcept {
+          return *this;
+      }
+  };
+  int main() {
+      Resource r;
+      r = Resource{};
+  }
+  #+end_src
+
+* Beispiele -- 2
+- Container-Klasse: alle implementieren
+- nicht verschiebbare Klasse
+  \small
+  #+header: :exports code :results none :tangle src/immovable.cpp :flags -std=c++17
+  #+begin_src C++
+  #include <iostream>  // immovable.cpp
+  using namespace std;
+  struct Immovable {
+      Immovable() {}
+      Immovable(const Immovable&)=delete;
+      Immovable& operator=(const Immovable& o)=delete;
+    // explicitly not copyable -> not moveable as well
+    // in case you want to be explicit... feel free!
+  };
+  int main() {
+      Immovable i;
+      // i = Immovable{};  not possible any more
+  }
+  #+end_src
+

@@ -1,0 +1,16 @@
+<svg xmlns='http://www.w3.org/2000/svg' class="pikchr" viewBox="0 0 202.745 135.36">
+<path d="M2,32L87,32L87,2L2,2Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="44" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Core 1</text>
+<polygon points="44,82 40,71 48,71" style="fill:rgb(0,0,0)"/>
+<path d="M44,32L44,77"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M2,133L87,133L87,82L2,82Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="44" y="97" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Cache 1</text>
+<text x="44" y="118" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central"> x y </text>
+<path d="M115,32L200,32L200,2L115,2Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="158" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Core 2</text>
+<polygon points="158,82 153,71 162,71" style="fill:rgb(0,0,0)"/>
+<path d="M158,32L158,77"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M115,133L200,133L200,82L115,82Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="158" y="97" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Cache 2</text>
+<text x="158" y="118" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central"> x y </text>
+</svg>

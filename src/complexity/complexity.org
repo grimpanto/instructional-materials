@@ -1,0 +1,335 @@
+#+TITLE: Komplexität von Algorithmen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+#+LaTeX_HEADER: \usepackage{amssymb}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Algorithmus
+\vspace{1.8em}
+- Ursprung: Musa al-Chwarizmi (ca. 780 - 840) \to Buch über indische
+  Zahlensysteme und Rechenvorschriften (Addition, Subtraktion, Multiplikation,
+  Division, Wurzelziehen)
+- eine eindeutige Handlungsvorschrift wie eine Klasse von Problemen gelöst werden kann
+- Hmm, was heißt das eigentlich genau? Was wird damit spezifiziert?
+  \pause
+  - Was wird als Eingabe für den Algorithmus akzeptiert?
+  - Welche Schritte werden in welcher Reihenfolge durchgeführt?
+  - Wann stoppt der Algorithmus und was wird ausgegeben?
+  \pause
+- Hmm, geht es etwas genauer?
+  \pause
+  #+begin_quote
+  Eine Berechnungsvorschrift zur Lösung eines Problems heißt genau dann
+  Algorithmus, wenn eine zu dieser Berechnungsvorschrift äquivalente
+  Turingmaschine existiert, die für jede Eingabe, die eine Lösung besitzt,
+  stoppt. -- wikipedia
+  #+end_quote
+
+* Algorithmus -- 2
+- Keine Angabe wie ein Algorithmus ausgeführt wird!
+  - vom Menschen
+  - einer mechanischen Rechenmaschine oder
+  - einem Computer
+- Ausführung: Algorithmus \to Maschinencode
+  - Spezifikation
+    - mathematische (formale) Beschreibung
+    - Pseudocode
+    - Programmiersprache
+  - Übersetzung
+    - Maschinencode
+
+* Algorithmus -- 3
+- Algorithmus zur Berechnung der Fakultät
+  - mathematische Beschreibung, $\text{fact} = f$
+    \begin{eqnarray*}
+    f &:& \N \to \N\\
+    f(n) &=& \left\{ \begin{array}{ll}
+       1 & \text{für } n = 0\\
+       n \cdot f(n-1) & \text{für } n > 0
+       \end{array} \right.
+    \end{eqnarray*}
+  - Pseudocode =;-)=
+    \footnotesize
+    #+begin_src python
+    # pre: type(n) == int and n >= 0
+    def fact(n):
+        if n == 0:
+            return 1
+        else:
+            return n * fact(n - 1)
+    #+end_src
+
+* Algorithmus -- 4
+- Algorithmus zur Berechnung der Fakultät
+  - Programmiersprache
+    \footnotesize
+    #+begin_src c++
+    // pre: n >= 0
+    long long fact(long long n) {
+        if (n == 0)
+            return 1;
+        else
+            return n * fact(n - 1);
+    }
+    #+end_src
+
+* Komplexität eines Algorithmus
+\vspace{1em}
+- Fragestellung: Laufzeit oder Speicherbedarf eines Algorithmus?
+  - unabhängig von der verwendeten Technologie!
+  - abhängig von der "Größe" der Eingabedaten
+    - z.B. 100, 1000 oder 100 Millionen Daten zu sortieren
+    - Symbol: $n$
+- Arten
+  - Speicherkomplexität
+  - Zeitkomplexität
+    - # der elementaren Operationen für Abarbeitung des Algorithmus
+    - Annahme: Zeit je elementarer Operation ist bestimmte Zeit
+
+* Komplexität eines Algorithmus -- 2
+- Von nun an nur Zeitkomplexität!
+- Beispiel: lineare Suche in =[1,7,4,2,9,3,6,5,8]=
+- Fälle
+  - Bester Fall (best-case)
+    - Suche nach =1=
+  - Durchschnittlicher Fall (average-case)
+    - Suche nach =9=
+  - Schlechtester Fall (worst-case)
+    - Suche nach =8=
+- meist: worst-case
+
+* Komplexität eines Algorithmus -- 3
+- Landau-Symbol
+  \vspace{-1em}
+  \[O(g(n)) = \{f(n) | \exists C \ge 0, \exists n_0 \in \N, \forall n \ge n_0 : |f(n)| \le C \cdot |g(n)|\}\]
+  \vspace{-2em}
+  - "Groß-Oh Notation" (Big-O notation)
+  - $C$ und $n_0$ beliebig!
+    - Konstanten spiegeln nur technologische Möglichkeiten wider!
+  - statt $f(n) \in O(g(n))$ wird einfacher $f(n) = O(g(n))$ geschrieben
+- z.B.:
+  - $3n^2 + 10 \in O(n^2)$, da z.B. für
+    $C=4, n_0=4$ gilt, dass $\forall n\ge n_0 : 3n^2 + 10 \le C \cdot n^2$
+  - $0.001n^3 \notin O(n^2)$, da kein $C$ und $n_0$ existiert, dass $\forall n\ge n_0 : 0.001n^3 \le C n^2$
+
+* COMMENT Komplexitätsklassen
+- Komplexitätsklasse $P$ ... Menge von Problemen, die von einer deterministischen
+  Turingmaschine in Polynomialzeit gelöst werden können.
+  - $O(n^p)$ mit $p \in \N$ werden polynomiale Probleme bezeichnet
+    /und/ gelten als praktisch lösbar!
+  - d.h. Laufzeit begrenzt!
+  - allerdings: $O(n^100)$ wird für große $n$ wohl nicht als praktisch lösbar angenommen!
+    - denn schon für $n=10$ wäre Laufzeit astronomisch groß!
+    - praktisch relevante Probleme: $p \le 4§
+- Komplexitätsklasse $NP$ ... Menge von Problemen, die von einer /nicht-deterministischen/
+  Turingmaschine in Polynomialzeit gelöst werden können.
+  - "theoretisch" \to nicht mit gegenwärtigen Computern gleichwertig
+  - $P \subseteq NP$
+    - ob $P = NP$ ist, ist ein /ungelöstes/ Problem (\to 1 Mio USD Preisgeld...)!
+
+* Schrankenfunktionen
+\vspace{1.6em}
+- $O(1)$ ... konstant
+  - z.B. Zugriff in Hasharray
+- $O(\log(n))$ ... logarithmisch
+  - z.B. Suche in BSB
+- $O(n)$ ... linear
+  - z.B. Lineare Suche in Liste
+- $O(n\cdot\log(n))$ ... quasi linear, acuh superlinear
+  - z.B. Quicksort
+- $O(n^k)$ für $k \ge 1$ ... polynomial
+  - $O(n^2)$ ... quadratisch
+    - z.B. Bubblesort
+- $O(d^n)$ für $d > 1$ ... exponentiell
+  - z.B. Türme von Hanoi
+- $O(n!)$ ... faktoriell
+  - z.B. TSP hat $O(n!) (mit brute-force Suche)$
+
+* Schrankenfunktionen -- 2
+\vspace{1em}
+[[./bigofuncs.png]]
+Quelle: http://www.bigocheatsheet.com/
+
+* Optimierung
+\vspace{1.5em}
+- Änderung der Anforderungen
+  #+begin_quote
+  Always remember, however, that there’s usually a simpler and better way to
+  do something than the first way that pops into your head.  -- Donald Knuth
+  #+end_quote
+  \vspace{-1.5em}
+  - Können andere (weniger) Datensätze verwendet werden?
+  - Wird die geforderte Genauigkeit wirklich benötigt?
+  - Kann der Problemraum verkleinert werden?
+- Ändern des Entwurfes
+  #+begin_quote
+  People who are more than casually interested in computers should have at
+  least some idea of what the underlying hardware is like. Otherwise the
+  programs they write will be pretty weird.  -- Donald Knuth
+  #+end_quote
+  \vspace{-1.5em}
+  - Systemarchitektur (z.B. Client/Server vs. zentrale Architektur, peer-to-peer,...)
+  - Technologien (z.B. Java vs. \cpp)
+
+* Optimierung -- 2
+\vspace{1em}
+- Optimierung der Algorithmen
+  #+begin_quote
+  If you optimize everything, you will always be unhappy.  -- Donald Knuth
+  #+end_quote
+  \vspace{-1.5em}
+  - Laufzeit vs. Speicherbedarf?
+    - meist widersprüchlich!
+  - Algorithmen vs. Datenstrukturen?
+  - Häufige Fälle vs. seltene Fälle?
+  - Caching?
+- Optimierung des Programmcodes
+  #+begin_quote
+  Premature optimization is the root of all evil. -- Donald Knuth
+  #+end_quote
+  \vspace{-1.5em}
+  - Laufzeit vs. Speicherbedarf?
+  - Datenstrukturen?
+  - Profiling um kritischen Pfad zu finden!
+  - siehe Folien über Compilertechnologie!
+
+* Optimierung -- Beispiel
+- Potenzieren
+  \begin{eqnarray*}
+  f &:& \R \times \N \to \R\\
+  f(x, n) &=& \left\{ \begin{array}{ll}
+     1 & \text{für } n = 0\\
+     x \cdot f(x, n-1) & \text{für } n > 0
+     \end{array} \right.
+  \end{eqnarray*}  
+- naive Umsetzung
+  \footnotesize
+  #+begin_src c++
+  double pow(double x, unsigned int n) {
+      if (n == 0)
+          return 1;
+      else
+          return x * pow(x, n - 1);
+  }
+  #+end_src
+  \normalsize
+  \to Rekursion (Stack!, Funktionsaufrufe!)\\
+  \to $O(n)$
+
+* Optimierung -- Beispiel -- 2
+- Umsetzen in iterativen Ansatz (\to Programmcode!)
+  \footnotesize
+  #+begin_src C++
+  double pow(double x, unsigned int n) {
+      double res{(n == 0) ? 1 : x};
+      for (unsigned int i{1}; i < n; res *= x, ++i);
+      return res;
+  }
+  #+end_src
+  \normalsize
+  \to keine Rekursion!\\
+  \to $O(n)$
+
+* Optimierung -- Beispiel -- 3
+\vspace{1.5em}
+- Optimierung des Algorithmus!
+  - Unterscheidung in gerade und ungerade Exponenten
+    \begin{eqnarray*}
+    x^{2k} = x^k \cdot x^k = (x^k)^2\\
+    x^{2k+1} = x \cdot x^k \cdot x^k = x \cdot (x^k)^2
+    \end{eqnarray*}
+  - Indizes bilden eine geometrisch fallende Folge: \(n, \frac{n}{2}, \frac{n}{4}, \frac{n}{8},...\)
+  - \to $O(\log_2 n)$
+- resultierender Programmcode
+  \footnotesize
+  #+begin_src C++
+  double pow(double x, unsigned int n) {
+      double res{1};
+      if (n) {
+          res = pow(x, n / 2);
+          res *= res;
+          if (n % 2) res *= x;
+      }
+      return res; 
+  }
+  #+end_src
+  \normalsize
+  \to Rekursion!
+
+* Optimierung -- Beispiel -- 4
+\vspace{1.5em}
+- Umsetzen in iterativen Ansatz
+  #+begin_src C++
+  double pow(double x, unsigned int n) {
+      double res{1};
+      do {
+          if (n & 1) res *= x;  // n % 2 == 1?
+          x *= x;
+      } while (n >>= 1);  // n / 2 > 0?
+      return res;
+  }
+  #+end_src
+  \normalsize
+  \to keine Rekursion\\
+  \to Verwendung von Bit-Operationen anstelle von \hspace*{1em} arithmetischen Operationen
+  (mit guten Compilern...)\\
+  \small
+  \hspace*{1.3em}... Ansatz von Donald E. Knuth, The Art of Computer \hspace*{2.3em}Programming, Vol 2,
+  Chapter 4
+  - Bände 1, 2, 3 und 4A sind erschienen (seit 1962)
+  - Bände 4B, 4C, 4D, 5, 6, 7 sind in Planung (Knuth ist dzt. über 80 Jahre alt!)

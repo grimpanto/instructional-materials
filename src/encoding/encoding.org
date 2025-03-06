@@ -1,0 +1,540 @@
+#+TITLE: Kodierung
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Überblick
+\vspace{1em}
+- Kodierung (auch Code): Abbildung, die jedem Zeichen eines Quellalphabets
+  (Menge!) eindeutig ein Zeichen eines Zielalphabets zuordnet.
+  - kodieren vs. dekodieren
+  - Kodierung mit
+    - fixer Länge (z.B. ASCII)
+    - variable Länge (z.B. UTF-8)
+- Zweck
+  - Speicherung
+  - Informationsaustausch
+  - Verarbeitung
+  
+* Anwendungen
+- Zeichenkodierung
+  - \to "=character_encoding="
+- Zahlenkodierungen
+  - ganze Zahlen vs. Gleitkommazahlen
+  - Zahlen mit einer variablen Länge zur Datenübertragung
+- Leitungskodierung
+  - z.B.: Manchesterkodierung, Morsecode
+- Fehlererkennende und fehlerkorrigierende Codes
+  - z.B.: CRC
+- Komprimierung
+  - z.B.: Huffman-Kodierung
+
+* Zahlen mit variabler Länge
+- Zweck: Übertragen und Speichern einer beliebig großen Zahl
+- LEB128
+  - Little Endian Base 128
+    - Unsigned LEB128
+    - Signed LEB128
+        
+* Unsigned LEB128
+a. Zahl binär darstellen
+b. 0en bis auf Vielfaches von 7 links auffüllen
+c. in 7er Gruppen teilen
+d. auf 8 Bits bringen: MSB setzen in jeder Gruppe außer der höchstwertigsten
+e. Daten beginnend mit dem niederwertigsten Byte übertragen
+
+* Unsigned LEB128 -- 2
+a. 123456_10 = 11110001001000000_2
+b. 000011110001001000000
+c. 0000111 1000100 1000000
+d. 00000111 11000100 11000000
+e. Übertragen: 11000000 11000100 00000111
+
+* Signed LEB128
+a. Zahl binär darstellen
+   - negativ \to positiv, 0 Bit hinzu, 2er-Komplement
+b. VZ bis auf Vielfaches von 7 links auffüllen
+c. in 7er Gruppen teilen
+d. auf 8 Bits bringen: MSB setzen in jeder Gruppe außer der höchstwertigsten
+e. Daten beginnend mit dem niederwertigsten Byte übertragen
+
+Achtung: Empfänger muss wissen, ob /Signed LEB128/ oder /Unsigned LEB128/!
+
+* Signed LEB -- 2
+a. -123456_10 = -1 \cdot 11110001001000000_2 = -1 \cdot 011110001001000000_2 =
+   100001110111000000_2
+b. 111100001110111000000
+c. 1111000 0111011 1000000
+d. 01111000 10111011 11000000
+e. Übertragen: 11000000 10111011 01111000
+
+* Konfiguration & Programmierung
+- Betriebsystem konfigurieren!
+- Terminal konfigurieren!
+- Editor konfigurieren!
+  - aber auch: Fonts installieren...
+- HTML
+  #+Latex: {
+  \scriptsize
+  #+begin_src html
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-type"
+        content="text/html; charset=UTF-8">
+  #+end_src
+  #+Latex: }
+- Webbrowser
+  - \to wenn im HTML nicht spezifiziert...
+
+* Konfiguration & Programmierung  -- 2
+\vspace{1em}
+- HTTP
+  - Header für Inhalt
+    #+Latex: {
+    \scriptsize
+    #+begin_src text
+    Content-Type: text/plain; charset="UTF-8"
+    #+end_src
+    #+latex: }
+- Datenbank
+  - Datenbank, Tabelle, Spalte
+- XML
+  - jeder konforme XML-Prozessor muss UTF-8 unterstützen
+  #+Latex: {
+  \scriptsize
+  #+begin_src html
+  <?xml version="1.0" encoding="UTF-16"?>
+  #+end_src
+  #+Latex: }
+- Programmierung
+  - z.B. Java
+    #+Latex: {
+    \scriptsize
+    #+begin_src java
+    String name;
+    // ...
+    byte[] bytes = name.getBytes("utf-8");
+    // ...
+    name = new String(bytes, "utf-16")
+    #+end_src
+    #+Latex: }
+
+* Anwendungen -- 2
+- Verschlüsselung
+  - aber nicht jeder Code ist eine Verschlüsselung!
+  - z.B. DES, AES, RSA,...
+- Identifizierung von Gegenständen,...
+  - z.B.: ISBN-10 bzw. ISBN-13 (International Standard Book Number), ISSN (für
+    Zeitschriften), GTIN (Global Trade Item Number), QR-Code
+- Geekcode
+  \small
+  #+begin_example
+  GCS s a++ C UL++ L+++ E++ !tv b++ e++++ h----
+  #+end_example
+  - if you are really curious...
+    \to http://www.joereiss.net/geek/ungeek.html
+
+* ISBN
+\vspace{1.5em}
+- Beispiel: 3765457280 bzw. 978-3765457289
+- Aufbau
+  - Präfix: 978 oder 979 (keiner bei ISBN-10)
+  - Gruppennummer (national, sprachlich): 3 (deutsch)
+  - Verlagsnummer (variabel, abhängig von Gruppennummer): 7654
+  - Titelnummer: 5728
+  - Prüfziffer: 9
+- Prüfziffer für ISBN-13
+  - Berechnung
+    - $z_{13} = (10 - ((z_1 + z_3 + z_5 + z_7+ z_9 + z_{11} + 3 (z_2 + z_4 + z_6 + z_8 + z_{10} +
+      z_{12})) \mbox{ mod } 10)) \mbox{ mod } 10$
+  - Überprüfung
+    - $(z_1 + z_3 + z_5 + z_7+ z_9 + z_{11} + z_{13} + 3 (z_2 + z_4 + z_6 + z_8 + z_{10} +
+      z_{12})) \mbox{ mod } 10 = 0$
+
+* Kodierung für die Datenübertragung
+- Quellenkodierung
+- Kanalkodierung
+- Leitungskodierung
+  
+* Quellenkodierung
+- Aufgabe: Signale der Quelle einer Redundanzreduktion zu unterwerfen
+- ursprüngliches Signal enthält oft redundante Anteile, die nicht
+  benötigt werden (z.B. Audio, Video) oder Datenkompression
+- verlustlos vs. verlustbehaftet\pause
+  - verlustlos
+    - Lauflängenkodierung
+    - Kodierung mit variabler Länge, z.B. Huffman-Kodierung
+  - verlustbehaftet
+    - z.B. JPEG
+    - z.B. Audio: MPEG-1 Level III (mp3)
+    - z.B. Audio & Video: MPEG-4 (mp4)
+
+* Lauflängenkodierung
+- lange Folgen sich wiederholender Zeichen \to # der Wiederholungen und Zeichen
+- Bsp.: AAAAAAXXXXTTTTQUUU \to 6A4X4T1Q3U
+- Binäre Daten \to Angabe des Zeichens nicht notwendig
+  - 0000011110000001010 \to 5461111
+    
+* Huffman-Kodierung
+- wird für Texte oder binäre Daten (z.B. PNG) verwendet
+- variable Länge
+  - häufige Zeichen weniger Bits als seltene Zeichen
+  - redundanzfrei
+  - \to optimale Kodierung!
+- präfixfrei
+  - kein Codewort ist der Beginn eines anderen Codewortes
+  - \to keine Trennzeichen zwischen Codewörtern nötig!
+- basierend auf Baum
+  - Blätter stehen für die Codewörter
+- Quellalphabet $T$
+- Codealphabet $C$, $n = |C|$
+
+* Huffman-Kodierung -- 2
+\vspace{1em}
+- Kodieren
+  1. $n$ ermitteln
+  2. je Symbol $t \in T$: relative Häufigkeit $p_t$ ermitteln
+     - Anzahl ermitteln \div Gesamtanzahl aller Symbole
+  3. je Symbol: einen Knoten mit relativer Häufigkeit erstellen
+     \vspace{-0.1ex}
+     - d.h. je ein Baum mit genau einem Knoten
+  4. Wiederholen bis nur mehr ein Baum:
+     a. Alle $n$ Bäume mit geringster Häufigkeit in Wurzel auswählen
+     b. Ausgewählte Bäume zu neuem Baum zusammenfassen
+     c. Summe der Häufigkeiten der direkten Kinder addieren und
+        in neuer Wurzel notieren
+  5. Codewörterbuch erstellen
+  6. Je Symbol im Codewörterbuch nachschlagen
+
+* Huffman-Kodierung -- Beispiel
+- Text:\hspace{2em} =maxi;mini;otto;maria=
+- Quellalphabet: $T=\{m, a, x, i, ;, n, o, t, r\}$
+- Codealphabet: $C=\{1,0\}$
+
+  
+1. $n = 2$
+2. relative Häufigkeiten ermitteln:
+   $p_m=0.15,p_a=0.15,p_x=0.05,p_i=0.2,p_{;}=0.15,p_n=0.05,p_o=0.1,p_t=0.1,p_r=0.05$
+3. ...
+
+* Huffman-Kodierung -- Beispiel -- 2
+\vspace{1em}
+4. [@4] Baum
+   \scriptsize
+   #+begin_example
+             ╭─0.2:i
+       ╭─0.4─┤
+       │     │     ╭─0.1:o
+       │     ╰─0.2─┤
+       │           │     ╭─0.05:r
+       │           ╰─0.1─┤
+   1.0─┤                 ╰─0.05:x
+       │
+       │           ╭─0.15:a
+       │     ╭─0.3─┤
+       │     │     ╰─0.15:;
+       ╰─0.6─┤
+             │     ╭─0.15:m
+             ╰─0.3─┤
+                   │      ╭─0.05:n
+                   ╰─0.15─┤
+                          ╰─0.1:t
+   #+end_example
+
+* Huffman-Kodierung -- Beispiel -- 3
+5. [@5] Codewörterbuch
+   | i |   00 |
+   | o |  010 |
+   | a |  100 |
+   | ; |  101 |
+   | m |  110 |
+   | r | 0110 |
+   | x | 0111 |
+   | t | 1111 |
+   | n | 1110 |
+
+* Huffman-Kodierung -- 3
+- Wortlänge
+  - naive Kodierung: $\log_2(9)=3.17$ \to 4 Bits je Zeichen
+    \to 80 Bits
+  - Huffman \to 61 Bits \to 3.05 Bits je Zeichen
+    - mittlere Wortlänge konkret: $61\div20 = 3.05$
+    - mittlere Wortlänge mittels Auftrittswahrscheinlichkeiten: $(2\cdot0.2 + 3\cdot0.1 + 4\cdot0.05 + 4\cdot0.05 +
+      3\cdot0.15 + 3\cdot0.15 + 3\cdot0.15 + 4\cdot0.05 + 4\cdot0.1) \div 9 = 3.05$
+- Dekodieren
+  1. aus Codewörterbuch Baum erstellen
+  2. Je Symbol im Baum bis Blatt navigieren \to Symbol gefunden
+
+* Kanalkodierung
+\vspace{1.5em}
+- Fehlerarten:
+  - Rauschen (Störgröße mit breitem Frequenzspektrum)
+  - Kurzzeitstörungen (magnetische Felder)
+  - Signalverformung (z.B. physikalische Eigenschaften Kabel)
+  - Nebensprechen (durch kapazitive Kopplung)
+- Aufgabe: Erkennung und Korrektur von Fehlern
+  - Erkennung: \to Neuübertragung
+  - Korrektur: Netzwerke mit hoher
+    - Fehlerwahrscheinlichkeit (z.B. GSM)
+    - Latenz (\to Neuübertragung dauert lange)
+- Idee: zusätzliche Prüfbits (redundante Information)
+- Methoden
+  - Berechnung und Übertragung eines Codewertes
+  - Hinzufügen nicht gültiger Codewörter zum Code
+
+* Hamming-Distanz
+- Hamming-Distanz \Delta zweier Codewörter: Anzahl der unterschiedlichen Bitpositionen
+- Hamming-Distanz d eines Codes: Minimaler Werte aller Distanzen
+- Beispiel: $C = \{1001, 1111, 0100\}$
+  - $\Delta(x, y) = |x \oplus y|_1$
+  - $\Delta(1001, 1111)=2$
+  - $\Delta(1001, 0100)=3$
+  - $\Delta(1111, 0100)=3$
+  - \to $d(C) = 2$
+- Fehlererkennung: $d - 1$
+# - Fehlerkorrektur: $\mbox{floor}((d - 1) / 2)$
+- Fehlerkorrektur: $\lfloor \frac{d-1}{2}\rfloor$
+
+* Fehlererkennung -- Paritätsbits
+- Parität einer Zahl: Eigenschaft, ob diese gerade oder ungerade ist.
+- \to Hinzufügen von Paritätsbits, sodass die Anzahl der Einsen gerade
+  ist
+- Arten
+  - eindimensionale Parität
+  - zweidimensionale Parität
+  
+    \vspace{1em}
+    #+ATTR_LATEX: :center :align |ccccccc|c|
+    |---+---+---+---+---+---+---+---|
+    | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+    | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+    | 1 | 0 | 1 | 0 | 0 | 1 | 0 | 1 |
+    |---+---+---+---+---+---+---+---|
+    | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 |
+    |---+---+---+---+---+---+---+---|
+
+    \vspace{1em}
+    \to erkennt alle 1-, 2- und 3-Bitfehler sowie die meisten 4-Bitfehler!
+
+* Fehlererkennung -- Prüfsummen
+\vspace{1em}
+- Prinzip:
+  - Sender: mathematische Operationen \to Prüfsumme \to mitübertragen
+  - Empfänger: mathematische Operationen \to Prüfsumme \to vergleichen
+- Beispiel: IPv4 Prüfsummen
+  - Sender
+    - Daten als 16-Bitwörter
+    - aussummieren mittels Einerkomplementarithmetik (normale binäre Addition,
+      jedoch wird eine 1 am Ende addiert, wenn Übertrag)
+    - von Ergebnis Einerkomplement bilden \to mitübertragen
+  - Empfänger
+    - Berechnung wie Sender
+    - zum Ergebnis Prüfsumme addieren
+    - Ergebnis ungleich 0xFFFF \to Fehler
+
+* Beispiel: IPv4 Prüfsummen
+\vspace{2em}
+- mit 8-Bitworten: \hspace{3em}
+  #+ATTR_LATEX: :center :align |ccccccccc|
+  |---+---+---+---+---+---+---+---+---|
+  |  1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+  | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+  | 3 | 1 | 0 | 1 | 0 | 0 | 1 | 0 | 1 |
+  | 4 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 |
+  |---+---+---+---+---+---+---+---+---|
+- Sender
+  - Rechengang
+    1. Zeile 1 + Zeile 2: 10000001
+    2. Ergebnis von Schritt 1 + Zeile 3: 100100110
+    3. Übertrag addieren: 00100111
+    4. Zeile Ergebnis von Schritt 3 + Zeile 4: 01001011
+    5. Einerkomplement bilden: 10110100 (= Prüfsumme)
+- Empfänger
+  #+begin_example
+  01001011  wie Sender Schritte 1-4
+  10110100  Prüfsumme
+  --------
+  11111111
+  #+end_example
+
+* Fehlererkennung -- CRC
+\vspace{1.5em}
+- ebenfalls Prüfsumme
+  - ausgelegt, dass Fehler durch Rauschen mit hoher Wahrscheinlichkeit
+    erkannt wird.
+  - kann einfach in HW implementiert werden.
+- Nachricht der Länge $m$ wird als Polynom mit dem Grad $m−1$ aufgefasst.
+- Polynom wird durch ein gewähltes Polynom mit dem Grad $k$ (Generatorpolynom)
+  dividiert.
+- Der entstehende Rest wird zur Bildung der Prüfziffern herangezogen.
+- Bei "gutem" Generatorpolynom, dann
+  - alle Fehler mit ungerader Anzahl an Bitfehlern
+  - alle Bündelfehler der Länge \le k
+- \to Polynomarithmetik und Binärarithmetik
+
+* Fehlererkennung -- CRC -- 2
+\vspace{1em}
+#+ATTR_LATEX: :align |c|c|c| :font \small
+|-----------+---------------------------------------+----------|
+| Nachricht | Nachricht multipliziert mit Generator | Codewort |
+|-----------+---------------------------------------+----------|
+|       000 | $0\odot(x\oplus1)=0$                           |     0000 |
+|       001 | $1\odot(x\oplus1)=x\oplus1$                         |     0011 |
+|       010 | $x\odot(x\oplus1)=x^{2}\oplus x$                       |     0110 |
+|       011 | $(x\oplus1)\odot(x\oplus1)=x^{2}\oplus1$                    |     0101 |
+|       100 | $x^{2}\odot(x\oplus1)=x^{3}\oplus x^{2}$                     |     1100 |
+|       101 | $(x^{2}\oplus1)\odot(x\oplus1)=x^{3}\oplus x^{2}\oplus x\oplus1$            |     1111 |
+|       110 | $(x^{2}\oplus x)\odot(x\oplus1)=x^{3}\oplus x$                 |     1010 |
+|       111 | $(x^{2}\oplus x\oplus1)\odot(x\oplus1)=x^{3}\oplus1$                |     1001 |
+|-----------+---------------------------------------+----------|
+
+\vspace{-0.5em}
+- erzeugte Codewörter bilden 3-Bit-Binärcode mit angehängtem Paritätsbit.
+- einfaches Generatorpolynom \to kein Vorteil gegenüber Paritätsbits...
+- Prinzip: Alle Wörter, die nicht durch Generatorpolynom teilbar \to Fehler!
+
+* Fehlererkennung -- CRC -- 3
+1. Multipliziere Nachricht p mit $x^{k}$. D.h. es werden k Nullbits am rechten
+   Ende der Nachricht angehängt. Leicht durch Verschieben realisierbar.
+
+   \vspace{1em}
+   - p = 10001001, d.h. als Polynom: $x^{7}\oplus x^{3}\oplus1$
+   - als Generatorpolynom wählen wir CRC-4, d.h.: $x^{4}\oplus x\oplus1$.
+   - p mit $x^k$ multiplizieren: $(x^{7}\oplus x^{3}\oplus1) \odot x^4 = x^{11}\oplus x^{7}\oplus x^{4}$.
+     Als Bitmuster: 100010010000!
+
+* Fehlererkennung -- CRC -- 4
+\vspace{1.5em}
+2. [@2] Teile erhaltenes Ergebnis (Modulo-2 Arithmetik) durch
+   das Generatorpolynom: \to Restpolynom
+
+   #+begin_example
+   100010010000
+   10011
+   -----
+   00010001
+      10011
+      -----
+      00010000
+         10011
+         -----
+         000110
+   #+end_example
+   - Division durch sukzessives Abziehen des Generatorpolynoms
+   - Differenzoperator: $\ominus$ herangezogen (leicht durch XOR)
+   
+* Fehlererkennung -- CRC -- 5
+3. [@3] Restpolynom zum Ergebnis von Punkt 1 addieren:
+   $(x^{11}\oplus x^{7}\oplus x^{4})\oplus(x^{2}\oplus x)$. D.h. es ergibt sich der
+   Bitstring 100010010110.
+   Ebenfalls leicht durch XOR realisierbar, da letzte Stellen
+   alle 0 (siehe Punkt 1) und Anzahl der Stellen des Restes...
+4. Übertragung
+5. Empfänger dividiert empfangenes Polynom durch Generatorpolynom (wie Punkt
+   2). Entsteht ein Rest ungleich Null, dann ist ein Fehler aufgetreten.
+
+* COMMENT Beispiel CRC-32
+#+header: :exports code :results output :tangle src/crc32.cpp :flags -std=c++1z -lpthread
+#+begin_src C++
+#include <iostream>  // crc32.cpp
+#include <bitset>
+#define CRC32MASK 0x04C11DB7
+using namespace std;
+int main() {
+    int data[]{1,0,0,0,1,1,0,0};
+    uint32_t crc32{};   // Schieberegister
+    for (auto bit : data) {
+        if (((crc32 >> 31) & 1) != bit)
+            crc32 = (crc32 << 1) ^ CRC32MASK;
+        else
+            crc32 = (crc32 << 1);
+    }
+    cout << bitset<32>(crc32) << endl;
+}
+#+end_src
+
+: 01011100000000000111101110001010
+
+* Leitungskodierung
+- Aufgabe: Umwandlung digitaler Signale zur Übertragung über den (physischen)
+  Übertragungskanal
+- hauptsächlich im Basisband
+- binäre Signale meist durch 2 Pegeln
+  - positives Potential U+ (z.B. 5V) \equiv 1, Nullpotential \equiv 0
+  - positives Potential U+ \equiv 1, negatives Potential U- \equiv 0
+- 3 Kriterien
+  - Gute Ausnützung der Bandbreite
+  - Gute Regenerierung des Sendetaktes
+  - Möglichst geringer Gleichspannungsanteil
+    
+* Leitungskodierung -- 2
+\vspace{1.5em}
+- NRZ (Non-Return to Zero): eigentlich keine richtige Kodierung...
+- RZ (Return to Zero)
+  - Vermeidung langer Perioden von U+ bei bei langen Folgen von Einsen
+    - sonst: höherer Gleichspannungsanteil, schlecht Regenerierung
+    - allerdings: höhere Frequenz!
+- NRZ-I (Non-Return to Zero Inverse)
+  - Bei jeder 1 \to Pegelwechsel, 0 \to keine Änderung
+    - löst Problem aufeinanderfolgender Einsen
+    - ...aber nicht aufeinanderfolgende Nullen
+- AMI (Alternate Mark Inversion)
+  - 1 abwechselnd U+ und U-, 0 \equiv Nullpotential
+  - kein Gleichspannungsanteil, lange Perioden von 0er!
+
+* Leitungskodierung -- 3
+- MLT-3 (Multilevel Transmission Encoding)
+  - 1 abwechselnd ...,0,U+,0,U-,0,U+,...
+  - 0 keine Änderung
+  - ähnlich AMI
+- Manchester Code
+  - 1 \equiv Übergang von U+ zu U- (negative Flanke)
+  - 0 \equiv positive Flanke
+  - de facto kein Gleichspannungsanteil, gute Taktrückgewinnung
+  - Möglichkeit Codeverletzungen zu erkennen
+    - oder absichtlich einbauen, um z.B. Anfang/Ende eines Frame zu erkennen
+  - Verdopplung des Frequenzbandes!
+
+* Leitungskodierung -- 4
+[[file:./line_codes.pdf]]
+
+* Blockkodierung
+- Ziele
+  - Vermeidung langer Folgen von 0en und 1en
+  - Zusatzinformationen mitübertragen wie beim Manchester-Code
+- Notation: mBnx
+  - m ... Anzahl der Bits
+  - B ... "Bits"
+  - n ... Länge des Blocks
+  - x ... Anzahl der verschiedenen Symbole
+    - B ... binär
+    - T ... ternär
+    - Q ... quarternär
+
+* Blockkodierung -- 2
+\vspace{1.5em}
+- 4B5B
+  - 4 Bits werden zu 5 Bits umkodiert
+  - 16 Bitkombinationen auf 32 Codewörter
+  - Hälfte der Codewörter können zusätzlich verwendet werden
+    - z.B. Fehlererkennung
+  - Nie mehr als 3 Nullen aufeinanderfolgend
+    - kann optimal mit NRZ-I kombiniert werden
+  - nur 25% höhere Bandbreite
+- 4B3T
+  - 4 Bits auf 3 ternäre Signalparameter
+  - 16 Bitkombinationen auf 27 (3^3) Codewörter
+  - redundante Signalgruppen werden benutzt, um Gleichspannungsanteil
+    auszugleichen
+    - dazu bisherigen Gleichspannungsanteile summieren und entsprechend
+      einen von zwei möglichen ternären Codes wählen

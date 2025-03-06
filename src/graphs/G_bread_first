@@ -1,0 +1,17 @@
+graph G_bread_first {
+	1 [label=1]
+	2 [label=2]
+	3 [label=3]
+	4 [label=4]
+	5 [label=5]
+	6 [label=6]
+	7 [label=7]
+	8 [label=8]
+	2 -- 1 [constraint=true]
+	4 -- 1 [constraint=true]
+	5 -- 1 [constraint=true]
+	3 -- 2 [constraint=true]
+	6 -- 2 [constraint=true]
+	8 -- 4 [constraint=true]
+	7 -- 3 [constraint=true]
+}

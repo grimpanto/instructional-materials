@@ -1,0 +1,20 @@
+
+graph koenigsberger {
+    bgcolor="transparent"
+    A -- B;
+    B -- C;
+    C -- A;
+    D -- E;
+    E -- F;
+    F -- D;
+    { rank=same;
+        A;
+        D;
+        F;
+    }
+    { rank=same;
+        B;
+        C;
+        E;
+    }
+}

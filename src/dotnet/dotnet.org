@@ -1,0 +1,235 @@
+#+TITLE: .NET Core
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+# +LATEX_HEADER:\usepackage{enumitem}
+# +LATEX: \setlistdepth{4}
+# +LATEX: \renewlist{itemize}{itemize}{4}
+# +LATEX: \setitemize{label=\usebeamerfont*{itemize item}\usebeamercolor[fg]{itemize item}\usebeamertemplate{itemize item}}
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+# +latex_header: \hypersetup{colorlinks=true,linkcolor=red,citecolor=green,filecolor=magenta,urlcolor=ExecusharesRed}
+
+
+* Quellen
+- https://docs.microsoft.com
+- /Professional C# and .NET Core 2.0/
+  - Christian Nagel
+  - John Wiley & Sons, Inc.
+  - 2018
+  - ISBN: 978-1-119-44927-0
+- https://de.wikipedia.org/wiki/.NET
+- https://de.wikipedia.org/wiki/.NET_Framework
+- https://github.com/dotnet/core
+- ...
+
+* Einführung
+- .NET ist eine Familie von Frameworks von Microsoft
+  - gewachsen seit 2002
+  - unübersichtliche Geschichte
+- ursprüngliche Idee: ein Framework für mehrere Programmiersprachen unter
+  Windows
+- heute: mehrere .NET-basierende Implementierungen!
+- eine .NET App wird ausgeführt in einer Implementierung
+- [[https://docs.microsoft.com/en-us/dotnet/core/][.NET Core Guide]]
+  
+* .NEΤ Implementierungen
+\vspace{2em}
+- .NET Framework
+- .NET Core
+- Xamarin (für Mac, iOS, Android)
+- Mono
+- UWP (Universal Windows Platform)
+  
+  #+begin_quote
+  für Touchscreengeräte und Software für das Internet der Dinge (Internet of
+  Things, IoT) ... PCs, Tablets, Phablets über Smartphones bis hin zur Xbox
+  -- https://docs.microsoft.com/de-de/dotnet/standard/components
+  #+end_quote
+
+  #+begin_quote
+  Programmable in C#, C++, Visual Basic, and Javascript. For UI, use XAML,
+  HTML, or DirectX.
+  -- https://docs.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide
+  #+end_quote
+
+* .NET Überblick
+[[./images/netcore.png]]
+Quelle: https://blogs.msdn.microsoft.com/premier_developer/2017/04/12/net-core-overview/
+
+* .NET Standard
+keine Implementierung, sondern eine Spezifikation
+- liegt allen Implementierungen zugrunde
+- [[https://docs.microsoft.com/en-us/dotnet/standard/net-standard][.NET Standard 2.0]]
+  - .NET Core 2.0 (dzt. .NET Core in Version 2.1)
+  - .NEΤ Framework 4.6.1
+  - Xamarin.iOS 10, Xamarin.Android 8.0, Xamarin Mac 3.8
+  - Mono 5.4 ... Open Source von Xamarin (Microsoft)
+    - ist Grundlage von Xamarin
+    - implementiert einen größeren Teil der APIs von .NET
+  - UWP 10.0.1
+
+* Common Language Infrastructure
+\vspace{1.5em}
+- CLI, internationaler Standard (ISO 23271 und ECMA-335)
+  - für sprach- und plattformneutrale Anwendungsentwicklung
+- besteht aus
+  - Common Type System (CTS)
+    - Hierarchie von Datentypen
+  - Metadaten
+    - Metadaten, die Klassen und Methoden beschreiben
+    - werden vom CLI Compiler erzeugt und zu CIL in Assembly gespeichert
+  - Common Intermediate Language (CIL)
+    - Zwischencode
+    - objektorientierte stack-basierte Sprache
+  - Virtual Execution System (VES)
+    - \to Common Language Runtime (CLR) in .NET
+  - Common Language Specification (CLS)
+    - Regeln, die alle kompatiblen Sprachen erfüllen müssen
+    - Sprachen: C#, C++/CLI, VB.NET, F#
+
+* .NET Implementierungen -- 2
+bestehen aus
+- mind. einer Runtime (basiert auf CLI)
+  - CLR für .NET Framework
+  - CoreCLR für .NET Core
+- einer Base Class Library (BCL, implementiert .NEΤ Standard)
+  - z.B.: .NEΤ Framework Base Class Library
+  - z.B.: .NEΤ Core Base Class Library (CoreFx)
+- Optional: Anwendungsframeworks
+  - z.B.: ASP.NEΤ oder ASP.NEΤ Core
+  - z.B.: Windows Forms oder WPF
+- Optional: Entwicklungstools
+  - Compiler
+  - Build-Management
+  - Paket-Management
+  - z.B. =dotnet= von .NET Core
+
+* Common Language Runtime (CLR)
+- Laufzeitumgebung (analog zu JRE)
+- Abarbeitung von IL (Intermediate Language) Zwischencode (analog zu Java Opcodes)
+  - auch CIL genannt (Common IL)
+    - objektorientierte stack-basierte Sprache
+  - d.h. ist eine virtuelle Maschine
+  - wird von CLR verwaltet (\to managed code)
+  - IL wird von Compiler erzeugt und in Assembly gespeichert
+- enthält einen JIT-Compiler
+- Managed vs. Unmanaged
+  - Managed: Programme, die von CLR verwaltet werden
+  - Unmanaged: nicht in CLR (nativer Code, meist Treiberprogramme)
+
+* .NET Standard 2.0 -- BCL Überblick
+\vspace{1.5em}
+- =System=
+- =System.Collections=
+- =System.Collections.Generic=
+- =System.Data=
+- =System.IO=
+- =System.Linq=
+- =System.Net=
+- =System.Numerics=
+- =System.Reflection=
+- =System.Runtime=
+- =System.Security=
+- =System.Text=
+- =System.Threading=
+- =System.XML=
+
+
+* Features von .NEΤ Core
+- Open Source
+- verwendet moderne Patterns
+- unterstützt mehrere Plattformen
+  - Windows, macOS, Linux und Docker-Images
+- ASP.NET Core
+- Entity Framework Core (ORM)
+- modular -- im Gegensatz zu .NET Framework
+
+* Anwendungsgebiete
+\vspace{1em}
+[[https://docs.microsoft.com/de-de/dotnet/standard/choosing-core-framework-server][Wahl zwischen .NET Core und .NET Framework für Server-Apps]]:
+- .NET Core
+  - plattformübergreifende Anwendungen
+  - Erstellung von Microservices
+  - verwenden von Docker-Container
+  - für skalierbare Hochleistungssysteme
+    - 20.8.2018: M$ stellt bing.com auf .NET Core 2.1 um \to [[https://blogs.msdn.microsoft.com/dotnet/2018/08/20/bing-com-runs-on-net-core-2-1/][34% Reduktion der Server-Latenz]]
+  - pro Anwendung verschiedene parallele .NET Versionen notwendig
+- .NET
+  - vorhandene .NET Anwendungen
+  - Bibliotheken von Drittanbietern
+  - wenn .NET Technologien notwendig, die .NET Core nicht unterstützt (z.B. WPF)
+
+* Ausblick auf .NET Core 3
+- Unter [[https://blogs.msdn.microsoft.com/dotnet/2018/05/07/net-core-3-and-support-for-windows-desktop-applications/][.NET Core 3 and Support for Windows Desktop Applications]]
+  findet man die folgenden Zitate:
+
+  #+begin_quote
+  We think that .NET Core 3.0 will be one of the most exciting .NET releases we’ve ever released.
+  #+end_quote
+  
+  #+begin_quote
+  For new desktop applications, we’ll guide everyone to start with .NET Core 3.
+  #+end_quote
+  
+  #+begin_quote
+  There are many benefits with .NET Core that are great for desktop apps. ...
+  Performance improvements and other runtime updates that will delight your users
+  #+end_quote
+- Unter [[https://github.com/dotnet/core/blob/master/roadmap.md][.NET Core Roadmap]]: Milestone == Q1 2019
+
+* Ausblick auf .NET Core 3 -- 2
+\vspace{1.5em}
+#+attr_latex: :height 8cm
+[[file:images/netcore3.png]]

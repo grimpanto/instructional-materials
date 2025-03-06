@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' class="pikchr" viewBox="0 0 337.709 34.56">
+<path d="M6,32L51,32A4 4 0 0 0 56 27L56,6A4 4 0 0 0 51 2L6,2A4 4 0 0 0 2 6L2,27A4 4 0 0 0 6 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="29" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Read</text>
+<polygon points="128,17 116,21 116,12" style="fill:rgb(0,0,0)"/>
+<path d="M56,17L122,17"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M132,32L200,32A4 4 0 0 0 204 27L204,6A4 4 0 0 0 200 2L132,2A4 4 0 0 0 128 6L128,27A4 4 0 0 0 132 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="166" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Process</text>
+<polygon points="276,17 265,21 265,12" style="fill:rgb(0,0,0)"/>
+<path d="M204,17L271,17"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M281,32L331,32A4 4 0 0 0 335 27L335,6A4 4 0 0 0 331 2L281,2A4 4 0 0 0 276 6L276,27A4 4 0 0 0 281 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="306" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Write</text>
+</svg>

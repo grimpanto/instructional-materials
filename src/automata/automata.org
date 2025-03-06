@@ -1,0 +1,843 @@
+#+TITLE: Automaten
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+# +BEAMER_FRAME_LEVEL: 2
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Automaten -- Einführung
+- Automat = virtuelle Maschine
+- Ausführung eines Algorithmus
+  - als Programm auf realer Maschine
+  - virtuelle Maschine
+- Automatentheorie
+  - Teil der theoretischen Informatik
+  - Beschreibung der Arbeitsweise von Automaten
+  - Algorithmen mit Hilfe von Automaten untersuchen
+
+* Automaten -- Zweck
+- Überprüfung, ob reale Maschine gebaut werden kann
+- Modellierung von zustandsabhängigen Systemen
+  - Entwurf und Analyse digitaler Schaltkreise
+  - Simulation und Implementierung realer Automaten
+    (z.B. Getränkeautomat, Verkehrsampel, Bankomat,...)
+  - Spezifikation und Implementation 
+    von Netzwerkprotokollen, GUIs (z.B. Wizard), Workflows
+  - lexikalische Analyse (Compiler)
+  - Überprüfung von Eingabeworten, Mustererkennung
+
+* Einteilung der Automaten
+Chomsky-Hierarchie für Automaten
+\begin{center}
+\begin{tabular}[h]{|l|l|l|}
+\hline
+Typ   & Automat             & Sprache\\
+\hline\hline
+Typ-0 & Turingmaschine      & unbeschränkt\\
+\hline
+Typ-1 & linear beschränkter Automat & kontextsensitiv\\
+\hline
+Typ-2 & Kellerautomat       & kontextfrei\\
+\hline
+Typ-3 & endlicher Automat   & regulär\\
+\hline
+\end{tabular}
+\end{center}
+
+* Definitionen
+- Eingabealphabet = Menge aller Eingabezeichen: E
+- endliche Menge aller Zustände: Z
+  - d.h. $|Z| = n, n \in \N$
+- Zustandsübergangsfunktion: $\delta$
+  - Automat im i.ten Zustand $z_i$
+    - Startzustand: $z_0$
+  - durch Eingabe des i-ten Zeichens $e_i$
+    - Eingabewort $e=(e_0, e_1,{\ldots},e_n)$
+  - wird in den Zustand $z_{i+1}$ übergeleitet.
+
+* Definitionen -- 2
+- Menge der Endzustände: F
+  - $F \sseq Z$
+- Ausgabealphabet = Menge aller Ausgabezeichen: A
+- Ausgabefunktion: $\gamma$
+  - Automat im i.ten Zustand: $z_i$
+  - durch Eingabe des i-ten Zeichens: $e_i$
+  - ausgegeben wird das i-te Zeichen: $a_{i}$.
+
+* Beispiel Getränkeautomat
+- Geldstück vom Betrag g
+- Wahl zwischen zwei möglichen Getränken
+  - Kaffee ... k
+  - Tee ... t
+- Auswahltaste ohne Geld: Signalton s
+- Rückgabemöglichkeit durch Drücken von r
+
+* Beispiel Getränkeautomat -- 2
+- Eingabealphabet $E=\{g,k,t,r\}$
+  - g ... Einwurf eines Geldstückes
+  - k ... Kaffee-Auswahltaste k drücken
+  - t ... Tee-Auswahltaste t drücken
+  - r ... Rückgabetaste r drücken
+- Zustandsmenge $Z=\{A,B\}$
+  - A ... Geldbetrag ausreichend
+  - B ... Automat bereit
+- Ausgabealphabet $A=\{k,t,x,s\}$
+  - k ... Ausgabe Getränk Kaffee
+  - t ... Ausgabe Getränk Tee
+  - x ... Rückgabe - Geldbetrag x
+  - s ... Signalton
+
+* Arbeitsweise
+- Vom Eingabewort e (am Eingabeband) wird ein Zeichen gelesen
+- neuer Zustand wird bestimmt
+- eventuell Ausgabe von Zeichen (am Ausgabeband)
+  #+Attr_LaTeX: height=2cm
+  [[./automat1.png]]
+
+* Zustandsdiagramm
+- Darstellungsweise der Zustandsübergangsfunktion $\delta$
+- Knoten (Zustand)
+  - Startzustand
+  - Normaler Zustand
+  - Endzustand
+    - \to Fehlerzustand
+- Kante (Zustandsübergang)
+  - mit/ohne Ausgabe
+  - Zusammenfassung mehrerer paralleler Kanten
+
+* Beispiele
+- Zustandsdiagramm des Getränkeautomaten
+- Zustandsdiagramm des erweiterten Getränkeautomaten
+  - Getränkepreis 1 Euro
+  - 1 Euro-Münze und 50 Cent-Münze
+  - Restbetrag soll zurückgegeben werden
+\vspace{1em}
+- \to manchmal ist "Fehlerzustand" sinnvoll
+
+* Zustandstabelle
+- Darstellungsweise der Zustandsübergangsfunktion $\delta$
+- einfacher Getränkeautomat
+  - $z_0 = B, F = \{B\}$
+  - Tabelle\\
+
+    #+ATTR_LATEX: :environment tabular :align l|l|l|l|l
+    |   | g   | k   | t   | r   |
+    |---+-----+-----+-----+-----|
+    | _B_ | A/- | B/s | B/s | B/- |
+    | A | A/g | B/k | B/t | B/g |
+    
+- Beispiel
+  - ges.: Zustandstabelle des erweiterten Getränkeautomaten
+
+* Automaten -- Überblick
+\vspace{1.5em}
+a. Endlicher Automat ohne Ausgabe (EA)
+b. Deterministischer EA (DEA)
+c. Satz von der Existenz endlicher Automaten
+d. Konstruktion eines EA aus einer rechtslinearen regulären Grammatik
+e. Nichtdeterministischer EA (NEA)
+f. Satz über die Äquivalenz von NEA und DEA
+g. Konstruktion eines DEA aus NEA
+h. Konstruktion eines minimalen DEA
+i. Implementierung eines DEA
+j. Endlicher Automat mit Ausgabe: Mealy & Moore
+k. Kellerautomat
+l. Turingmaschine
+       
+* Endlicher Automat ohne Ausgabe
+\vspace{1.5em}
+(engl. finite automaton)
+- $\text{EA} = (E, Z, \delta, z_0, F)$
+- EA: /endliche/ Menge an Zuständen!
+  - d.h. $|Z| = n$
+- ohne Ausgabe \to Akzeptor
+  - Akzeptor: Eingabeworte entweder akzeptiert oder nicht akzeptiert
+  - akzeptiert gdw. Eingabewort zur Gänze gelesen und Endzustand erreicht
+  - hält, wenn Eingabewort zur Gänze gelesen oder kein weiterer
+    Zustandsübergang möglich
+
+* EA -- prinzipielle Arbeitsweise
+#+begin_src python
+def process(delta, z0, F, e):
+    z = z0
+    for e in e:
+        waehle z aus delta(z, e)
+        wenn kein Folgezustand:
+            break
+    else: # Eingabewort zur Gaenze gelesen!
+        if z in F:
+            return True
+    return False
+#+end_src
+Von einem Knoten mehrere gleichbezeichnete Kanten?!
+
+* Deterministischer EA
+\vspace{1.5em}
+- Keine gleichbezeichnete Kanten von einem Knoten
+  - Zustandsübergangsfunktion $\delta$ liefert einen Zustand
+    - $\delta: Z \times E \ar Z$, $z_{i+1} = \delta(z_i, e_i)$
+    - verwenden wir nicht: \epsilon-DEA ... $\delta: Z \times (E \cup \{\epsilon\}) \to Z$
+- $\delta$ liefert u.U. keinen Zustand
+  - $\delta: Z \times E \ar (Z \cup \{\eps\})$
+- Arbeitsweise
+  \small
+  #+begin_src python
+  def process(delta, z0, F, e):
+      z = z0
+      for e in e:
+          z = delta(z, e)
+          if not z:
+              break  # kein Zustandsuebergang!
+      else:  # Eingabewort zur Gaenze gelesen!
+          if z in F:
+              return True
+      return False
+  #+end_src
+
+* DEA -- Beispiele
+- Darstellung ganzer Zahlen
+- Darstellung für Gleitkommazahlen (ohne Exponent).
+  - erlaubt: =123	+0.5	-.3	.7=
+  - nicht erlaubt: =3.	1.2.3	--5=
+  - Eingabealphabet: $E=\{0,\dots,9,+,-,.\}$
+  - Zustände: $Z = \{S, A, B, C, D\}$
+  - Anfangsszustand: $z_0=S$
+  - Endzustände: $F=\{ A,C\}$
+
+* Akzeptierte Wortmenge eines DEA
+\vspace{1.5em}
+- erweiterte Zustandsübergangsfunktion $\hat{\delta}$ eines DEA
+  - ermittelt ausgehend von einem Zustand beim Einlesen eines Wortes den
+    erreichten Zustand
+  - $v, w \in E^{+}, e \in E, w = v e$
+    \begin{align*}
+    \hat{\delta} &: Z \times E^{+} \ar Z\\
+    \hat{\delta}(z, w) &=
+    \begin{cases}
+    \delta(\hat{\delta}(z, v),e) & |w| > 1 \\
+    \delta(z, w) & |w| = 1
+    \end{cases}
+    \end{align*}
+  - Beispiel: $\hat{\delta}(z, abc) = \delta(\hat{\delta}(z, ab), c) = \delta(\delta(\hat{\delta}(z, a),
+    b), c) = \delta(\delta(\delta(z, a), b), c)$
+- Wortmenge, die von einem DEA akzeptiert wird: $T(DEA)$ \\
+  \vspace{0.5em}
+  $T(DEA) =
+  \begin{cases}
+  \{w \in E^{+} | \hat{\delta}(z_0, w) \in F\} & z_0 \notin F \\
+  \{w \in E^{+} | \hat{\delta}(z_0, w) \in F\} \cup \{\epsilon\} & z_0 \in F
+  \end{cases}$
+
+* Satz von der Existenz EA
+Zu jeder regulären Grammatik G gibt es einen endlichen Automaten A,
+für den gilt:
+\[L(G) = T(A)\]
+wobei:
+- L(G) ... Sprache, die durch eine Grammatik erzeugt werden kann
+- T(A) ... Menge der Worte, die vom Automaten akzeptiert werden
+D.h. die von A akzeptierte Wortmenge T(A) stimmt mit der von der
+Grammatik G erzeugten Sprache L(G) überein.
+
+* Konstruktion: aus re-li reg. G
+- G = (\Phi, \Sigma, P, S)
+- Algorithmus
+  a. Zu jedem NT-Symbol aus $\Phi$ wird Knoten gebildet
+     (keine Endknoten).
+  b. Zusätzlicher Endknoten mit neuer Bezeichnung.
+  c. Startknoten entspricht Startsymbol S.
+  d. Kanten gemäß den Produktionen:
+     - A \ar aB: Kante von A nach B mit der Beschriftung a.
+     - A \ar a: Kante vom Knoten A zum Endknoten mit der Beschriftung a.
+     - Bei S \ar $\eps$: Startknoten ist gleichzeitig Endknoten.
+
+* Beispiel
+ges.: Automat für ganze Zahlen
+
+\begin{align*}
+G &= (\Phi, \Sigma, P, S)\\
+\Phi &= \{S, Z\}\\
+\Sigma &= \{+,-,0,1,2,3,4,5,6,7,8,9\}\\
+P &= \{ S \ar +Z | -Z | 0Z | 1Z | 2Z | 3Z | 4Z | 5Z | 6Z | 7Z | 8Z | 9Z,\\
+    & \qquad S \ar 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,\\
+    & \qquad Z \ar 0Z | 1Z | 2Z | 3Z | 4Z | 5Z | 6Z | 7Z | 8Z | 9Z,\\
+    & \qquad Z \ar 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 \}\\
+S &= S
+\end{align*}
+
+* Satz: Äquivalenz von re-li und li-li Gr
+- Zu jeder rechtslinearen Grammatik G = (\phi, \Sigma, P, S) existiert eine
+  linkslineare Grammatik G' = (\phi', \Sigma, P', S'), sodass L(G) = L(G') gilt, die Grammatiken also
+  äquivalent sind.
+- Zu jeder linkslinearen Grammatik G = (\phi, \Sigma, P, S) existiert eine
+  rechtslineare Grammatik G' = (\phi', \Sigma, P', S'), sodass L(G) = L(G') gilt, die Grammatiken also
+  äquivalent sind.
+
+* Konstruktion: aus li-li reg. G
+- G = (\Phi, \Sigma, P, S)
+- Algorithmus
+  a. Zu jedem NT-Symbol aus $\Phi$ wird Knoten gebildet
+     (keinen Startknoten markieren!).
+  b. Zusätzlicher Startknoten mit neuer Bezeichnung.
+  c. Endknoten entspricht Startsymbol S.
+  d. Kanten gemäß den Produktionen:
+     - A \ar Ba: Kante von B nach A mit der Beschriftung a.
+     - A \ar a: Kante vom neuem Startknoten zum Knoten A mit der Beschriftung a.
+     - Bei S \ar $\eps$: neuer Startknoten ist gleichzeitig Endknoten.
+
+* Nichtdeterministischer EA
+\vspace{1.5em}
+- Von einem Knoten: mehrere gleichbezeichnete Kanten
+  - Zustandsübergangsgangsfunktion $\delta$ liefert Menge zurück
+    - $\delta: Z \times E \ar \P(Z)$
+    - verwenden wir nicht: \epsilon-NEA ... $\delta: Z \times (E \cup \{\epsilon\}) \to \P(Z)$
+- D.h. der Automat  muss eine der Kanten wählen
+  - kann die "falsche" sein \to backtracking
+- Arbeitsweise
+  \small
+  #+begin_src python
+  def process(delta, z0, F, e):
+      z = z0
+      for e in e:
+          zset = delta(z, e)
+          if not zset:
+              break  # kein Zustandsuebergang!
+          z = zset.pop()  # u.U. falsch!
+      else:  # Eingabewort zur Gaenze gelesen!
+          if z in F:
+              return True
+      return False
+  #+end_src
+
+* NEA -- Beispiel
+Darstellung für Gleitkommazahlen (ohne Exponent)
+   
+erlaubt: =123	+0.5	-.3	.7=\\
+nicht erlaubt: =3.	1.2.3	--5=\\
+\vspace*{0.2cm}
+
+#+ATTR_LATEX: :environment tabular :align l|c|c|c
+|   | $0-9$   | $+,-$     | .       |
+|---+---------+-----------+---------|
+| S | $\{E\}$ | $\{D,A\}$ | $\{B\}$ |
+| A | $\{A\}$ | -         | $\{B\}$ |
+| B | $\{C\}$ | -         | -       |
+| _C_ | $\{C\}$ | -         | -       |
+| D | $\{E\}$ | -         | -       |
+| _E_ | $\{E\}$ | -         | -       |
+
+\vspace*{0.2cm}
+=0.3=,... kann nicht verarbeitet werden. Modifikationen?
+
+
+* COMMENT Akzeptierte Wortmenge eines NEA
+\vspace{1.5em}
+- erweiterte Zustandsübergangsfunktion $\hat{\delta}$ eines NEA
+  - $v, w \in E^{+}, e \in E, w = v e$
+    \begin{align*}
+    \hat{\delta} &: Z \times E^{+} \ar \P(Z)\\
+    \hat{\delta}(z, w) &=
+    \begin{cases}
+    \delta(\hat{\delta}(z, v),e) & |w| > 1 \\
+    \delta(z, w) & |w| = 1
+    \end{cases}
+    \end{align*}
+  - Beispiel: $\hat{\delta}(z, abc) = \delta(\hat{\delta}(z, ab), c) = \delta(\delta(\hat{\delta}(z, a),
+    b), c) = \delta(\delta(\delta(z, a), b), c)$
+- Sprache, die von einem NEA akzeptiert wird: $L(NEA)$ \\
+  \vspace{1em}
+  $L(DEA) =
+  \begin{cases}
+  \{w \in E^{+} | \hat{\delta}(z_0, w) \cap F \ne \{\}\} & z_0 \notin F \\
+  \{w \in E^{+} | \hat{\delta}(z_0, w) \cap F \neq \{\}\} \cup \{\epsilon\} & z_0 \in F
+  \end{cases}$
+
+* Satz: Äquivalenz von NEA und DEA
+Zu jedem nicht-deterministischen endlichen Automaten gibt es einen
+äquivalenten deterministischen endlichen Automaten.
+
+\vspace*{0.5cm}
+Es gilt somit: T(NEA) = T(DEA)
+
+* NEA zu DEA
+- $Z_{NEA} = \{z_{(0)}, z_{(1)}, z_{(2)}, z_{(3)},{\ldots}\}$
+- $Z_{DEA} = \{z_{(0)}', z_{(1)}', z_{(2)}', z_{(3)}',{\ldots}\}$
+- Zustandsmenge des DEA ist eine Teilmenge der Potenzmenge der Zustandsmenge des 
+  NEA
+  \[
+  \mathcal{P}(Z_{NEA}) = \{\{\}, \{z_{(0)}\}, \{z_{(0)}, z_{(1)}\}, \{z_{(0)}, z_{(2)}\}, \{z_{(0)},
+  z_{(3)}\},{\ldots}\}
+  \]
+  D.h.:
+  \[
+  Z_{DEA} \subseteq \mathcal{P}(Z_{NEA})
+  \]
+
+* NEA zu DEA -- Konstruktion
+\vspace{1em}
+- Basis: Zustandstabelle des nicht-deterministischen Automaten
+- Verfahren
+  1. Beim Startzustand beginnen
+  2. Enthält die Zustandstabelle eine Teilmenge: neuer
+     Knoten, der diese Teilmenge darstellt.
+  3. Für neue `Teilmengen'-knoten ergibt sich das Verhalten aus der
+     Summe aller Zustände der Teilmenge.
+  4. Schritt 2,3 solange durchführen, bis alle Knoten, die in der
+     Zustandstabelle vorkommen auch auf der linken Seite (Liste der
+     Zustände) stehen.
+  5. Bestimmen der Endknoten: Jene, die mindestens einen Endknoten
+     des NEA enthalten.
+  6. Die neuen Knoten zur besseren Lesbarkeit umbenennen.
+
+* NEA zu DEA -- Beispiel
+[[./automat2.png]]
+
+* Minimaler DEA
+Motivation und Definition
+- Erinnerung: $Z_{DEA} \subseteq \mathcal{P}(Z_{NEA})$, d.h.:$|Z_{DEA}| \le 2^{|NEA|}$ \to
+  Anzahl der Zustände des konstruierten DEA ist u.U. sehr hoch!!!
+- Optimal für die Implementierung: DEA mit minimaler Anzahl an Zuständen
+- Definition: Äquivalenter minimaler DEA ... äquivalenter DEA mit
+  minimaler Anzahl an Zuständen (von allen äquivalenten DEAs)
+- Ziel: Konstruktion eines äquivalenten minimalen DEAs
+  
+* Minimaler DEA -- 2
+\vspace{1em}
+Äquivalente Zustände
+- $z_{(i)}$ und $z_{(j)}$ sind äquivalent, wenn: $\forall w \in E^{+} :
+  \hat{\delta}(z_{(i)}, w) \in F \biimp \hat{\delta}(z_{(j)}, w) \in F$
+- Beachte, dass *nicht* gefordert ist, dass \[\hat{\delta}(z_{(i)}, w) = \hat{\delta}(z_{(j)}, w)\]
+- man nennt 2 Zustände /unterscheidbar/, wenn diese nicht äquivalent sind
+  - D.h. $z_{(i)}$ ist von $z_{(j)}$ unterscheidbar, wenn es mindestens ein $w$
+    gibt, sodass einer der Zustände $\hat{\delta}(z_{(i)}, w)$ und $\hat{\delta}(z_{(j)}, w)$
+    akzeptiert und der andere nicht.
+- Ermittlung äquivalenter Zustände mit dem /Table-filling/ Algorithmus
+
+* Minimaler DEA -- Konstruktion
+\vspace{1em}
+1. Entferne alle Zustände, die vom Startzustand aus nicht erreicht werden
+   können.
+   
+/Table-filling Algorithmus/:
+
+2. [@2] Erstelle für die Menge von unterschiedlichen Paaren (keine Reihenfolge \to
+   Menge) an Zuständen $\{\{z_{(i)}, z_{(j)}\}, i \ne j\}$ eine Tabelle.
+3. Markiere alle Paare, bei denen genau ein Zustand zu den akzeptierenden
+   Zuständen gehört und der andere nicht, als nicht zusammenlegbar.
+4. Wiederhole bis keine Änderungen mehr vorgenommen:
+   - markiere alle Paare als nicht zusammenlegbar, für die es ein
+     Eingabezeichen $e$ gibt, so dass die mit $e$ erreichten Folgezustände
+     bereits markiert wurden.
+
+* Minimaler DEA -- Konstruktion -- 2
+5. [@5] Partitioniere die Menge der Zustände $Z$ auf Basis von Schritt 4 in
+   Blöcke, die jeweils alle zu einem Zustand $z$ äquivalenten Zustände
+   enthalten.
+6. Konstruiere den äquivalenten minimalen DEA unter Verwendung
+   der erstellten Blöcke.
+
+* Beispiel
+\begin{tikzpicture}[->,
+    >=stealth',
+    node  distance =2.8cm,
+    semithick,
+    initial text={}]
+
+    \node[initial, state]    (0) {$S$};
+    \node[state]             (1) [above  right =0.65cm and 1.5cm of 0]   {$A$};
+    \node[state]             (2) [below  right =0.65cm and 1.5cm of 0]   {$B$};
+    \node[state, accepting]  (E) [right =3.75cm of 0] {$C$};
+    
+    \path    (0)  edge [above]                   node  {1} (1)
+                  edge [below]                   node  {0} (2)
+             (1)  edge [left , bend  right =10]  node  {0} (2)
+                  edge [above]                   node  {1} (E)
+             (2)  edge [right ,bend  right =10]  node  {1} (1)
+                  edge [below ,loop  below]      node  {0} (2)
+             (E) edge [below]                   node  {0} (2)
+                 edge [right ,loop  right]      node  {1} (E)
+                 ;
+\end{tikzpicture}
+
+* Beispiel -- 2
+1. Zustände entfernen... \to nichts zu tun
+2. Leere Tabelle erstellen\\
+   \vspace{0.5em}
+   \begin{tabular}{|*{4}{c|}}
+                               \cline{1-2}
+     A &                       \\ \cline{1-3}
+     B &   &                   \\ \hline
+     C &   &   &               \\ \hline
+       & S & A & B             \\ \hline
+   \end{tabular}
+   \vspace{0.5em}
+3. Initiale Paare markieren\\
+   \vspace{0.5em}
+   \begin{tabular}{|*{4}{c|}}
+                               \cline{1-2}
+     A &                       \\ \cline{1-3}
+     B &   &                   \\ \hline
+     C & X & X & X             \\ \hline
+       & S & A & B             \\ \hline
+   \end{tabular}
+
+* Beispiel -- 3
+4. [@4] Wiederholen bis keine Änderungen...
+   #+ATTR_LATEX: :options [(a)]
+   a. Iteration 1
+      - $\{A, S\}$: $A \overset{1}{\to} C, S \overset{1}{\to} A$ ... $\{C, A\}$
+        bereits markiert \to $\{A, S\}$ markieren!
+      - $\{B, S\}$: $B \overset{1}{\to} A, S \overset{1}{\to} A$ ... nicht
+        unterscheidbar \to /nicht/ markieren!
+      - $\{B, A\}$: $B \overset{1}{\to} A, A \overset{1}{\to} C$ ... $\{C, A\}$
+        bereits markiert \to $\{B, A\}$ markieren!
+
+      \vspace{0.5em}
+      \begin{tabular}{|*{4}{c|}}
+                                  \cline{1-2}
+        A & X                     \\ \cline{1-3}
+        B &   & X                 \\ \hline
+        C & X & X & X             \\ \hline
+          & S & A & B             \\ \hline
+      \end{tabular}
+      \vspace{0.5em}
+   b. Iteration 2: Einzige freie Stelle ist $\{B, S\}$ \to nicht unterscheidbar...
+
+* Beispiel -- 4
+5. [@5] Blöcke bilden. Nur $\{B, S\}$ ist nicht unterscheidbar \to $Z = \{SB, A, C\}$
+6. Zustandsdiagramm des äquivalenten minimalen DEA
+
+   \vspace{0.5em}
+   \begin{tikzpicture}[->,
+       >=stealth',
+       node  distance =2.8cm,
+       semithick,
+       initial text={}]
+   
+   \node[initial ,state]    (0) {$SB$};
+   \node[state]             (1) [above right =0.65cm and 1.5cm of 0] {$A$};
+   \node[state, accepting]  (E) [right =3cm of 0] {$C$};
+   
+   \path    (0)  edge [above, bend left=20]   node  {1} (1)
+                 edge [below, loop below]     node  {0} (1)
+            (1)  edge [below, bend left=20]   node  {0} (0)
+                 edge [above, bend left=20]   node  {1} (E)
+            (E)  edge [below, bend left=30]   node  {0} (0)
+                 edge [right, loop right]    node  {1} (2)
+                ;
+   \end{tikzpicture}
+   
+   Knoten umbenennen und fertig!
+
+* Implementierung eines DEA
+\vspace{1.5em}
+1. =switch=-basiert
+   \small
+   #+begin_src C++
+   char z;  // current state
+   char e;  // current input symbol
+   switch (z) {
+     case 'A': 
+       switch (e) {
+         case 'a':
+           z_new = 'B';
+           break;
+         case 'b': ...
+         case 'c': ...
+       }
+       break;
+     case 'B':
+       switch (e) {
+         case 'a': ...
+         ...
+       }
+   }
+   #+end_src
+
+* Implementierung eines DEA
+=switch= basiert \to einfach, effizient, aber unflexibel
+
+2. [@2] Tabellen-basiert
+   - Verwendung eines verschachtelten Dictionaries
+     - u.U. auch zweidimensionales Array
+   - äußeres Dictionary
+     - Key ... aktueller Zustand
+     - Value ... inneres Dictionary
+   - inneres Dictionary
+     - Key ... aktuelles Eingabesymbol
+     - Value ... Folgezustand
+   - Ermittlung des Folgezustandes
+     #+begin_src C++
+     z = delta_tab[z][e]
+     #+end_src
+
+* Endlicher Automat /mit/ Ausgabe
+- Zweck: Erzeugung von Ausgabewörtern aus gegebenen Eingabewörtern
+- $M = (E, Z, A, \delta, \gamma, z_o, F)$
+- Mealy-Automat
+  - Ausgabefunktion
+    - $a_{i} = \gamma(z_i, e_i)$, 
+    - $\gamma: Z \times E \ar (A \cup \{\eps\})$
+- Moore-Automat
+  - Ausgabefunktion
+    - $a_i = \gamma(z_i)$
+    - $\gamma : Z \ar (A \cup \{\eps\})$
+
+* Beispiel: Alarmanlage
+\vspace{1em}
+- Zustände:
+  - \small O ... ausgeschaltet (off)
+  - B ... bereit
+  - V ... Voralarm (Bewegungsmelder an)
+  - A ... Alarm (Unterbrechungsmelder an)
+- Eingangssymbole:
+  - \small e ... einschalten
+  - a ... ausschalten
+  - v ... Vorarlarm ausschalten
+  - b ... Alarm Bewegungsmelder
+  - u ... Alarm Unterbrechungsmelder
+  - q ... Alarm quittieren
+- Ausgabesymbole:
+  - \small b ... Vorbeugende Maßnahmen: alle Warnmelder aktiviert
+  - s ... Sicherungsmaßnahmen: Schließen aller Tore
+  - l ... Alarmmaßnahmen: Warnsirene/Scheinwerfer an
+
+* Kellerautomat -- Definition
+\vspace{1em}
+(engl. push down automaton)
+- KA = (E, Z, K, $\delta$, $z_0$, $k_0$, F)
+  - $\delta: Z \times (E \cup \{ \eps \}) \times K \ar P(Z \times K^*)$
+  - $e \in E^*$ ... Eingabewort
+  - $z \in Z^*$ ... Wort, das alle Zustände in der Reihenfolge enthält,
+    die der Automat einnimmt.
+  - $k \in K^*$ ... aktuelles Wort im Stack. Mit $k_0$ als
+    oberstes Element.
+- prinzipielle Arbeitsweise
+  - $e_j \in E \cup \{ \eps \}$
+  - $(z_{i+1}, l) \in \delta(z_i,e_j,k_0)$
+  - dann
+    - Zustand $z_{i+1}$
+    - $k_0$ durch $l = l_0...l_n \in K^*, n\in \mathbb{N}_0$ ersetzt
+      (in der Reihenfolge von oben nach unten).
+
+* Übergänge, Halten, Akzeptieren
+- 2 Arten von Zustandsübergängen
+  - mit Lesen eines Eingabezeichens:
+    $\delta(z_i, e_i, k_0) \neq \{\}$
+  - ohne Lesen eines Eingabez. (spontan):
+    $\delta(z_i, \eps, k_0) \neq \{\}$
+- Haltebedingungen
+  - der Stack leer ist
+  - Eingabewort gelesen & kein spontaner Übergang möglich
+  - Eingabewort nicht gelesen ist & kein Übergang möglich
+- Akzeptanzbedingungen
+  - zustandsakzeptiert: Endzustand erreicht
+  - kellerakzeptiert: Stack leer
+  - akzeptiert: Endzustand erreicht und Stack leer
+
+* Zustandsübergangsfunktion
+- Zustandstabelle\\
+
+  \vspace*{0.5cm}
+  #+LaTeX: {\scriptsize
+  \begin{tabular}{|c|l|l|l|}
+  \hline
+  & Eingabesymbol & {\ldots}  & $\eps$\\ \hline
+  Zustand,Kellersymbol & Menge von (Folgezustand, Wort aus $K^*$)
+    & {\ldots} & {\ldots}\\
+  \hline
+  {\ldots} & {\ldots} & {\ldots} & {\ldots} \\ \hline
+  \end{tabular}
+  #+LaTeX: }
+  \vspace*{0.5cm}
+- Zustandsdiagramm\\
+  \vspace*{0.5cm}
+  #+Attr_LaTeX: :height 2cm
+  [[./automat3.png]]
+
+* Beispiel
+\vspace{1em}
+- $E = \{0,1\}, Z=\{A,B\}, F=\{B\}, K=\{\bot, 0, 1\}$
+- $z_0=A, k_0=\bot$
+- $\delta$ gemäß folgender Zustandstabelle:\\
+  \vspace{0.5cm}
+  \begin{tabular}{|c|c|c|}
+    \hline
+             & 0           & 1           \\ \hline
+    $A,\bot$ & $(B,\bot)$  & $(A,1\bot)$ \\ \hline
+    $A,0$    & --          & --          \\ \hline
+    $A,1$    & $(A,\eps)$  & $(A,11)$    \\ \hline
+    $B,\bot$ & $(B,0\bot)$ & $(A,\bot)$  \\ \hline
+    $B,0$    & $(B,00)$    & $(B,\eps)$  \\ \hline
+    $B,1$    & --          & --          \\ \hline
+  \end{tabular}
+  \vspace{0.5cm}
+- Akzeptierte Sprache: $L(KA) = \{w \in \{0,1\}^* | \#0 \hspace*{1cm} \#1\}$
+
+* Konfigurationen und Züge
+\vspace{1.5em}
+- Konfiguration
+  - Tripel $(z_i,w,k) \in Z \times E^* \times K^*$
+  - geben an:
+    - den momentanen Zustand $z_i\in Z$
+    - den noch zu lesenden Teil $w \in E^*$ des Eingabewortes
+    - den Kellerinhalt $k \in K^*$
+  - Startkonfiguration ist $(z_0, e, k_0)$
+- Zug
+  - Paar von Konfigurationen
+  - entweder
+    - $((z_i, w, k_0\;l), (z_{i+1}, w, q\;l)), k_0 \in K, q \in K^*$
+      mit $(z_{i+1}, q) \in \delta(z_i,\eps,k_0)$
+    - $((z_i, e_j\;w, k_0\;l), (z_{i+1}, w, q\;l))$ mit
+      (z_{i+1}, q) \in \delta(z_{i},e_{j},k_{0})
+  - werden üblicherweise so angeschrieben:
+    - $(z_i, w, p\;l) \vdash (z_{i+1}, w, q\;l)$ bzw.
+    - $(z_i, e_j w, p\;l) \vdash (z_{i+1}, w, q\;l)$
+
+* Beispiele
+- KA aus vorhergehendem Beispiel; $e = 11000$
+  - Züge: $(A,11000,\bot) \vdash (A,1000,1\bot) \vdash
+    (A,000,11\bot) \vdash (A,00,1\bot)\vdash (A,0,\bot) \vdash
+    (B,\eps,\bot)$
+  - d.h.: e vollständig gelesen, Endzustand erreicht, Stack
+    bis auf Startsymbol leer; Stack kann in diesem Fall nicht
+    leer werden!
+- KA aus vorhergehendem Beispiel; $e = 011000$
+- KA aus vorhergehendem Beispiel; $e = 1101100$
+
+* Beispiel
+- $E = \{0,1\}, Z=\{A,B\}, F=\{B\}, K=\{\bot, 0, 1\}$
+- $z_0=A, k_0=\bot$
+- $\delta$ gemäß folgender Zustandstabelle:\\
+  \vspace{0.5cm}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+             & 0            & 1           & \eps \\ \hline
+    $A,\bot$ & $(A,0\bot)$  & $(A,1\bot)$ & $(B,\eps)$\\ \hline
+    $A,0$    & $(A,00)$     & $(A,\eps)$  & -- \\ \hline
+    $A,1$    & $(A,\eps)$   & $(A,11)$    & -- \\ \hline
+  \end{tabular}
+  \vspace{0.5cm}
+- $L(KA) = \{w \in \{0,1\}^* | \#0 \hspace*{1cm} \#1\}$
+- Dieser Automat ist nicht deterministisch!
+
+* Beispiel
+\vspace{1em}
+- \small $E = \{0,1\}, Z=\{A,B,C\}, F=\{C\}, K=\{\bot, 0, 1\}$
+- $z_0=A, k_0=\bot$
+- $\delta$ gemäß folgender Zustandstabelle:\\
+  \vspace{0.2cm}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+             & 0           & 1           & $\eps$\\ \hline
+    $A,\bot$ & $(A,0\bot)$ & $(A,1\bot)$ & $(B,\bot)$\\ \hline
+    $A,0$    & $(A,00)$    & $(A,10)$    & $(B,0)$\\ \hline
+    $A,1$    & $(A,01)$    & $(A,11)$    & $(B,1)$\\ \hline
+    $B,\bot$ & --          & --          & $(C,\bot)$\\ \hline
+    $B,0$    & $(B,\eps)$  & --          & --\\ \hline
+    $B,1$    & --          & $(B,\eps)$  & --\\ \hline
+    $C,\bot$ & --          & --          & --\\ \hline
+    $C,0$    & --          & --          & --\\ \hline
+    $C,1$    & --          & --          & --\\ \hline
+  \end{tabular}
+  \vspace{0.2cm}
+- $L(KA) = \{w \in \{0,1\}^* | w = w_1 w_2, w_1 = w_2\hspace*{0.5cm}\}$
+- Dieser Automat ist nicht deterministisch!
+
+* Deterministischer KA (DKA)
+- KA deterministisch, wenn
+  - für alle $z_i\in Z$, $E_i\in E$ und $k_0\in K$ gilt:
+    - $\#\delta(z_i,E_i,k_0) + \#\delta(z_i,\eps,k_0) \leq 1$
+- D.h. für jeden Zustand und für jedes Zeichen an der Kellerspitze
+  gibt es höchstens eine Möglichkeit, mit oder ohne Eingabe den
+  Zustand zu wechseln und das Kellerzeichen zu ersetzen.
+- Beispiel
+  - DKA soll folgende Sprache akzeptieren:
+    \[L(KA) = \{w_1 \$ w_2 | w_1,w_2 \in \{0,1\}^*, w_1 = w_2^T\}\]
+  - ges.: Zustandstabelle und Zustandsdiagramm
+
+* Turingmaschine (TM) -- Überblick
+- wahlfreier Zugriff auf den Arbeitsspeicher
+  - vgl. Stack beim Kellerautomaten
+- TM: /universelles/ Maschinenmodell zur Realisierung von Algorithmen
+  - hauptsächlich in der theoretischen Informatik
+  - Turings Vorstellung
+    - Endlicher Automat mit einem unendlichen Speicherband
+    - Lese/Schreibkopf, der sich auf dem Band bewegen kann.
+    - Felder des Bandes: Buchstaben des Bandalphabets
+    - Zeichen unter dem Kopf: lesen/verändern
+    - Kopf: um ein Feld nach links/rechts oder an Stelle
+  - CPU läßt sich als TM auffassen (aber: endlicher Speicher)
+- Linear beschränkter Automat: beschränkter Speicher!
+
+* Turingmaschine -- Definition
+\vspace{1em}
+- TM = $(Z, E, B, \delta, z_0, \#, F)$
+  - \small B ... Bandalphabet, $E \subseteq B$
+  - \delta: Z \times B \ar \P(Z \times B \times \{l, r, n\})$
+  - $\# \in B-E$ ... Leerzeichen
+  - l ... Bewegung nach links
+  - r ... Bewegung nach rechts
+  - n ... keine Bewegung
+  - # ... Leerzeichen
+- Arbeitsweise
+  - \small TM im Zustand $z_i$, unter Kopf das Bandsymbol $b_m\in B$
+  - TM im nächsten Schritt in den Zustand $z_{i+1}$ über
+  - schreibt anstelle von $b_m$ ein Symbol $b_n \in B$
+  - führt danach eine Bewegung $x\in \{l, r, n\}$
+  - Am Anfang steht das Eingabewort *am Band* und der
+    Schreib-/Lesekopf befindet sich am ersten Zeichen.
+- Beispiel: $L(G) = \{a^n b^n c^n | n > 0\}$

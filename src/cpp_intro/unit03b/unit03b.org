@@ -1,0 +1,499 @@
+#+TITLE: Modernes C++\linebreak \small...für Programmierer \hfill Unit 03b: Datentypen & Deklarationen
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \newcommand{\cppXIV}{C++14\xspace}
+#+LATEX: \newcommand{\cppXI}{C++11\xspace}
+#+LATEX: \newcommand{\cppXVII}{C++17\xspace}
+
+* Deklaration vs. Definition
+- Deklaration
+  - Zuordnung von Name zu Typ
+  - ist eine Anweisung
+  - \to Gültigkeitsbereich
+  - \to Lebensdauer
+- Definition
+  - ist eine Deklaration
+  - enthält alle Angaben um Namen zu benutzen
+    - d.h. alles was der Linker benötigt!
+    - bei Variable wird Speicher reserviert
+    - bei Funktion ist Funktionsrumpf vorhanden
+    - Klasse (Struktur) vollständig vorhanden
+
+* Deklaration vs. Definition -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/declarations.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // declarations.cpp
+using namespace std;
+constexpr double get_r() {
+  return 3;
+}
+
+struct User; // no definition: just a declaration!
+extern int err_nr;  // no definition
+
+int main() {
+    char ch;
+    auto cnt{1};
+    const double e{2.7182};
+    constexpr double pi{3.1415};
+    constexpr double U{2 * get_r() * pi};
+}
+#+END_SRC
+
+* Ausdruck vs. Anweisung
+- Ausdruck hat Wert
+  - z.B.:\hspace{1em} =1 + 2=
+  - z.B.:\hspace{1em} ~a = 3~
+  - z.B.:\hspace{1em} ~if (a = 0) cout <​< a;~
+- Anweisung hat keinen Wert
+  - einfache Anweisungen
+    - Ausdruck + =;=\hspace{0.5em} \equiv\hspace{0.5em} Anweisung, z.B.:\hspace{1em} =2 + 3;=
+  - zusammengesetzte Anweisungen (=if=, =while=, =switch=,...)
+    - teilweise mit =;= (z.B. =class= oder =struct=)
+
+* Gültigkeitsbereich (engl. scope)
+- in der Regel gültig ab Deklaration
+- verschiedene Arten
+  - lokal: innerhalb von ={= =}=
+  - Klasse: gültig in der gesamten Klasse
+  - Namespace: innerhalb eines Namenraumes
+  - global: bis Ende der Datei
+  - Anweisung: innerhalb von =(= =)= einer =for=, =while=, =if=, =switch=,
+    bis Ende der Anweisung
+  - Funktion: gültig in der gesamten Funktion; nur Labels
+
+* Gültigkeitsbereich -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/scope.cpp
+#+BEGIN_SRC C++
+#include <iostream>  // scope.cpp
+using namespace std;
+int x;  // global
+
+int main() {
+    cout << x << endl;  // 0
+    int x;  // local (global x shadowed)
+    x = 1;  // local x
+    {
+        int x=x;  // de facto uninitialized!
+        cout << x << endl;  // e.g.: -1081928100
+        x = 2;
+    }
+    x = 3;  ::x = 1;
+    cout << x << " " << ::x << endl;  // 3 1
+}
+#+END_SRC
+
+* Initialisierung
+\vspace{1.5em}
+#+header: :exports code :results output :tangle src/init.cpp
+#+BEGIN_SRC C++
+#include <initializer_list>
+using namespace std;
+int main() { // init.cpp
+    // direct-list-initialization
+    // explicit and non-explicit constructors
+    int i1{1};  // recommended!!!
+    // copy-list-initialization
+    // only non-explicit constructors
+    int i2={2};
+    int i3=3;  // don't do it!
+    int i4(4);  // also: no!
+    auto i5{5};  // be careful of "old" compilers
+    auto i6={6}; // not the same: see next slide!
+    auto i7=7;  // yes but not needed any more
+    auto i8(8);  // almost no...
+}
+#+END_SRC
+
+* Initialisierung -- \cpp{}17
+\vspace*{2em}
+In "neuen" Compilerversionen auch bei \cpp11 und \cpp14!\newline
+\hspace*{2em} \to auf Empfehlung des Standardkomitees!!
+#+header: :exports both :results output :tangle src/cpp17.cpp :flags -std=c++1y
+#+BEGIN_SRC C++
+#include <iostream>
+#include <initializer_list>
+
+using namespace std;
+
+int main() {
+    auto a={1, 2, 3};  // initializer_list<int>
+    for (auto e : a) cout << e << ' ';
+    auto b={4};
+    for (auto e : b) cout << e << ' ';
+    auto c{42};
+    cout << c << endl;
+    // auto d{1, 2, 3};  // error!
+}
+#+end_src
+
+#+RESULTS:
+: 1 2 3 4 42
+
+* Initialisierung -- 2
+#+header: :exports code :results output :tangle src/init2.cpp
+#+BEGIN_SRC C++
+#include <initializer_list>
+class X {};  // init2.cpp
+
+int main() {
+    // int i1{1.5};  // compile error: narrowing...
+    // int i2={2.5};  // compile error...
+    int i3=3.5;  // i3 == 3 → narrowing
+    int i4(4.5);  // i4 == 4
+    int i5();  // function declaration!!
+    X x(X());  // ditto!
+}
+#+END_SRC
+
+* Initialisierung -- 3
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results output :tangle src/init2.cpp
+#+BEGIN_SRC C++
+#include <iostream>
+#include <mutex>
+#include <typeinfo>
+using namespace std;
+
+mutex mtx;
+int main() {
+  cout << typeid(mtx).name() << endl;  // -> St5mutex
+  {
+    // new unique_lock named mtx
+    unique_lock<mutex>(mtx);  // -> St11unique_lockISt5mutexE
+    cout << typeid(mtx).name() << endl;
+    // using mtx as mutex will appear the bug
+  }
+  {
+    // temp object initialized with mtx!
+    unique_lock<mutex>{mtx};  // -> St5mutex
+    cout << typeid(mtx).name() << endl;
+    // using mtx as unique_lock will appear the bug
+  } }
+#+END_SRC
+
+#+RESULTS:
+: St5mutex
+: St11unique_lockISt5mutexE
+: St5mutex
+
+* Initialisierung -- 4
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/init2a.cpp
+#+BEGIN_SRC C++
+#include <iostream>
+
+using namespace std;
+
+struct X {
+    int i{42};
+};
+
+X f() {
+    return X{};
+}
+
+X x(X(xx)()) {
+    return xx();
+}
+
+int main() {
+    X();
+    X x(X());
+    cout << x(f).i << endl;  // -> 42
+}
+#+END_SRC
+
+* Initialisierung -- 5
+\vspace{2em}
+#+header: :exports code :results output :tangle src/init3.cpp
+#+BEGIN_SRC C++
+#include <iostream>  // init3.cpp
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> v1(10);
+    cout << v1.size() << " " << v1[0] << endl;
+    vector<int> v2(1, 10);
+    cout << v2.size() << " " << v2[0] << endl;
+    //vector<int> v3{1, 10}; // <=C++14
+    vector v3{1, 10};  // since C++17 possible
+    cout << v3.size() << " " << v3[0] << endl;
+}
+#+END_SRC
+
+: 10 0
+: 1 10
+: 2 1
+
+* Initialisierung -- 6
+- wenn keine Initialisierungsspezifierer vorhanden, dann:
+  - wenn global, Namespace, =static=, dann: initialisiert mit ={}=
+    - bei benutzerdefinierten Typ: Default-Konstruktor
+  - wenn lokal oder am Heap, dann:
+    - benutzerdefinierter Typ und Default-Konstruktor: initialisiert
+    - anderenfalls: nicht initialisiert
+
+* Initialisierung -- 7
+\vspace{1em}
+#+header: :exports code :results output :tangle src/init4.cpp
+#+BEGIN_SRC C++
+#include <iostream>  // init4.cpp
+#include <vector>
+using namespace std;
+int x;  // initialized with {}
+
+int main() {
+    int x;  // not initialized
+    char buf[1024];  // not initialized
+
+    int* p{new int};  // *p not initialized
+    string s;  // s == ""
+    vector<int> v;  // v == {}
+    string* ps{new string};  // *ps == ""
+}
+#+END_SRC
+
+* Initialisierung -- 8
+\vspace{1em}
+#+header: :exports code :results output :tangle src/init5.cpp
+#+BEGIN_SRC C++
+#include <complex>  // init5.cpp
+#include <vector>
+using namespace std;
+
+int main() {
+    int a[]{1, 2, 3};  // array-initializer
+    struct S {
+        int i;
+        string s;
+    };
+    S s{1, "hello"};  // struct-initializer
+    complex<double> z{0, 1};  // use constructor
+    vector<int> v{1, 2, 3};  // list-initializer
+}
+#+END_SRC
+
+* Objekte und Werte
+- Objekt: zusammenhängender Speicherbereich
+- L-Wert (lvalue): Ausdruck der auf Objekt verweist
+  - linke Seite einer Zuweisung, z.B. ~i = 5;~
+  - Faustregel: kann =&= angewandt werden → lvalue
+  - aber: Konstanten sind lvalues, aber nicht auf linker Seite
+- R-Wert (rvalue):
+  - "kein lvalue", z.B. ein Wert, der von Funktion zurückgegeben wird, z.B.
+    ~int i;  i = f();~
+  - kann aber auf auf linker Seite stehen: ~g() = 3;~
+
+* Objekte und Werte -- 2
+\vspace{1em}
+#+header: :exports both :results output :tangle src/lrvalues.cpp
+#+BEGIN_SRC C++
+#include <iostream>  // lrvalues.cpp
+using namespace std;
+
+int x{0};
+
+int f() { return 0; }
+// never ever should be x a local variable...
+int& g() { return x; }
+
+int main() {
+    // f() = 2;  // error: lvalue required...
+    g() = 1;
+    cout << x << endl;
+}
+#+end_src
+
+* Objekte und Werte -- 3
+\vspace{1em}
+#+header: :exports both :results output :tangle src/lrvalues2.cpp
+#+BEGIN_SRC C++
+#include <iostream>  // lrvalues2.cpp
+using namespace std;
+
+int main() {
+    int i;
+    i = 4;
+    // 4 = i;  // error: lvalue required...
+    (i + 1) = 5;  // error!
+    const int j{6};  // j is an lvalue
+    // j = 7;  // error!
+}
+
+int& h() {
+  return 2; //error: invalid init...from an rvalue
+}
+#+end_src
+
+
+* lvalue vs. rvalue -- im Detail
+\vspace{1.5em}
+#+ATTR_LaTeX: :width 4.5cm :placement [H]
+[[./lvalue_vs_rvalue.png]]
+
+- lvalue ... "eigentlicher" lvalue
+- prvalue ... pure rvalue ("eigentlicher" rvalue)
+- xvalue ... eXpiring value
+  - z.B. =std::move(x)= oder =X{}.m=
+- glvalue ... generalized lvalue
+
+* Lebensdauer von Objekten
+Gibt an, wann ein Objekt "zerstört" wird
+- automatisch: wenn es Gültigkeitsbereich verlässt (lokal)
+- statisch: enden mit Programmende (global, Namensraum, =static=)
+- Freispeicher (engl. free store, heap): bei =delete=
+- temporäre Objekte: z.B. Zwischenergebnisse in einer Berechnung
+  =a * (b + c * d)=
+  - enden mit Ende des vollständigen Ausdruckes (nicht Teil eines anderen Ausdruckes)
+  - außer wenn an Referenz gebunden
+- threadlokal: Objekte, die =thread_local= deklariert sind, enden
+  mit Threadende
+
+* Implizite Konvertierungen
+- Aufweitung der integralen Datentypen (engl. integral promotions, kurz:
+  promotions):
+  - =char=, =signed char=, =unsigned char=, =short=, =unsigned short=
+    *zu* =int=, =unsigned=
+  - =char16_t=, =char32_t=, =wchar_t= bzw. =enum= *zu* =int=, =unsigned=,
+    =long=, =unsigned long=, =unsigned long long=
+  - =bool= zu =int=
+- Konvertierungen auf gemeinsamen Typ
+
+* Implizite Konvertierungen -- 2
+#+header: :exports code :results output :tangle src/conv.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // conv.cpp
+using namespace std;
+
+int main() {
+    char a{'0'};
+    char b{'0'};  // ASCII decimal: 48
+    cout << a << ' ' << sizeof(a) << endl;
+    cout << a + b << ' ' << sizeof(a + b) << endl;
+}
+#+END_SRC
+
+: 0 1
+: 96 4
+
+* Implizite Konvertierungen -- 3
+\vspace{1em}
+#+header: :exports code :results output :tangle src/conv2.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // conv2.cpp
+using namespace std;
+
+int main() {
+    long long int ll{};
+    char c{};
+
+    cout << "size(ll) = " << sizeof(ll) << endl;
+    cout << "size(c) = " << sizeof(c) << endl;
+    cout << "size(ll+c) = "<<sizeof(ll + c)<<endl;
+}
+#+END_SRC
+
+: sizeof(ll) = 8
+: sizeof(c) = 1
+: sizeof(ll+c) = 8
+
+* Implizite Konvertierungen -- 4
+\small
+#+header: :exports code :results output :tangle src/conv3.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // conv3.cpp
+using namespace std;
+
+int main() {
+    int i{};
+    i = 3.5;
+    cout << i << endl;  // ok, it's expected
+    char c;
+    c = 128;  // undef behaviour if 8bits signed
+    cout << static_cast<int>(c) << endl;  // explicit
+}
+#+END_SRC
+
+: 3
+: -128
+
+* Explizite Konvertierungen
+\vspace{1.5em}
+- Regel: "don't cast at all!"
+- Regel: "use neither =(T)x= nor =T(x)="
+- =static_cast= \to das Mittel der Wahl
+  - liefert Wert des neuen Typs
+  - nicht bei Downcasts verwenden (da keine Überprüfung)
+  - kein Overhead zur Laufzeit
+- =dynamic_cast=
+  - konvertiert Pointer und Referenzen innerhalb von Vererbungshierarchien
+  - liefert =nullptr= zurück, wenn nicht konvertierbar
+  - außer bei Referenzen \to =std::bad_cast= Exception
+- =const_cast=
+  - zum "Wegcasten" von =const=
+  - kein Overhead zur Laufzeit
+- =reinterpret_cast=
+  - Bitpattern des Werts wird als neuer Typ interpretiert
+  - kein Overhead zur Laufzeit
+
+* =using=
+- =using=-Direktive
+  - alle Bezeichner des angegebenen Namensraumes im aktuellen
+    Gültigkeitsbereich
+  - z.B. =using namespace std;=
+    - sollte nicht verwendet werden, besser \to =using=-Deklaration!
+- Typalias (engl. type alias declaration)
+  - neuer Name für bestehenden Typ
+- =using=-Deklaration
+  - Verwendung eines bestehenden Namens aus anderem Namensraum
+
+* =using=-Typalias
+\vspace{1em}
+#+header: :exports code :results none :tangle src/typealias.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // typealias.cpp
+#include <vector>
+using namespace std;
+
+int main() {
+    using IntStack = std::vector<int>;
+    IntStack stack{};
+    stack.push_back(1); stack.push_back(2);
+    cout << stack.back() << endl;
+    stack.pop_back();
+    cout << stack.back() << endl;
+    stack.pop_back();
+}
+#+END_SRC
+
+* =using=-Deklaration
+#+header: :exports code :results none :tangle src/usingdecl.cpp :flags -std=c++11
+#+BEGIN_SRC C++
+#include <iostream>  // usingdecl.cpp
+#include <vector>
+
+int main() {
+    // equiv to: using vector = std::vector;
+    using std::vector;
+
+    using std::cout;  // cout is no type!
+    vector<int> vec{1, 2, 3};
+    cout << vec.size() << std::endl;
+}
+#+END_SRC

@@ -1,0 +1,279 @@
+#+TITLE: Domain Name System -- DNS
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* DNS
+- Zweck: Auflösung von Namen in IP-Adressen und umgekehrt
+  - \to Positionstransparenz, \to Migrationstransparenz
+- Struktur: verteiltes, hierarchisches System
+- Namensraum
+  - baumartig
+    - Wurzel: =.=
+  - in Zonen aufgeteilt
+    - Zone: administrative Einheit
+    - von DNS Servern verwaltet
+    - Teilbäume werden oft an Subdomäne (mit eigenen Nameservern) /delegiert/
+
+* Komponenten
+- Domainname (fully qualified domain name, FQDN)
+  - besteht aus Folge von Labels (alphanumerisch und Bindestrich), getrennt
+    durch =.=
+- Nameserver (DNS Server)
+- Resolver (DNS Client)
+  - direkt in TCP/IP integriert
+    - bekannte Programme: nslookup, host, dig, drill
+  - Transportprotokoll defaultmäßig DNS
+    - außer Zonentransfer oder Antwort zu groß \to TCP
+    - Port 53
+
+* Domainname
+- DN
+- Folge von Labels durch Punkte getrennt
+  - Label: alphanumerisch (case-insensitive) und Bindestrich
+    - max. 63 Bytes
+    - TLD (top level domain)
+  - abgeschlossen mit Punkt, kann weggelassen werden
+  - max. 255 Bytes
+- FQDN, z.B. =htlwrn.ac.at.=
+- TLD...top level domain
+
+* Top level domain
+\vspace{1em}
+- generische TLD
+  - nicht gesponsert, z.B.: =.com=, =.info=, =.net=, =.org=, =.name=,...
+    - haben ursprünglich eine Bedeutung gehabt und waren
+      Einschränkungen unterworfen...
+    - werden von ICANN (Internet Corporation for Assigned Names and Numbers)
+      kontrolliert
+  - gesponsert, z.B.: =.edu=, =.gov=, =.jobs=, =.tel=,...
+- Länderspezifisch (gemäß ALPHA-2 von ISO-3166-1), z.B. =.at=, =.tv= (Tuvalu), =.st=
+  (Sao Tome), =.io= (Britisches Territorium im Indischen Ozean),... und =.uk= sowie
+  =.eu=
+- neue TLDs, z.B. =.wien=, =.tirol=, =.bio=, =.suzuki=, =.gmail=, =.shop=, =.search=,...
+- Spezial-TLDs, z.B. =.arpa=, =.localhost=, =.example=, =.test=,...
+- Betrieb
+  - jede TLD: Gruppe von Nameservern
+
+* Internationalisierter DN
+- Internationalized Doman Name (IDN)
+- Umlaute, chinesische Zeichen,...
+- prinzipiell fast alle Unicode-Zeichen
+  - jede Vergabestelle (network information center) schränkt ein
+  - =nic.at= erlaubt:\hspace{1em} à á â ã ä å æ ç è é ê ë ì í î ï ð ñ ò ó ô õ ö ø œ š ù ú û ü
+    ý ÿ ž þ
+- zuerst meist Umwandlungen im Client wie z.B. Großbuchstaben in Kleinbuchstaben
+- Umwandlung in ASCII mittels Punycode-Kodierung
+  - Beispiel: =dömäin.example= → =xn--dmin-moa0i.example=
+
+* Nameserver und Zonen
+- Nameserver
+  - autoritative Namesever: sind für Zone verantwortlich
+  - nicht-autoritative Nameserver: sind nicht für Zone verantwortlich
+- Zonen
+  - Zone ist administrative Einheit und für einen Teil des
+    Baumes verantwortlich
+  - jede Zone mind. 2 Nameserver
+
+* Typen von DNS-Server
+- Master und Slave
+  - je Zone mind. zwei autoritative Server
+  - einer hat Rolle des Masters, die anderen sind Slaves
+  - Zonendatei wird am Master geändert
+  - Slave bekommt Kopie
+  - Änderungen werden an Seriennummer in Zonendatei erkannt
+- Caching-Server
+  - keine autoritativen Antworten
+- Forwarder
+
+* Namensauflösung
+- Arten
+  - rekursive Namensauflösung
+    - kennt Namensserver die Antwort nicht, dann fragt dieser
+      selbständig weiter
+  - iterative Namensauflösung
+    - kennt Namenserver die Antwort nicht, dann liefert dieser
+      den nächsten Namensserver zurück
+- welche Art verwendet wird, hängt von Flag in Anfrage ab
+  - Rootserver akzeptieren nur iterative Anfragen
+    - es gibt 13 Rootserver
+- inverse Anfrage: 192.170.149.127 \to 127.149.170.192.in-addr.arpa
+
+* Beispiel: Namensauflösung (Typ =A=)
+\scriptsize
+#+begin_src sh
+$ drill www.htlwrn.ac.at
+...
+;; QUESTION SECTION:
+;; www.htlwrn.ac.at.    IN      A
+
+;; ANSWER SECTION:
+www.htlwrn.ac.at.       16714   IN      A       195.202.147.97
+...
+#+end_src
+
+* Zonendatei und RR
+- Zonendatei
+  - (ursprünglich) Teil der Konfiguration von BIND
+  - besteht aus
+    - Liste von Resource Records (RR)
+  - beschreibt Zone
+- Resource Record
+  - =<nam>= Domänenname des Objektes
+  - =<ttl>= TTL (optional) \to caching server!
+  - =<class>= Protokollgruppe (optional), de facto nur =IN=
+  - =<type>= Typ des RR
+  - =<rdlength>= Länge der Daten (optional)
+  - manche Typen erwarten sich hier weitere Felder (wie z.B. bei =MX=)
+  - =<rdata>= Daten des RR
+
+* Typen von RR
+\vspace{1.5em}
+- =A= ... Address Record
+- =AAAA= ... für IPv6
+- =CNAME= ... Canonical Name, legt anderen Namen fest
+  - Alias für anderen DN, z.B. =www.htlwrn.ac.at= \to =htlwrn.ac.at=
+- =MX= ... Mail eXchange
+- =NS= ... Nameserver: Delegiert Subdomain zu Nameserver
+  - z.B.: =htlwrn.ac.at.= \to =venus.htlwrn.ac.at.=
+- =PTR= ... Pointer Record, d.h. für inverse Auflösung
+- =SOA= ... Start Of Authority, d.h. Informationen über Zone
+- =SRV= ... Service Locator, wird bei allgemeinen Diensten verwendet
+  - z.B. wird von SPF (Sender Policy Framework, Spamabwehr)
+- =TXT= ... eigentlich für Menschen, heute für verschiedenste Dienste
+
+* Beispiel: Typ =MX=
+\scriptsize
+#+begin_example
+$ drill htlwrn.ac.at MX
+...
+;; htlwrn.ac.at.        IN      MX
+
+;; ANSWER SECTION:
+htlwrn.ac.at.   85682   IN      MX      5 avispa2.htlwrn.ac.at.
+htlwrn.ac.at.   85682   IN      MX      120 mail2.htlwrn.ac.at.
+htlwrn.ac.at.   85682   IN      MX      100 mail.htlwrn.ac.at.
+...
+#+end_example
+
+* Beispiel: inverse Anfrage
+\scriptsize
+#+begin_example
+$ drill -x 195.202.147.72
+...
+;; QUESTION SECTION:
+;; 72.147.202.195.in-addr.arpa. IN      PTR
+
+;; ANSWER SECTION:
+72.147.202.195.in-addr.arpa.    38400   IN      PTR     mail2.htlwrn.ac.at.
+...
+#+end_example
+
+* Beispiel: beliebiger Typ
+\tiny
+#+begin_example
+$ drill htlwrn.ac.at any
+;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 3239
+;; flags: qr rd ra ; QUERY: 1, ANSWER: 8, AUTHORITY: 0, ADDITIONAL: 0 
+;; QUESTION SECTION:
+;; htlwrn.ac.at.        IN      ANY
+
+;; ANSWER SECTION:
+htlwrn.ac.at.   86392   IN      SRV     10 2 5061 _sipfederationtls._tcp.student.htlwrrn.ac.at.
+htlwrn.ac.at.   86392   IN      TXT     "v=spf1 mx mx:avispa.htlwrn.ac.at mx:avispa1.htlwrn.ac.at mx:avispa2.htlwrn.ac.at mx:mail.htlwrn.ac.at mx:mail2.htlwrn.ac.at ip4:195.202.147.70 ip4:195.202.147.71 ip4:195.202.147.72 include:office.htlwrn.ac.at -all"
+htlwrn.ac.at.   86392   IN      MX      5 avispa2.htlwrn.ac.at.
+htlwrn.ac.at.   86392   IN      MX      100 mail.htlwrn.ac.at.
+htlwrn.ac.at.   86392   IN      MX      120 mail2.htlwrn.ac.at.
+htlwrn.ac.at.   86392   IN      SOA     venus.htlwrn.ac.at. root.venus.htlwrn.ac.at. 2005080883 7200 1800 172800 86400
+htlwrn.ac.at.   8637    IN      NS      jupiter.htlwrn.ac.at.
+htlwrn.ac.at.   8637    IN      NS      venus.htlwrn.ac.at.
+
+;; AUTHORITY SECTION:
+
+;; ADDITIONAL SECTION:
+
+;; Query time: 25 msec
+;; SERVER: 192.168.8.1
+;; WHEN: Sun Sep  2 12:02:52 2018
+;; MSG SIZE  rcvd: 470
+#+end_example
+
+* Dynamisches DNS (DDNS)
+\vspace{1em}
+- Zweck: dynamische Aktualisierung von DNS Einträgen
+  - Szenario 1: Server werden nicht mit statischen IP Adressen
+    versorgt, sondern mittels DHCP werden IP Adressen dynamisch
+    vergeben (\to Felixibilität).
+  - Szenario 2: Rechner im Heimnetzwerk bekommen vom Provider
+    dynamisch sich ändernde IP Adressen zugeteilt. Ein Host
+    soll im Internet als Server dienen (z.B. Anbieter DynDNS)
+- D.h. es sind Änderungen regelmäßig und automatisch im DNS vorzunehmen.
+- 2 Möglichkeiten der Realisierung
+  - DDNS über RFC 2136 (DNS Update): Protokoll hauptsächlich
+    zwischen DHCP Server und DNS Server. Sicherheits-relevante
+    Updates in RFC 2137 und RFC 3007.
+  - DDNS über HTTP: Änderungen werden per HTTPS aktiv dem DDNS
+    Anbieter bekanntgegeben. Dazu ist eine Client-SW am Host
+    zu installieren.
+
+* Sicherheit
+- DNSSEC
+  - Sicherstellung der Integrität mittels asymmetrischen Verfahren
+- DoT
+  - DNS over TLS
+  - z.B. Coudflare (1.1.1.1) oder Google (8.8.8.8)
+  - aber auch: Digitale Gesellschaft Schweiz (185.95.218.42)
+- DoH
+  - DNS over HTTPS
+  - z.B. Coudflare (1.1.1.1) oder Google (8.8.8.8)
+  - aber auch: Digitale Gesellschaft Schweiz (185.95.218.42)

@@ -1,0 +1,474 @@
+#+TITLE: Verteilte Systeme \linebreak \small \mbox{ } \hfill HTTP 1.1 -- Teil C
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Client-seitiges Upgrade
+a. Client
+   #+begin_example
+   GET /hello.txt HTTP/1.1
+   Host: www.example.com
+   Connection: Upgrade, HTTP2-Settings
+   Upgrade: h2c
+   HTTP2-Settings: <base64url encoding of
+     HTTP/2 SETTINGS payload>
+   #+end_example
+b. Server
+   #+begin_example
+   HTTP/1.1 101 Switching Protocols
+   Connection: upgrade
+   Upgrade: h2c
+   → weiter mit HTTP/2
+   #+end_example
+
+* Server-seitiges Upgrade
+a. Client
+   #+begin_example
+   GET / HTTP/1.1
+   ...
+   #+end_example
+b. Server
+   #+begin_example
+   HTTP/1.1 426 Upgrade Required
+   Upgrade: TLS/1.0, HTTP/1.1
+   Connection: upgrade
+   → TLS Handshake...
+   #+end_example
+
+* Authentifizierung
+- HTTP Basic Authentication
+- HTTP Bearer Authentication
+- HTTP Digest Authentication
+- Formularbasierte Authentifizierung
+  + basierend auf Cookies
+  + basierend auf einem Token (siehe Bearer Authentication)
+- HTTPS-Authentifizierung
+
+* Base64
+- Kodierung
+  - um binäre Daten über ASCII Kanal zu übertragen
+- 3 \times 8 Bits \to 4 \times 6 Bits
+- 0 \to =A=,...,26 \to =a=,...,52 \to =0=,...,62 \to =+=, 63 \to ~/~
+  - padding: ~=~
+- Varianten
+  - base64url: =-= anstatt =+=, =_= anstatt =/=
+    - zur Verwendung in Dateinamen und URLs
+  - Radix-64: wie Base64 jedoch mit CRC-24 Prüfsumme am Ende
+    - CRC ... Cyclic Redundancy Check
+  - weitere Abarten/Varianten...
+
+* Base64 -- 2
+\vspace{4em}
+[[./base64.png]]
+
+\vspace{7em}
+\scriptsize
+\center https://vikashazrati.files.wordpress.com/2008/07/base64.png
+
+* HTTP Basic Authentication
+\vspace{1.5em}
+- Passwort mittels Base64 kodiert!
+- Prinzip
+  a. Browser
+     #+begin_example
+     GET /secure/index.html HTTP/1.0
+     #+end_example
+  b. Server
+     #+begin_example
+     HTTP/1.0 401 Unauthorized
+     ...
+     WWW-Authenticate: Basic realm="secureapp"
+     #+end_example
+  c. Browser \to Dialogbox
+     #+begin_example
+     GET /secure/index.html HTTP/1.0
+     Authorization: Basic bWF4Om11c3Rlcg==
+     #+end_example
+     \pause
+     #+begin_src python
+     import base64
+     base64.decodestring(b"bWF4Om11c3Rlcg==")
+     # -> b'max:muster'
+     #+end_src
+
+* HTTP Bearer Authentication
+- wie HTTP Basic Authentication
+- aber: ~WWW-Authenticate: Bearer realm=<realm>~
+- Übermittlung des Tokens bei jedem Zugriff mittels
+  + ~Authorization: Bearer <token>~
+  + über ein Formular (theoretisch)
+  + Query-Parameter (theoretisch)
+  aber auf keinem Fall in Cookies!
+
+* Passwörter
+- Server speichert Passwort in DB
+  - Client sendet Passwort und Server empfängt Passwort und vergleicht mit DB\pause
+  - Client sendet Hashwert des Passwortes und Server berechnet Hashwert des
+    in DB gespeicherten Passwortes\pause
+- Server speichert Hashwert in DB
+  - Client sendet Hashwert des Passwortes und Server vergleicht mit DB\pause
+- Weitere Möglichkeiten mit \to /Salt/ und /Pepper/...
+
+* HTTP Digest Authentication
+\vspace{1em}
+- ähnlich wie Basic Auth
+- Prinzip
+  a. Browser sendet Request
+  b. Server sendet "nonce" ("Platzhalter")
+  c. Browser sendet Hash (MD5!) von
+     - Benutzername
+     - Passwort
+     - realm
+     - URI
+     - Methode
+     - nonce
+
+* HTTP Digest Authentication -- 2
+- anfällig für MITM Angriffe!
+  - \pause \to MITM verwendet HTTP Basic Authentication
+  - \pause \to MITM verwendet /rainbow table\newline/
+    Datenstruktur, um die ursprüngliche Zeichenfolge für einen Hashwert (Hashfunktion ohne Salt) zu ermitteln
+  - \pause \to MITM versucht /chosen-plaintext attacks/\newline
+    Aus Geheimtext für gewählten Klartext wird versucht den Schlüssel zu ermitteln
+- \pause Erweiterungen in RFC 2617 um
+  - client-nonce
+    - \pause \to wg. /chosen-plaintext attacks/ und /rainbow tables/
+  - request counter
+    - \pause \to wg. /replay attacks/
+
+* Einschub: Wörterbuchangriff
+\vspace{1em}
+- Hashwert zu einem Passwort immer derselbe
+- Vorberechnung möglich: Wörterbuchangriff
+  - \to Rainbow Tables
+- Salt
+  - Server erzeugt je Passwort zufällige Zeichenfolge und speichert diese (Salt)
+  - Kombination mit Salt
+  - Berechnung des Hashwertes
+- Pepper
+  - wie Salt, aber für alle Passwörter gleich
+  - dafür wird dieser *nicht* in der Datenbank gespeichert sondern
+    extern an einem sicheren Ort
+  - \to Auch wenn Angreifer Zugriff auf Datenbank erhält (z.B. mittels
+    SQL-Injection) sind keine realistischen Angriffe auf die
+    Passwörter möglich
+
+* Rainbow Table -- Aufbau
+- Hashfunktion $H$ und Reduzierungsfunktion $R$
+  - $R$ ... beliebige Funktion, die Hashwert in eine Klartextzeichenkette
+    wandelt
+- Annahme: 6 stellige Passwörter und Hashfunktion, die 32 Bithashwerte
+  liefert
+  - =aaaaaa= $\underset{H}{\to}$ =281DAF40= $\underset{R}{\to}$ =sgfnyd=
+    $\underset{H}{\to}$ =920ECF10= $\underset{R}{\to}$ =kiebgt=
+- Tabelle
+  a. Wähle beliebige Anzahl an Anfangspasswörter
+  b. Berechne von jedem eine fixe Kette der Länge $k$ und speichere
+     jeweils Anfang und Ende
+
+* Rainbow Table -- Prinzip     
+- Vorgang
+  a. Berechne für gegebenen Hashwert die Kette bis zum Ende
+  b. Beginne am Anfang dieser Kette und verfolge diese bis nächster
+     Hashwert erreicht wird
+- Beispiel
+  a. =920ECF10= $\underset{R}{\to}$ =kiebgt=
+  b. =aaaaaa= $\underset{H}{\to}$ =281DAF40= $\underset{R}{\to}$ =sgfnyd=
+    $\underset{H}{\to}$ =920ECF10=
+     - d.h. Passwort ist =sgfnyd=!\pause
+     - wenn nicht enthalten, dann "falscher Alarm" \to verwerfen und
+       Kette bis max. zur Länge $k$ weiterverfolgen. Wenn dann
+       nicht enthalten, dann wurde das Passwort in keiner Kette
+       generiert.
+
+* Tunneling Proxy
+- Relais zwischen 2 Verbindungen
+  - im Standard von HTTP/1.1: "Tunnel"
+- Zweck
+  - unveränderte Weitergabe
+  - meist: TLS zwischen Client und Server via Proxy
+    - \to =CONNECT=
+
+* Reverse Proxy
+- Serverseite
+  - im Standard von HTTP/1.1: "Gateway"
+- Zweck
+  - Lastverteilung (load balancing)
+    - ankommende Requests werden aufgeteilt
+  - Caching
+  - Sicherheit
+    - Verschlüsselung: TLS (u.U. eigene HW)
+    - Zusätzliche Schicht
+
+* (Forward) Proxy
+\vspace{1em}
+- Clientseite
+  - im Standard von HTTP/1.1: "Proxy"
+- Zweck
+  - Caching
+  - Sicherheit
+    - Verschlüsselung, Zugriffskontrolle
+  - Authentifizierung
+  - Loggen
+  - Verändern der Nachricht (z.B. Bildformate)
+    - speziell: Kompression
+  - Filterung von Inhalten
+  - Anonymisierung
+- absolute URL!
+
+* =proxy.pac= -- Beispiel
+#+begin_src js
+function FindProxyForURL(url, host) {
+    if (shExpMatch(host, "*.htlwrn.ac.at")) {
+        return "DIRECT";
+    }
+
+    if (isInNet(host, "10.0.0.0", "255.0.0.0")) {
+        return "PROXY intprox.htlwrn.ac.at:8080";
+    }
+
+    return "PROXY proxy.htlwrn.ac.at:8080;";
+}
+#+end_src
+
+* Webanwendungen
+\vspace{0.5em}
+- client-seitig
+  - Interaktivität
+  - JavaScript (TypeScript, Dart, CoffeeScript), WebAssembly
+  - \to SPA (single page application)
+    - ein HTML Dokument, u.U. Inhalte dynamisch nachladen
+    - Angular, Vue.js, Knockout.js,...
+- server-seitig
+  - Sicherheit
+  - Rechenleistung
+  - zentraler Datenbestand
+  - PHP, Python, Ruby, Java, C#,...
+    - CGI, FastCGI, SCGI, WSGI,...
+    - Apache Modules, ISAPI
+    - ASP.NET, Java Servlets (JSP), JEE, Node.js,...
+    - RoR (Ruby on Rails), Django, Flask, Vaadin,...
+
+* CGI
+- Common Gateway Interface
+- Problematik: Funktionen am Server im Kontext von Webanwendungen ausführen
+- Prinzip
+  - starten eines Prozesses
+  - Input: Umgebungsvariable, stdin, Kommandozeilenparameter
+  - Output: stdout
+- Nachteil: Latenz!
+- Alternativen
+  - FastCGI: 1 laufender Prozess!
+  - SCGI (Simple CGI): wie FastSCGI, aber einfacher
+  - WSGI (Web Server Gateway Interface): speziell für Python
+
+* HTTP -- Interaktivität
+- prinzipiell gering
+  - \to Request/Response
+    - neuer Aufbau einer Seite!
+  - daher auch keine "Echtzeitfähigkeit"
+- Lösungsansätze
+  - "Tool": XMLHttpRequest (XHR) *!*
+  - Polling
+  - Long-Polling
+  - Comet
+  - Server-Sent Events *!!*
+  - WebSockets *!!!*
+
+* XHR
+#+begin_src javascript
+var xhr = new XMLHttpRequest();
+// true -> async!
+xhr.open("GET", "http://if.htlwrn.ac.at", true);
+xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+    }
+}
+xhr.send();
+#+end_src
+\to Ajax (Asynchronous Javascript And XML)
+
+\vspace*{2em}
+Tipp: besser z.B. jQuery verwenden
+
+* XHR -- Zustandsdiagramm
+#+ATTR_LATEX: :height 8cm
+[[./xhr_state_diagram.pdf]]
+
+* Polling
+#+begin_src javascript
+function poll() {
+    xhr.send();
+    clearTimeout(timeout_id);
+    timeout_id = setTimeout("poll()", 2000);
+}
+timeout_id = setTimeout("poll()", 2000);
+#+end_src
+
+\vspace{2em}
+keine Daten \to leere Antwort
+
+* Long-Polling
+- wie Polling, aber:
+- Antwort
+  - sofort, wenn Daten vorhanden
+  - nach Ablauf einer Zeitspanne, dann leere Antwort
+  - Verbindung muss (natürlich) offen bleiben
+- nach Antwort: umgehend neuer Request
+
+* Long-Polling -- 2
+[[./ajax-long-polling.png]]
+
+\small
+Quelle: https://www.fullstackpython.com/websockets.html
+
+* Comet
+\vspace{1em}
+- ebenfalls Putzmittel...
+- keine
+  - einheitliche Definition \to Oberbegriff
+  - Standardardisierung
+- wie Long-Polling, aber:
+  - JSONP (JSON with Padding) anstatt XHR
+  - =script= Element dynamisch erzeugen
+    - und zu DOM hinzufügen
+    - =script= hebelt SOP (Same Origin Policy) aus!
+      \to CORS (Cross-Origin Resource Sharing \to /Websicherheit/)
+- SOP \to Folien /Websicherheit/
+  - Skripte einer "Seite" dürfen nur auf Informationen dieser "Seite"
+    zugreifen
+  - wenn Domäne | Protokoll | Port unterschiedlich \to kein Zugriff
+
+* =<script>= mit JSONP -- 1
+- =script= Element
+  #+begin_src html
+  <script type="text/javascript"
+    src="http://if.htlwrn.ac.at/getjson?
+        callback=parseResponse">
+  </script>
+  #+end_src
+- Antwort
+  #+begin_src javascript
+  parseResponse({"name": "foo", "id": 4711});
+  #+end_src
+
+* =<script>= mit JSONP -- 2
+\vspace{1em}
+#+begin_src html
+<script>
+function parseResponse(data) {
+    // process data
+};
+
+// a new script element
+var elem = document.createElement('script');
+
+elem.src = "http://if.htlwrn.ac.at/getjson?" +
+           "callback=parseResponse";
+
+// add it to <head>
+document.getElementsByTagName('head')[0].
+  appendChild(elem);
+</script>
+#+end_src
+\to besser z.B. jQuery verwenden!
+
+* Server-Sent Events (SSE)
+- HTML5
+- Nachrichten von Server zu Client
+- definiert API
+- definiert Protokoll
+- Nicht: IE
+
+* SSE -- API
+#+begin_src emacs-lisp
+var es = new EventSource("messages");
+es.onmessage = function(event) {
+    msg_div = document.getElementById("msg");
+    msg_div.innerHTML += "<br/>" + event.data;
+};
+#+end_src
+
+#+begin_src html
+<body>
+    <div id="msg"></div>
+</body>
+#+end_src
+
+* SSE -- API -- =EventSource=
+- =url= :: (readonly)
+- =CONNECTING= :: 0 (readonly, const)
+- =OPEN= :: 1 (readonly, const)
+- =CLOSED= :: 2 (readonly, const)
+- =readyState= :: (readonly)
+- =onopen= :: (function)
+- =onmessage= :: (function)
+- =onerror= :: (function)
+- void =close()=
+
+* SSE -- API -- Events
+#+begin_src javascript
+// if an event field is available (see later)
+es.addEventListener("user_connect", function(e) {
+  var new_item = document.createElement("li");
+
+  // data: {"user": "maxi", "time": "2016-11-06"}
+  var o = JSON.parse(e.data);
+  new_item.innerHTML = "user " + o.user + " at "
+                         + o.time;
+  eventList.appendChild(new_item);
+});
+#+end_src
+\vspace{2em}
+=message= ist der Default als Eventtyp.
+
+* SSE -- Protokoll -- Request
+#+begin_example
+GET /messages HTTP/1.1
+...
+Accept: text/event-stream
+Last-Event-ID: 6           # nicht im API!!!
+Cache-Control: no-cache
+#+end_example
+
+* SSE -- Protokoll -- Response
+\vspace{1em}
+#+begin_example
+HTTP/1.1 200 OK
+...
+Content-Type: text/event-stream
+Expires: Mon, 1 Jan 2001 00:00:00 GMT
+Cache-Control: no-cache, no-store, max-age=0,
+  must-revalidate
+Pragma: no-cache
+Connection: close
+
+id: 7
+data: {"key": "foo", "value": 4711}
+
+id: 8
+data: {"key": "bar", "value": 1503}
+
+...
+#+end_example
+
+* SSE -- Protokoll -- Response -- 2
+- Feldnamen
+  - =id= :: last event ID wird auf diesen Wert gesetzt
+  - =data= :: die Daten...
+  - =event= :: der Eventname, z.B. ="user_connect"= \to =addEventListener()=
+  - =retry= :: Zeit in ms wenn UA die Verbindung geschlossen hat
+       und danach wieder öffnet
+- Kommentar: Zeile beginnt mit =:=

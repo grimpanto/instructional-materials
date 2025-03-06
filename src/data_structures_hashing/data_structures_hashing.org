@@ -1,0 +1,338 @@
+#+TITLE: Datenstrukturen -- Hashing
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+
+* Hashing -- Überblick
+\vspace{1.5em}
+- Hashverfahren: Basis für Dictionarys und Mengen!
+- Beobachtung: nur Teilmenge der möglichen Schlüssel gespeichert!
+- Idee: Finden durch *Berechnung* anstatt durch Schlüsselvergleiche
+- Verwendet wird: Array mit Index $0,\ldots,m-1$
+- Hashfunktion $h$ \\
+  $h: K \to \{0,\ldots,m-1\}$ \\
+  ordnet jedem Schlüssel $k \in K$ einen Index
+  $h(k)$ mit $0 \leq h(k) \leq m-1$
+  zu.
+- \lto Hashtabelle, Dictionary, Assoziatives Array,
+  Streuspeicherung
+
+* Anforderungen an Hashfunktion
+- gleichmäßige Verteilung, um Adresskollisionen zu vermeiden
+  - hashing \ldots 'zerhacken'
+  - auch wenn Schlüssel nicht gleichmäßig verteilt
+    sind. z.B. Variablenamen: i1, i2, i3,...
+- Surjektivität: Alle möglichen Hashwerte sollen auch
+  durch Hashfunktion auch errechnet werden können
+  - d.h. $|K| \ge m$
+- schnell und einfach berechenbar
+
+* Beispiele für Hashfunktionen
+\vspace{1.7em}
+- Annahme: Schlüssel k ist binär
+\vspace{0.05em}
+- XOR-Methode (einfach)
+  - bei Rechnern mit langsamer Division
+  - k in Stücken zu je n Bits zerschneiden und diese XOR verknüpfen
+    - Das Resultat -- als Dualzahl
+      interpretiert -- liegt in $[0, 2^n-1]$
+- Multiplikationsmethode
+  - Multiplikation des Schlüssels mit Konstante $A \in (0,1)$
+  - Multiplikation des gebrochenen Rests der vorhergehenden
+    Multiplikation mit $m$ und abrunden
+  - d.h.:\hspace{1em} $h(k) = \lfloor m ((k \cdot A) \mod 1) \rfloor = \lfloor m (k \cdot A) - \lfloor k \cdot A \rfloor\rfloor$
+    - mit z.B.:\hspace{1em} $A = \frac{\sqrt{5}-1}{2}$ (lt. Knuth)
+    - $\lfloor x \rfloor$ ... =floor(x)= (größte ganze Zahl nicht größer als =x=)
+  - Vorteil: Wahl von $m$ beliebig möglich
+    - z.B. $m=2^p$, dann Multiplikation schnell!
+- Kongruenzmethode (Divisions-Rest-Methode)
+  - siehe folgende Folie
+
+* Kongruenzmethode
+- auch: Divisions-Rest-Methode
+- Interpretation als nicht negative Dualzahl im Intervall $[0, 2^n-1]$
+- $h(k) = k\; \text{mod}\; m$
+- Wie sieht m aus?
+  - (vorzugsweise) Primzahl
+    - aber nicht wenn Primzahl gleich $2^n-1$ (für beliebiges $n$) ist
+  - Vorsicht bei bestimmten Werten: Bei $m = 2^j$ wäre Index die Dualzahl aus
+    den letzten j Bits der Schlüssel!
+- Spezialfall der Multiplikationsmethode mit $\;A = \frac{1}{m}$
+
+* Hashfunktion für Strings
+\vspace{2em}
+- Schlüssel k besteht aus $n$ Zeichen $z_{n-1}...z_0$
+  - z.B. ASCII oder UTF-8,...
+- basierend auf Kongruenzmethode
+- Jedes Zeichen (Annahme: Byte) interpretiert man als eine Stelle
+  einer Zahl $z_{n-1}...z_0$ im Zahlensystem zur Basis 256 und
+  definiert
+  \vspace{-1em}
+  \[
+  h(k) = (\sum_{i=0}^{n-1} \text{ord}(z_{i}) \cdot 256^{i})\; \text{mod}\; m
+  \]
+  mit einer geeigneten Primzahl $m$.
+- String abgespeichert als Bytes $b_{0}...b_{n-1}$ (d.h. 1 Zeichen \equiv 1 oder mehrere
+  Bytes). Damit erfolgt die
+  Berechnung als:
+  \vspace{-0.5em}
+  \[
+  h(k) = (\sum_{i=0}^{n-1} \text{ord}(b_{n-1-i}) \cdot 256^{i})\; \text{mod}\; m
+  \]
+
+* Hashfunktion für Strings -- 2
+- Multiplizieren? potenzieren? ($\leadsto\;$ $\cdot\; 256^{i}$) \pause
+  - \to verschieben
+    \vspace{-1em}
+    \[
+    h(k) = (\sum_{i=0}^{n-1} \text{ord}(b_{n-1-i}) \text{ <​< } (8 \cdot i))\; \text{mod}\; m
+    \]
+- Multiplizieren mit 8?\pause
+  - \to Hornerschema!
+    \vspace{-1em}
+    \begin{align*}
+    h(k) &= (\sum_{i=0}^{n-1} \text{ord}(b_{n-1-i}) \text{ <​< } (8 \cdot i))\; \text{mod}\; m =\\
+         &= (\text{ord}(b_{n-1}) + (\text{ord}(b_{n-2}) + (\text{ord}(b_{n-3})\; + \\
+         &\hspace{1em}+ (...) \text{ <​< }8) \text{ <​< }8) \text{ <​< }8)\; \text{mod}\; m
+    \end{align*}
+
+* Hashfunktion für Strings -- 3
+- Als Algorithmus?\pause
+  #+begin_src python
+  def hash_str_horner(s, m):
+      val = 0
+      for i in range(len(s)):
+          val = (val << 8) + ord(s[i])
+      return val % m
+  #+end_src
+  - nur mehr Verschiebeoperation und Addition!
+
+* Hashfunktion für Strings -- 4
+\vspace{1em}
+- Gibt es hier ein Problem?\pause
+  #+latex: { \small
+  #+begin_src python
+  def hash_str_horner(s, m):
+      val = 0
+      for i in range(len(s)):
+          val = (val << 8) + ord(s[i])
+      print(val)
+      return val % m
+
+  hash_str_horner("value_or_not_value?", 163)
+  # liefert 52 als Rückgabe ...aber Ausgabe?
+  #+end_src
+  #+latex: }
+  \pause
+  \vspace{1em}
+  2639974731703654884162212619924595652148159807\pause
+  \vspace{0.5em}
+  - zu groß für eine 32 Bit unsigned Zahl!\pause
+    - 4294967295\pause
+  - *auch* zu groß für eine 64 Bit unsigned Zahl!!!
+    - 18446744073709551615
+
+* Hashfunktion für Strings -- 5
+\vspace{1em}
+- Ein bisschen Mathematik gefällig?
+  \vspace{-0.5em}
+  \begin{align*}
+  (a + b) \text{ mod } m &= (a \text{ mod } m + b \text{ mod } m) \text{ mod } m\\
+  (a \cdot b) \text{ mod } m &= (a \text{ mod } m \cdot b \text{ mod } m) \text{ mod } m
+  \end{align*}
+\vspace{-1em}
+- In Algorithmus einbauen:
+  #+latex: { \small
+  #+begin_src python
+  def hash_str_horner(s, m):
+      val = 0
+      for i in range(len(s)):
+          val = ((val << 8) % m + ord(s[i]) % m) % m
+          print(val, end=",")
+      return val
+
+  hash_str_horner("value_or_not_value?", 163)
+  # wieder 52 als Rückgabe ...aber Ausgabe?
+  #+end_src
+  #+latex: }
+  \pause
+  \vspace{0.5em}
+  \small
+  118,150,40,88,135,99,27,17,46,150,43,40,66,62,158,132,5,77,52,52
+
+
+* Hashfunktion für Strings -- 6
+\vspace{1.5em}
+- Alternativen zur Kongruenzmethode?
+  - liefert gute Ergebnisse, aber... oft werden theoretisch weniger
+    abgesicherte, aber performantere und bewährte Funktionen verwendet!
+    \pause
+- Algorithmus "djb2" von Dan Bernstein:
+  #+latex: { \footnotesize
+  #+begin_src C++
+  unsigned long hash(unsigned char* str) {
+      unsigned long hash{5381};
+      int c;
+
+      while (c = *str++) {
+          /*           hash * 33      + c */
+          hash = ((hash << 5) + hash) + c;
+      }
+
+      return hash;
+  }
+  #+end_src
+  #+latex: }
+
+* COMMENT
+- z.B. /Prinzip/ in Python (effbot.org/zone/python-hash.htm)
+  #+latex: { \footnotesize
+  #+begin_src python
+  def c_mul(a, b):  # simulates 32 bits multiplication in C
+      return int(hex((a * b) & 0xFFFFFFFF), 16)
+
+  # 2 ** m ... size of array (→ m is not prime!)
+  def hash_str_python(s, m):
+      if not s:  # empty string -> 0
+          return 0
+      val = ord(s[0]) << 7
+      for c in s:
+          val = c_mul(100003, val) ^ ord(c)
+      val = val ^ len(s)
+      return val & (2 ^ m - 1)  # m last bits only
+  
+  print(hash_str_python("value_or_not_value?", 4))
+  #+end_src
+  #+latex: }
+
+* Einfügen und Enfernen
+- Datensätze ... DS
+- Hasharray ... $t$
+  - hat fixe Größe, speichert DS
+- Einfügen
+  1. $i = h(k)$ berechnen
+  2. Wenn Platz $i$ frei, eintragen in $t$
+  3. Anderenfalls: Kollisionsbehandlung!
+     - Offene Hashverfahren\\
+       Eintragen der Überläufer in freien Plätzen
+     - Verkettung der Überläufer\\
+       Eintragen der Überläufer in verketteter Liste
+- Entfernen: abhängig von gewählter Strategie der Kollisionsbehandlung      
+
+* Offene Hashverfahren -- Allgemeines
+\vspace{1em}
+- Eintragen der Überläufer in freie Plätze
+  - wenn voll, dann neues Array anlegen und im neuem Array neu eintragen; dann
+    altes löschen (Heap!)
+- Wenn Platz belegt, dann einen freien Platz (/offene/ Stelle)
+  finden und eintragen
+- Wie findet man einen neuen freien Platz?\\
+  - /Sondierungsfolge/: Reihenfolge der zu betrachtenden Speicherplätze
+   (d.h. eine Permutation aller Hashadressen).
+- Sondierungsfunktion: $s(j,k)$ eine Funktion von j und k, dass
+  - $(h(k) - s(j,k))\;\text{mod}\;m$
+  für $j=0,1,\ldots,m-1$ eine /Sondierungsfolge/ bildet.
+
+* Offene Hashverfahren -- Operationen
+\vspace{1.5em}
+- Suchen
+  - Beginne mit $i=h(k)$
+  - Solange k nicht in $t[i]$ gespeichert ist und $t[i]$ nicht
+    frei ist, suche weiter bei $i = (h(k)-s(j,k))\;\text{mod}\;m$.
+  - Falls $t[i]$ belegt, wurde $k$ gefunden, anderenfalls Suche
+    erfolglos
+- Einfügen
+  - Beginne mit $i=h(k)$
+  - Solange $t[i]$ belegt ist, mache weiter bei
+    $i = (h(k)-s(j,k))\;\text{mod}\;m$.
+  - Trage $k$ in $t[i]$ ein.
+- Entfernen
+  - problematisch, da nicht aus Sondierierungfolge
+    entfernt werden darf. D.h. wird nur als entfernt markiert:
+    - Beim Suchen: wie belegt
+    - Beim Einfügen: wie frei
+
+* Offene Hashverfahren -- Sondieren
+\vspace{1em}
+- Lineares Sondieren
+  - Sondierungsreihenfolge:
+    $h(k), h(k)-1, h(k)-2,\ldots,0,m-1,\ldots,h(k)+1$
+  - Sondierungsfunktion: $s(j,k) = j$
+- Quadratisches Sondieren ($m$ Primzahl, $m = 4 i + 3$)
+  - Sondierungsreihenfolge:
+       $h(k), h(k)+1, h(k)-1, h(k)+4, h(k)-4,\ldots\;$ jeweils modulo $m$.
+  - Sondierungsfunktion: $s(j,k) = (\operatorname{ceil}(j/2))^2 (-1)^j$
+- Double Hashing (zweite Hashfunktion)
+  - Sondierungsreihenfolge:
+    $h(k), h(k) - h'(k), h(k) - 2\, h'(k),\ldots,h(k)-(m-1)\,h'(k)$ jeweils
+    modulo $m$.
+  - Sondierungsfunktion: $s(j,k) = j * h'(k)$
+
+* Verkettung der Überläufer
+\vspace{1em}
+- Separate Verkettung der Überläufer
+  - zusätzlich zum DS wird ein Zeiger auf eine verkettete Liste
+    gespeichert, die alle den selben Hashwert aufweisen
+    ($\leadsto$ Überläufer).
+  - Suchen
+    a. Beginne bei $i = h(k)$
+    b. Wenn DS nicht gefunden, dann verkettete Liste der
+       Überläufer absuchen bis gefunden, oder nicht gefunden.
+  - Einfügen (analog zu Suchen und Einfügen in Liste)
+  - Entfernen (u.U. erstes Element der Überläuferliste in
+    Hashtabelle eintragen)
+- Direkte Verkettung der Überläufer
+  - wie separate Verkettung, jedoch werden keine DS direkt
+    in der Hashtabelle gespeichert.
+

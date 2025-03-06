@@ -1,0 +1,376 @@
+#+TITLE: Testing Tools
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* COMMENT Tools
+- Java
+  - checkstyle http://checkstyle.sourceforge.net
+  - Metriken: Source line counter,...
+	- http://www.kclee.de/clemens/java/javancss/
+	- http://sunset.usc.edu/research/CODECOUNT/ (Java, Python, C#,
+      C++, HTML, CSS,...)
+  - statische Analyse: PMD http://pmd.sourceforge.net
+- Python
+  - pep8 http://pypi.python.org/pypi/pep8
+  - statische Analyse: http://pypi.python.org/pypi/pyflakes3k
+- Web
+  - SeleniumHQ http://seleniumhq.org/
+  - http://splinter.cobrateam.info/docs/
+
+* JUnit 4
+- http://www.junit.org
+- Prinzip
+  - verwendet Annotations
+  - nimmt an, dass Methoden in beliebiger Reihenfolge aufgerufen
+    werden können
+    - \lto Tests sollten nicht von anderen Tests abhängen
+
+* Beispiel 1
+\small
+#+begin_src java
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+ 
+public class TestCalculations {
+    private Calculator calc;
+    
+    @Before
+    public void setUp() {
+         calc = new Calculator();
+    }
+    
+    @Test
+    public void test_empty() {
+        assertEquals(calc.add(1, 1), 2);
+        // wenn nicht gleich, dann -> AssertionError
+    }
+#+end_src
+
+* =org.junit.Assert.*=
+- \small =assertEquals(long expected, long actual)=
+  - \small =assertEquals(String message, long expected, long actual)=
+  - ... alle anderen ebenfalls mit "message"
+- =assertEquals(double expected, double actual, double delta)=
+- =assertEquals(Object expected, Object actual)=
+- =assertSame(Object expected, Object actual)=
+- =assertNull(Object obj)= bzw. =assertNotNull(Object obj)=
+- =assertTrue(boolean condition)= bzw. =assertFalse(boolean condition)=
+- =assertArrayEquals(.,.)= mit verschiedenen Arten von Arrays
+- =fail()=
+
+* Beispiel 2
+\vspace{1em}
+\small
+#+begin_src java
+import static org.junit.Assert.*; 
+import org.junit.*;
+import java.io.*;  // Pfui
+ 
+public class TestFile {
+    @Before
+    public void setUp() {
+        // create file
+    }
+    @After
+    public void tearDown() {
+        // remove file
+    }
+    // Test schlaegt fehl, wenn IOException geworfen wird!
+    @Test
+    public void test_read() throws IOException {
+        // read the contents of the file
+    }
+#+end_src
+
+* Beispiel 3
+\vspace{1em}
+\small
+#+begin_src java
+import static org.junit.Assert.*;
+import org.junit.*;
+import java.io.*;  // Pfui
+ 
+public class TestFile {
+    @BeforeClass
+    public void setUpOnce() throws Exception {
+        // connect to database
+    }
+    @AfterClass
+    public void tearDownOnce() {
+        // close connection to database
+    }
+    @Test
+    public void test_select() {
+        // query the database
+    }
+#+end_src
+
+* Organisation der Tests
+- wohin mit den Testklassen im Dateisystem?
+  - gemeinsam mit den zu testenden Klassen
+  - getrennt (empfohlen), z.B.:
+    \small
+    #+begin_example
+    /myproject/
+        src/
+            calculator/
+                UPNCalculator.java
+        tests/
+            calculator/
+                TestUPNCalculator.java
+    #+end_example
+- CLASSPATH setzen
+  #+latex: { \small
+  #+begin_src sh
+  export CLASSPATH=.../junit.jar:~/myproject/classes  
+  #+end_src
+  #+latex: }
+- Testrunner ausführen:
+  \small
+  #+begin_src sh
+  java org.junit.runner.JUnitCore TestCalculations
+  #+end_src
+  
+
+* pytest -- Überblick
+- =unittest= analog zu JUnit
+- aber =py.test= ist "more pythonic"
+- keine Klassen notwendig
+  - aber möglich
+  - \lto Funktionen
+- =py.test= startet im aktuellen Verzeichnis
+  - sucht nach Modulen, die mit =test_= beginnen.
+  - jede Funktion, die mit =test= beginnt
+
+* pytest -- Beispiel
+#+begin_src python
+def test_zero():
+    assert 0 == 0.0
+#+end_src
+- Keine Markierung notwendig
+- Keine speziellen Methoden nötig
+
+* Loggen mit Java
+- Anwendung erzeugt einen Logger, z.B.
+  #+begin_src java
+  import java.util.logging.Logger;
+  class Test {
+    private final static Logger LOGGER = 
+      Logger.getLogger(Test.class.getName()); 
+  #+end_src
+- Logger hat einen Namen in Punktschreibweise
+  - oft vollständiger Name, z.B.: "at.ac.htlwrn.Manager"
+  - formen Hierarchie: default-mäßig an Eltern-Logger
+    - siehe später
+
+* Level
+\vspace{1em}
+- =java.util.logging.Level=
+  - gibt die Bedeutung der Lognachricht an
+  - Hierarchie der Level
+    1. \small SEVERE (höchster Level)
+    2. WARNING
+    3. INFO
+    4. CONFIG
+    5. FINE
+    6. FINER
+    7. FINEST (niedrigster Level)
+- "Level" einer =Logger= - Instanz kann gesetzt werden
+  - ~LOGGER.setLevel(Level.INFO)~ \to Nachrichten mit
+    Level SEVERE, WARNING und INFO geloggt
+- Loggen einer Nachricht mit einem bestimmten Level
+  - ~LOGGER.info("das ist eine info");~
+
+* Methoden zum Loggen
+- \small Je Level eine Methode (siehe vorhergehende Folie)
+- =log(Level level, String msg)=
+- =log(Level level, String msg, Object param)=
+  - \small ~log.log(Level.INFO, "hello {0}!", "World");~
+- =log(Level level, String msg, Object[] params)=
+  - \small mit mehreren Parametern
+- =logp(Level level, String sourceClass, String method, String msg)=
+  - \small auch mit einem oder mehreren Parametern
+- =entering(String sourceClass, String method)=
+- =leaving(String sourceClass, String method)=
+
+* Hierarchie der Logger
+\vspace{1em}
+- \small Hierarchie gegeben durch Punkt-notierten Namen
+- Beispiel: =Logger.getLogger("com.uberdev.db")=
+  - \small =Logger.getLogger("")= erzeugt und liefert die Wurzel
+  - =Logger.getLogger("com")= ... das Kind der Wurzel
+  - =Logger.getLogger("com.uberdev")= ...
+  - =Logger.getLogger("com.uberdev.db")= liefert das Blatt
+- Aber:
+  - \small diese werden nicht automatisch angelegt:
+    #+begin_src java
+    Logger log = Logger.getLogger("com.uberdev.db");
+    Logger parent = log.getParent(); // liefert Logger ""
+    #+end_src
+  - D.h. u.U. diese vorerst mittels =getLogger= anlegen!
+- Sinn dieser Hierarchie?
+  - \small Log-Nachrichten werden prinzipiell nach oben weitergereicht.
+  - "com.uberdev.db" \lto "com.uberdev" \lto "com" \lto ""
+
+* Hierarchie und Level
+\small
+#+begin_src java
+Logger log1 = Logger.getLogger("com");
+Logger log2 = Logger.getLogger("com.uberdev");
+Logger log3 = Logger.getLogger("com.uberdev.db");
+
+log2.setLevel(Level.WARNING);
+
+log1.info("hallo log1");  // wird geloggt
+log2.info("hallo log2");  // NICHT (auch nicht an log1 weiter)
+// auch NICHT (hat keinen Level -> erbt von log2)
+log3.info("hallo log3");
+
+log3.setLevel(Level.INFO);  // Level setzen
+log3.info("hallo hallo log3");  // wird jetzt geloggt!
+
+//log3.warning("warning");
+#+end_src
+
+* Handler
+\vspace{1em}
+- Jedem Logger kann ein oder mehrere Handler zugewiesen sein
+  - kein Handler \lto keine Ausgabe von diesem Logger
+- Nur Root-Logger hat default-mäßig eine Instanz der Klasse
+  =ConsoleHandler=!
+  - vorhergehendes Bsp.: "hallo hallo log3" wird Handler von Root-Logger
+    verwendet!
+- Wird eine Nachricht von einem Logger akzeptiert, dann
+  wird die Nachricht an seine Handler-Objekte und alle obenliegende
+  Handler-Objekte zur Behandlung weitergegeben.
+  - Filter und Level werden nicht mehr überprüft!!!
+- Level werden aber "vererbt"!
+- Filter werden nicht "vererbt"!
+
+* Handler -- 2
+\vspace{1em}
+- =ConsoleHandler=: Ausgabe auf =stderr=
+- =StreamHandler=
+  - Basisklasse von =ConsoleHandler=
+  - z.B. ~new StreamHandler(outputStream, formatter);~
+- =FileHandler=
+  - Unterklasse von =StreamHandler=
+  - z.B. ~new FileHandler("out.log", true)~
+  - zweiter Parameter optional, ~true~ ... append
+  - konkreter Filename oder Pattern (siehe Doku)
+- =SocketHandler=
+  - Unterklasse von =StreamHandler=
+  - z.B.: ~new SocketHandler("log.htlwrn.ac.at", 9999);~
+
+* Filter
+- jeder Logger kann einen Filter zugeordnet haben
+- passiert die Log-Nachricht den Filter \lto Verarbeitung
+  - kein Filter \lto ebenfalls Verarbeitung
+- wenn Nachricht an Eltern-Logger, dann kein Durchlauf des
+  Filters des Eltern-Logger (einmal passiert, dann ok)
+
+* Filter -- 2
+\small
+#+begin_src java
+Logger log1 = Logger.getLogger("com.ueberdev");
+Logger log2 = Logger.getLogger("com.ueberdev.db");
+log1.setFilter(new Filter() {
+         public boolean isLoggable(LogRecord rec) {
+             return false; }
+     });
+log2.setFilter(new Filter() {
+         public boolean isLoggable(LogRecord rec) {
+             return true; }
+     });
+log1.info("hallo log1");  // verschwindet im Nirvana
+// log2, dann log1, dann root-Logger!
+// keine Handler fuer log2 und log1!
+log2.info("hallo log2");
+// nur eine Ausgabe!
+#+end_src
+
+* Formatter
+- Jeder Handler hat einen Formatter
+- ~handler.setFormatter(...)~
+- =LogRecord= wird mittels Formatter auf Ausgabe geschrieben
+- =Formatter=
+  - =SimpleFormatter=
+  - mittels Format-String
+- =XMLFormatter=
+
+* Formatter -- Beispiel
+\vspace{1em}
+\small
+#+begin_src java
+import java.text.MessageFormat; 
+import java.util.Date;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+ 
+public class MessageFormatFormatter extends Formatter {
+  private static final MessageFormat messageFormat = 
+	  new MessageFormat("{0}[{1}|{2}|{3,date,H:mm:ss}]: {4} \n");
+  public MessageFormatFormatter() {
+	  super(); }  
+  @Override public String format(LogRecord record) {
+      Object[] arguments = new Object[6];
+		arguments[0] = record.getLoggerName();
+		arguments[1] = record.getLevel();
+		arguments[2] = Thread.currentThread().getName();
+		arguments[3] = new Date(record.getMillis());
+		arguments[4] = record.getMessage();
+		return messageFormat.format(arguments);
+  } }
+#+end_src

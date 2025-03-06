@@ -1,0 +1,122 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Firewalls
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+
+* Firewalls & Aufgaben
+- Komponente im Sicherheitssystem
+- Schutz einzelner Rechner oder Rechnernetze vor unerlaubten Zugriffen
+  - d.h. keine Angriffserkennung, sondern Umsetzung von Regeln
+- internes vom externen Netz trennen und abschotten
+- eingehenden und *ausgehenden* Datenstrom regulieren
+  - d.h. nicht durchlassen, wenn Regeln verletzt
+- Umsetzung der Sicherheitspolicy
+- Alarm bei Verletzung der Regeln
+- Protokollierung des Datenverkehrs
+
+* Arten
+- Personal Firewall
+  - SW auf dem zu schützenden Rechner
+- externe Firewall
+  - eigenes Gerät: Firewall SW oder Appliance
+
+* Personal Firewall
+- Schutz des Rechners
+- filtert zwischen Rechner und Netzwerk
+- Vorteile
+  - einfach installierbar, keine externen Abhängigkeiten
+  - Konfiguration für einzelnen Rechner!
+- Nachteile
+  - Firewall-SW kann selbst angegriffen werden
+    - z.B. Deaktivierung
+  - Firewall-SW kann abstürzen
+
+* Externe Firewall
+- Schutz von Rechnern und Netzen
+- filtert zwischen Netzen
+- Vorteile
+  - bei Kompromittierung \to kein Endsystem kompromittiert
+  - gesamtes Netz geschützt
+- Nachteile
+  - Kosten
+  - zusätzliches Netz (wenn dieses nicht benötigt wird)
+
+* Typen
+- Paketfilter
+  - nur Header wird betrachtet
+  - jedes Paket wird einzeln betrachtet
+  - z.B. Verwerfen auf Grund der Source IP
+- stateful Paketfilter
+  - nur Header wird betrachtet
+  - es wird Folge von Paketen betrachtet
+  - z.B. Verwerfen wenn nicht zu einer Verbindung
+- Application Gateway
+  - Inhalt wird ebenfalls betrachtet
+  - z.B. wenn Virus als Attachment bei E-Mail
+
+* Paketfilter
+- Header
+  - Source IP, Destination IP, Identification, DF, MF,...
+  - Port, SequenceNum, SYN, ACK, FIN, RST,...
+- Aktionen
+  - accept: akzeptieren
+  - reject: ablehnen, senden von ICMP /port unreachable/
+  - drop: verwerfen
+
+* Sichtbarkeit
+- sichtbar
+  - Proxy-Funktionalität
+- transparent
+  - Router
+  - auf IP Ebene sichtbar
+- unsichtbar
+  - Bridge
+  - auf IP Ebene \emph{un}sichtbar
+  - Vorteile
+    - Router muss kein Firewalling beherschen
+    - können nachträglich eingebaut werden
+
+* Aufteilung in Netze
+- internes Netz
+- demilitarisierte Zone (DMZ)
+  - angriffsgefährdet, da externe Dienste
+  - zusätzliche Sicherheitsschicht
+- externes Netz
+  - unsicher
+
+* DMZ
+- Hosts in der DMZ
+  - begrenzter Zugriff auf internes Netz
+    - da nicht so sicher wie internes Netz
+  - begrenzter Zugriff auf externes Netz
+    - um DMZ sicherer zu machen
+- kein Zugriff von externen Netz auf internes Netz
+- Arten
+  - einstufig
+  - zweistufig
+
+* Services
+- internes Netz
+  - LDAP, DHCP
+  - Dateiserver, Datenbankserver
+  - Application Server
+  - interne SMTP Server
+- DMZ
+  - Proxy
+  - Reverse Proxy, WWW
+  - extern zugreifbare SMTP Server
+  - externe DNS 

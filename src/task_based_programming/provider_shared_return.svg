@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' class="pikchr" viewBox="0 0 476.064 34.56">
+<path d="M6,32L80,32A4 4 0 0 0 85 27L85,6A4 4 0 0 0 80 2L6,2A4 4 0 0 0 2 6L2,27A4 4 0 0 0 6 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="43" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Provider</text>
+<polygon points="157,17 145,21 145,12" style="fill:rgb(0,0,0)"/>
+<path d="M85,17L151,17"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M161,32L271,32A4 4 0 0 0 275 27L275,6A4 4 0 0 0 271 2L161,2A4 4 0 0 0 157 6L157,27A4 4 0 0 0 161 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="216" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Shared state</text>
+<polygon points="275,17 287,12 287,21" style="fill:rgb(0,0,0)"/>
+<path d="M281,17L347,17"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<path d="M352,32L469,32A4 4 0 0 0 473 27L473,6A4 4 0 0 0 469 2L352,2A4 4 0 0 0 347 6L347,27A4 4 0 0 0 352 32Z"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="410" y="17" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Return object</text>
+</svg>

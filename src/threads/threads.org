@@ -1,0 +1,623 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Threads
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \newcommand{\cppII}{C++11\xspace}
+
+* Threads
+- Grundbausteine paralleler Software
+- aus Sicht des Betriebssystems: kleinste Einheit der Parallelität
+- ein Prozess besteht aus 1 oder mehreren Threads
+- alle Threads innerhalb eines Prozesses können auf alle
+  Ressourcen des Prozesses zugreifen
+- jeder Thread hat separat Stack, Registerinhalte, Schedulingparameter
+  (Priorität, Affinität,...). Außerdem: thread-lokale Daten
+- Ab \cppII: =thread=,...!
+  - früher POSIX (=pthreads)=, Windows API, Qt (=QThread)=, Poco (=Thread)=
+
+* Prozess vs. Thread
+- Prozess
+  - Vorteile
+    - Nichtbeinflussung anderer Prozesse
+    - Rechte, Abrechnung
+  - Nachteile
+    - Anlegen ressourcenintensiv (Zeit, Speicher)
+    - Context Switch zeitintensiv: CPU Kontext (Register, Programmzähler,
+      Stackpointer,...), MMU Register, Swapping, CPU Abrechnungen,...
+- Thread
+  - Vorteile
+    - geringerer Overhead beim Anlegen & Context Switch
+    - Zugriff auf Daten und offene Dateien,...
+  - Nachteile
+    - Beeinflussung durch andere Threads
+
+* Einsatz auf Single-Core Systemen
+- Asynchrones Warten (aus globaler Sicht)
+  - Überbrückung der Wartezeit bei Ein- aber auch Ausgaben
+- Responsiviät der Benutzeroberfläche
+  - Bedienbarkeit trotz "rechenintensiver" Applikation
+- Trennung der Teilaufgaben
+  - Aufsplittung von unabhängigen Aktivitäten
+  - z.B. Musik, Kommunikation, Darstellung,... in einem Computerspiel
+
+* Übersetzen von Threads
+\vspace{1em}
+- Es ist eine Threadbibliothek beim Linken anzugeben!
+- Verwende z.B. folgenden Befehl:
+  #+BEGIN_EXAMPLE
+  g++ -o go -std=c++20
+    -Wsizeof-array-argument -Wall
+    -Wextra -lpthread
+  #+END_EXAMPLE
+- Füge folgende Meson-Anweisung hinzu
+  #+begin_example
+  thread_dep = dependency('threads')
+  executable('xxx', 'src/xxx.cpp',
+             dependencies : thread_dep)
+  #+end_example
+\vspace{2em}
+- \small Bzw. füge folgende CMake-Anweisungen hinzu
+  #+BEGIN_EXAMPLE
+  find_package(Threads)
+  # replace xxx with name of the executable
+  target_link_libraries(xxx -lpthread)
+  #+END_EXAMPLE
+
+* Starten von Threads
+#+header: :exports code :results output :tangle src/thread.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // thread.cpp
+#include <thread>
+using namespace std;
+void f() {
+    for (int i=0; i < 5; ++i) {
+        cout << "B";
+    }
+}
+
+int main() {
+    thread t{f};   // thread starts HERE
+    for (int i{0}; i < 5; ++i) {
+        cout << "A";
+    }
+}
+#+end_src
+
+* Starten von Threads -- 2
+- Mögliche Ausgabe:
+  #+BEGIN_EXAMPLE
+  terminate called without an active exception
+  AAAAABBBBBfish: 'go' terminated by signal SIGABRT (Abbruch)
+  #+END_EXAMPLE
+
+- Warum?
+  - Scheduler!
+  - Beenden des Hauptthreads \to Destruktur von =thread= \to =terminate=!
+  - gepufferte Ausgabe, aber kein "flushen"!
+
+* Pufferung von =cout=
+#+header: :exports none :results output :tangle src/thread2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // thread2.cpp
+#include <thread>
+using namespace std;
+void f() {
+    for (int i{0}; i < 5; ++i) {
+        cout << "B";
+    }
+    cout << flush;
+}
+
+int main() {
+    thread t{f};
+    for (int i{0}; i < 5; ++i) {
+        cout << "A";
+    }
+    cout << flush;
+}
+#+end_src
+
+Nach jeder Schleife einfügen:
+#+begin_src C++
+// thread2.cpp
+cout << flush;
+#+end_src
+
+- Mögliche Ausgabe:
+
+  #+BEGIN_EXAMPLE
+  AAAAAterminate called without an active exception
+  BBBBBBBBBBfish: Job 2, 'go' terminated by signal SIGABRT (Abbruch)
+  #+END_EXAMPLE
+
+- Warum?
+  - Scheduler?
+  - =cout= thread-safe (keine data races), aber "beliebige" Reihenfolge der Ausgabe
+  - mehrere Bs auf Grund von =terminate=
+
+* Scheduler & =sleep_for=
+In =for= nach jeder Ausgabe einfügen:
+#+begin_src C++
+// thread3.cpp
+this_thread::sleep_for(chrono::milliseconds(10));
+#+end_src
+
+- Mögliche Ausgabe:
+  #+BEGIN_EXAMPLE
+  ABABBABABAterminate called without an active exception
+  fish: 'go' terminated by signal SIGABRT (Abbruch)
+  #+END_EXAMPLE
+
+#+header: :exports none :results output :tangle src/thread3.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // thread2.cpp
+#include <thread>
+using namespace std;
+void f() {
+    for (int i{0}; i < 5; ++i) {
+        cout << "B";
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+}
+
+int main() {
+    thread t{f};
+    for (int i{0}; i < 5; ++i) {
+        cout << "A";
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+    cout << flush;
+}
+#+end_src
+
+* =join=
+#+header: :exports none :results output :tangle src/join.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // join.cpp
+#include <thread>
+using namespace std;
+void f() {
+    for (int i{0}; i < 5; ++i) {
+        cout << "B";
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+}
+#+end_src
+
+Funktion =f()= wie gehabt, =main= wie folgt:
+#+header: :exports code :results output :tangle src/join.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+int main() {
+    thread t{f};
+    cout << t.joinable() << endl;
+    for (int i{0}; i < 5; ++i) {
+        cout << "A";
+        this_thread::sleep_for(
+          chrono::milliseconds(10));
+    }
+    cout << endl;
+    t.join();
+    cout << t.joinable() << endl;
+}
+#+end_src
+
+* =join= -- 2
+- Mögliche Ausgabe
+  : 1
+  : ABABBABABA
+  : 0
+- Der Hauptthread wartet auf die Beendigung des gestarteten Thread
+- =terminate= wird /nicht/ mehr durch die \cpp Runtime aufgerufen,
+  da auf den "joinable" Thread jetzt gewartet wurde. Nach =join=
+  ist der Thread nicht mehr "joinable"!
+
+* =this_thread::get_id()=
+#+header: :exports none :results output :tangle src/this_thread.cpp :flags -std=c++17 -lpthread :main no
+#+begin_src C++
+#include <iostream>  // join2.cpp
+#include <thread>
+#include <vector>
+using namespace std;
+#+end_src
+\vspace{1em}
+Mehrere Threads... Funktion =f()= wie gehabt, =main= wie folgt:
+#+header: :exports code :results output :tangle src/this_thread.cpp :flags -std=c++17 -lpthread
+#+begin_src C++
+int main() {  // join2.cpp
+  vector<thread> threads;
+
+  for(int i = 0; i < 5; ++i){
+    threads.push_back(std::thread([](){
+      cout << "Hello from thread "
+           << this_thread::get_id() << endl;
+    }));
+  }
+
+  for(auto& thread : threads){
+    thread.join();
+  }
+}
+#+end_src
+
+* =this_thread::get_id()= -- 2
+
+: Hello from thread 3073993536
+: Hello from thread 3038767936
+: Hello from thread Hello from thread 3047160640
+: 3057208128
+: Hello from thread 3065600832
+
+* =join= und Exceptions
+\vspace{1em}
+#+header: :exports code :tangle src/join2.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // join2.cpp
+#include <thread>
+using namespace std;
+void f() {
+    throw logic_error{"something failed..."};
+}
+int main() {
+    thread t{f};
+    t.join();
+}
+#+end_src
+
+\pause
+
+#+BEGIN_EXAMPLE
+terminate called after throwing an instance of 'std::logic_error'
+  what():  something failed...
+fish: 'go' terminated by signal SIGABRT (Abbruch)
+#+END_EXAMPLE
+
+\pause
+
+Alle Exceptions innerhalb eines Threads abfangen!
+
+* =join= und Exceptions - 2
+\vspace{1em}
+#+header: :exports both :results output :tangle src/join3.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // join3.cpp
+#include <thread>
+using namespace std;
+void g() {
+    this_thread::sleep_for(chrono::seconds(1));
+}
+int inverse(int x) {
+    if (x == 0) throw logic_error{"div by zero"};
+    else return 1 / x;
+}
+void f() {  // may throw an exception
+    thread t{g};
+    cout << inverse(0) << endl;
+    t.join();
+}
+int main() { try { f(); } catch (...) { }}
+#+end_src
+
+* =join= und Exceptions - 3
+
+Bricht mit
+
+\vspace{0.3cm}
+=terminate called without an active exception=
+
+\vspace{0.3cm}
+ab! Warum?
+
+#+beamer: \pause
+
+\vspace{0.3cm}
+=try= und =catch= um Aufruf von =inverse=, aber Destruktor
+von =t= wird =terminate= aufrufen, da =join= nicht aufgerufen
+wurde! Was ist zu tun?
+\vspace{0.3cm}
+
+#+beamer: \pause
+
+Benötigt wird ein Wächter, der sich um den Aufruf von =join=
+kümmert.
+
+Das kann mittels RAII (Resource Acquisition Is Initialization)
+erreicht werden.
+
+* =join= -- 3
+\vspace{1em}
+#+header: :exports none :results output :tangle src/join4.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // join4.cpp
+#include <thread>
+using namespace std;
+
+void g() {
+    this_thread::sleep_for(chrono::seconds(1));
+}
+
+int inverse(int x) {
+    if (x == 0)
+        throw logic_error("div by zero");
+    else
+       return 1 / x;
+}
+#+end_src
+
+#+header: :exports code :results none :tangle src/join4.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+class thread_guard {  // join3.cpp
+    thread& t;
+  public:
+    explicit thread_guard(thread& t_)
+      : t{t_} {}
+    ~thread_guard() {
+        if (t.joinable()) {
+            t.join();
+        }
+    } };
+
+void f() {  // may throw an exception
+    thread t{g};
+    thread_guard tg{t};
+    cout << inverse(0) << endl;
+}
+#+end_src
+
+#+header: :exports none :results none :tangle src/join4.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+int main() {
+    try {
+        f();
+    } catch (...) {
+        // ignore
+    }
+}
+#+end_src
+
+* =join= -- 4
+Aber auch diese Lösung hat in gewisser Weise Nachteile...
+
+- Thread wird per Referenz an =thread_guard= übergeben. Damit
+  besteht wieder die Möglichkeit, dass das =thread_guard= Objekt
+  den Thread "überlebt" (d.h. das Thread-Objekt davor zerstört
+  wird).
+- Es könnte an anderer Stelle auf den Thread gewartet
+  werden (mittels =join=) oder dieser in den Hintergrund
+  geschickt werden (mittels =detach=) (siehe später),
+  obwohl die Idee ist, dass das =thread_guard= Objekt
+  die Eigentümerrolle übernommen hat.
+
+Lösung wäre ein Thread, der wie innerhalb eines Gültigkeitsbereiches
+(scope) existiert...
+
+* scoped thread
+\vspace{1em}
+#+header: :exports code :results none :tangle src/scoped.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // scoped.cpp
+#include <thread>
+using namespace std;
+class scoped_thread {
+    thread t;
+  public:
+    explicit scoped_thread(thread t_)
+      : t{move(t_)} {
+        if (!t.joinable())
+            throw logic_error("Not joinable");
+    }
+    ~scoped_thread() { t.join(); }
+    scoped_thread(scoped_thread const&) = delete;
+    scoped_thread& operator=(
+      scoped_thread const&) = delete;
+};
+#+end_src
+
+* scoped thread -- 2
+\vspace{1em}
+#+header: :exports code :tangle src/scoped.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+void g() {
+    this_thread::sleep_for(chrono::seconds(1));
+}
+
+int inverse(int x) {
+    if (x == 0)
+        throw logic_error("div by zero");
+    else
+       return 1 / x; }
+#+end_src
+
+#+header: :exports code
+#+begin_src C++
+void f() {  // may throw an exception
+    // g() and inverse(int) like before
+    scoped_thread t{thread{g}};
+    cout << inverse(0) << endl;
+}
+// main() like before
+#+end_src
+
+* scoped thread -- 3
+Auf das eigentliche Thread-Objekt kann nicht mehr gewartet werden...
+
+#+header: :exports code :results none :tangle src/scoped.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+void f() {  // may throw an exception
+    thread t{g};
+    scoped_thread st{move(t)};//dont do it this way!
+    cout << t.joinable() << endl;  // -> 0
+    cout << inverse(0) << endl;
+}
+// main() like before
+#+end_src
+
+#+header: :exports none :results none :tangle src/scoped.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    try {
+        f();
+    } catch (...) {
+        // ignore
+    }
+}
+#+end_src
+
+
+* =jthread=
+\vspace{1.5em}
+\small
+#+header: :exports code :tangle src/jthread.cpp
+#+begin_src C++
+#include <iostream>
+#include <thread>
+using namespace std;
+
+int main() {  // since C++20
+    {
+        // with 'thread' it would crash...
+        // jthread (since C++20) joins by default
+        jthread t{[]{ cout << "inside thread" << endl;}};
+        cout << "outside thread" << endl;
+    }
+    cout << "just before end" << endl;
+}  // -> scoped thread not needed anymore!
+#+end_src
+
+#+RESULTS:
+
+#+begin_example
+outside thread
+inside thread
+just before end
+#+end_example
+
+* jthread -- 2
+\vspace{1.5em}
+\small
+#+header: :exports code :tangle src/jthread2.cpp
+#+begin_src C++
+  #include <iostream>
+  #include <thread>
+  using namespace std;
+  int main() {
+      jthread t{[](stop_token tok){ // first in arg. list
+          int cntr{0};
+          while (cntr < 10){
+              this_thread::sleep_for(0.3s);
+              if (tok.stop_requested()) return;
+              cout << "interruptable: " << cntr << endl; 
+              ++cntr;
+          }
+      }};
+      this_thread::sleep_for(1s);
+      //  t.request_stop();  // here, not necessary...
+  } // destr of jthread: request_stop() and join()
+#+end_src
+
+#+begin_example
+interruptable: 0
+interruptable: 1
+interruptable: 2
+#+end_example
+
+* =detach=
+#+header: :exports code :tangle src/detach.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // detach.cpp
+#include <thread>
+using namespace std;
+using namespace std::literals;
+void f() {
+    for (int i{0}; i < 5; ++i) {
+        cout << "B";
+        this_thread::sleep_for(10ms);
+    }
+}
+#+end_src
+
+* =detach= -- 2
+\vspace{1.5em}
+#+header: :exports both :tangle src/detach.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+  {
+    thread t{f};
+    // daemon: term by programmers at MIT
+    // supernatural being working in the background
+    t.detach(); // ... Disk And Execution MONitor
+    cout << t.joinable() << endl;
+  }  // attn: thread proceeds!
+  for (int i{0}; i < 5; ++i) {
+      cout << "A";
+      this_thread::sleep_for(10ms);
+  }
+  cout << endl;
+}
+#+end_src
+
+: 0
+: ABBAABBABA
+
+* =detach= -- 3
+\vspace{1em}
+#+header: :exports code :tangle src/detach2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // detach2.cpp
+#include <thread>
+using namespace std;
+using namespace std::literals;
+void f() {
+    for (int i{0}; i < 5; ++i) {
+        cout << "B";
+        this_thread::sleep_for(10ms);
+    }
+}
+int main() {
+    thread t{f};
+    t.detach();
+    this_thread::sleep_for(20ms);
+}
+#+end_src
+
+#+beamer: \pause
+
+\to Ausgabe: =BB=! \pause ...da daemon-Threads beendet werden!
+
+* COMMENT =detach= und Exceptions
+#+header: :exports code :tangle src/detach3.cpp :flags -std=c++1y -lpthread
+#+begin_src C++
+#include <iostream>  // detach3.cpp
+#include <thread>
+using namespace std;
+using namespace std::literals;
+void f() {
+    this_thread::sleep_for(1s);
+    throw logic_error{"something failed..."};
+}
+int main() {
+    thread t{f};
+    t.detach();
+    this_thread::sleep_for(2s);
+}
+#+end_src
+
+\pause
+
+#+BEGIN_EXAMPLE
+terminate called after throwing an instance of 'std::logic_error'
+  what():  something failed...
+fish: 'go' terminated by signal SIGABRT (Abbruch)
+#+END_EXAMPLE
+
+D.h. auch bei =detach()= sind die Exceptions abzufangen!

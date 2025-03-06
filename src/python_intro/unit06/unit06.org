@@ -1,0 +1,72 @@
+
+
+#+TITLE: Python \hfill Unit 6\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Zahlensysteme in Python
+#+BEGIN_SRC python
+>>> 0b1111
+15
+>>> 0o77
+63
+>> 0xFF
+255
+>>> int("1111", 2)
+15
+>>> bin(15)
+'0b1111'
+>>> oct(63)
+'0o77'
+>>> hex(255)
+'0xff'
+#+END_SRC
+
+* Defaultwerte für Parameter
+#+BEGIN_SRC python
+>>> def sum(a, b=0, c=0, d=0, e=0):
+...     return a + b + c + d + e
+...
+>>> sum(1)
+1
+>>> sum(1, 2, 3)
+6
+#+END_SRC
+
+* Exceptions - 1
+#+BEGIN_SRC python
+>>> def div(a, b):
+...     return a / b
+...
+>>> div(1, 0)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 2, in div
+ZeroDivisionError: division by zero
+#+END_SRC
+
+* Exceptions - 2
+#+BEGIN_SRC python
+>>> def div(a, b):
+...     """Return a / b for natural numbers a,b.
+...
+...     If b is equal to zero then return -1.
+...     """
+...     try:
+...         return a / b
+...     except:
+...         return -1
+...
+>>> div(1, 0)
+-1
+#+END_SRC

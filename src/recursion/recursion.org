@@ -1,0 +1,464 @@
+#+TITLE: Rekursion
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Motivation
+\vspace{2em}
+#+CAPTION: Quelle: http://freakingid.com/
+#+ATTR_LaTeX: :width 0.8\textwidth
+[[./recursive.jpg]]
+
+* Rekursive Akronyme
+- Beispiele
+  - GNU ... GNU's Not Unix
+  - PHP ... PHP Hypertext Processor
+  - TikZ ... TikZ Ist Kein Zeichenprogramm
+- Konstruktionsmethode
+  - Akronym ausdenken, z.B.: REE ... Rekursion Einfach Erklärt
+  - um einen Buchstaben erweitern: TREE
+  - ganzes Akronym als ersten Teil verwenden: \\
+    TREE ... Tree Rekursion Einfach Erklärt
+
+* Begriff und Prinzip
+- Definition
+  Rekursion in der Mathematik und Informatik
+  #+begin_quote
+  ... in which the solution to each problem \\
+  depends on the solutions to smaller instances \\
+  of the same problem \\
+  -- Graham, Ronald; Donald Knuth, Oren Patashnik (1990). Concrete Mathematics
+  #+end_quote
+- Prinzip
+  - Eine unendliche Menge von Objekten durch eine endliche Aussage
+    definieren.
+  - Eine unendliche Anzahl von Berechnungen durch einen endlichen
+    Algorithmus (ohne Schleifen) zu beschreiben.
+
+* Beispiele
+- Rekursive Definition von Mengen
+  - Menge der ungeraden natürlichen Zahlen $\N_u$
+    - $1 \in \N_u$
+    - Wenn $x \in \N_u$, dann ist auch $(x + 2) \in \N_u$
+- Rekursive Alorithmen
+  - Summe alle Zahlen von 1 bis n: $\text{sum}(n) = \sum_{i=1}^n i$
+    - $\text{sum}(1) = 1$
+    - $\text{sum}(n) = \text{sum}(n - 1) + n$
+- Rekursive Datenstrukturen
+  - z.B. Bäume
+    - O ist ein Baum (genannt leerer Baum)
+    - Wenn t_1 und t_2 Bäume sind, dann ist auch die Struktur aus einem
+      Knoten mit zwei Verzweigungen t_1 und t_2 ein Baum.
+
+* Funktionsweise und Umsetzung
+- Es wird ein einfaches Problem spezifiziert und gelöst
+- Es werden allgemeine Regeln angegeben, die alle anderen Probleme 
+  auf das einfache Problem zurückführen lässt.
+- Umsetzung der Summenfunktion =sum(n)= in Python:
+  #+begin_src python
+  def sum(n):
+      if n == 1:     # Abbruchbedingung!
+          return 1
+      else:
+          return sum(n - 1) + n
+  #+end_src
+      
+* Ablauf für =sum(4)=
+#+begin_src python
+sum(4) = sum(3) + 4
+    sum(3) = sum(2) + 3
+        sum(2) = sum(1) + 2
+            sum(1) = 1
+        sum(2) = 1 + 2 = 3
+    sum(3) = 3 + 3 = 6
+sum(4) = 6 + 4 = 10
+#+end_src
+
+* Faktorielle (Fakultät) $n!$
+\vspace{1em}
+- Iterative Definition: Produkt aller nat. Zahlen von 1 bis $n$
+  - $n! = 1\cdot 2\cdot ... \cdot n$
+- Rekursive Definition: Produkt von $(n-1)!$ mit $n$,
+  wobei 1! gleich 1 ist, d.h.:
+  - $1! = 1$
+  - $n! = (n-1)! \cdot n$
+- Umsetzung in Python
+  #+begin_src python
+  def fak(n):
+     if n == 1:
+         return 1
+     else:
+         return fak(n - 1) * n
+
+  return fak(1000)
+  #+end_src
+
+* Beispiel: Umdrehen eines Strings
+#+begin_src python
+def reversed(s):
+    if s:
+        return s[-1] + reversed(s[:-1])
+    else:
+        return ""
+#+end_src
+Und wie sieht die iterative Lösung aus?
+
+* Beispiel mit lokalen Variablen
+#+begin_src python
+def print_reversed():
+    c = input("Bitte ein Zeichen ('.' beendet): ")
+    if c != ".":
+        print_reversed()
+        print(c, end="")
+#+end_src
+#+begin_src python
+>>> print_reversed()
+Bitte ein Zeichen ('.' beendet): a
+Bitte ein Zeichen ('.' beendet): b
+Bitte ein Zeichen ('.' beendet): c
+Bitte ein Zeichen ('.' beendet): .
+cba
+#+end_src
+D.h. jeder Aufruf hat seine eigenen lokalen Variablen!
+
+* Rekursiver ggT
+\vspace{1em}
+- Prinzip des euklidischen Algorithmus (\lto Stäbe abschneiden):
+  - Wenn $a = b$, dann ist das Ergebnis $a$
+  - Wenn $a > b$, dann ist das Ergebnis für $a$ und $b$ dieselbe wie
+    für $a-b$ und $b$.
+- rekursive Umsetzung:
+  #+begin_src python
+  def euklid1(a, b):
+      if a == b:
+          return a
+      elif a > b:
+          return euklid1(a - b, b)
+      else:
+          return euklid1(b - a, a)
+  #+end_src
+  Nachteil?
+
+* Rekursiver ggT -- 2
+- Verbesserung (die auch mit Stäben der Länge 0 zurecht kommt):
+  #+begin_src python
+  def euklid2(a, b):
+      if a == 0:
+          return b
+      elif a > b:
+          return euklid2(a - b, b)
+      else:
+          return euklid2(b - a, a)
+  #+end_src
+  Nachteile?
+
+* Vorteile und Nachteile
+- Vorteile
+  - einfache Formulierung von rekursiven Fragestellungen
+    - dadurch auch bessere Performance möglich als bei eigener
+      iterativer Umsetzung
+- Nachteile
+  - Performance \lto Funktionsaufrufe
+  - Ressourcenverbrauch \lto Speicher für lokale Variablen,
+    (auch Argumente), Rücksprungadresse
+  - maximale Rekursionstiefe
+
+* Maximale Rekursionstiefe?
+\vspace{1em}
+- =fak(1000)= \to
+  #+begin_example
+  Traceback (most recent call last):
+  File "<stdin>", line 11, in <module>
+  File "<stdin>", line 9, in main
+  File "<stdin>", line 7, in fak
+  ...
+  File "<stdin>", line 7, in fak
+  File "<stdin>", line 7, in fak
+  File "<stdin>", line 4, in fak
+  RecursionError: maximum recursion depth \
+    exceeded in comparison
+  #+end_example
+- Stack!
+  - lokale Variable
+  - Rücksprungadresse
+
+* Iterativer ggT
+#+begin_src python
+def slow_euklid(a, b):
+    while a != b:
+        if a > b:
+            a = a - b
+        else:
+            b = b - a
+    return a
+#+end_src
+Warum langsam? Verbesserung?
+
+* Iterativer ggT -- 2
+#+begin_src python
+def fast_euklid1(a, b):
+    if a < b:  # Stab a muss groesser sein!
+        a, b = b, a
+    while b > 0:
+        r = a % b # wiederholtes Abziehen vermeiden
+        a = b
+        b = r
+    return a
+#+end_src
+Kürzer möglich?
+
+* Iterativer ggT -- 3
+#+begin_src python
+def fast_euklid2(a, b):
+    while b > 0:  # oder b != 0
+        r = a % b
+        a = b
+        b = r
+    return a
+#+end_src
+Dadurch ein Schleifendurchgang mehr...
+
+Geht es noch kürzer?
+
+* Iterativer ggT -- 4 
+#+begin_src python
+def fast_euklid3(a, b):
+    while b:  # Abkuerzung fuer: b != 0
+        # Elimination der Zwischenvariable:
+        a, b = b, a % b
+    return a
+#+end_src
+Kürzer geht es nicht mehr!
+
+* Rekursiver ggT -- 3
+Hmm,... kann man nicht die Tricks der iterativen Variante wiederverwenden?
+#+begin_src python
+def euklid3(a, b):
+    if a == 0:
+        return b
+    else:
+        return euklid3(b, a % b)
+#+end_src
+Aber wie gesagt: in diesem Fall ist die iterative Variante
+viel vernünftiger!
+    
+* Binäre Suche
+- Problemstellung: Suche eines Datensatzes in einer sortierten direkt
+  zugreifbaren Sequenz.
+- Prinzip:
+  a. vergleiche Suchschlüssel mit dem mittleren Eintrag
+  b. wenn gleich, dann hat man den gesuchten Datensatz gefunden
+  c. wenn kleiner, dann in der linken Hälfte weitersuchen
+  d. anderenfalls in der rechten Hälfte weitersuchen
+
+* Binäre Suche -- 2
+\vspace{1.5em}
+#+begin_src python
+def binary_search(seq, key):
+    left = 0
+    right = len(seq) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if seq[mid] == key:
+            return mid
+        elif seq[mid] > key:
+            right = mid - 1
+        else:
+            left = mid + 1
+    return None
+#+end_src
+- Wie sieht der rekursive Algorithmus aus?
+- iterativ ist wiederum günstiger, aber wie sieht es aus mit...
+
+* Türme von Hanoi
+- Geschichte
+  - 64 Scheiben, je Scheibe 1 Sekunde: 585 Milliarden Jahre!
+#+begin_src python
+def hanoi(n, src, dst, aux):
+    """Loese Tuerme von Hanoi mit n Tuermen
+       von src nach dst ueber aux"""
+    if n > 1:
+        hanoi(n-1, src, aux, dst)
+    print("Scheibe von", src, "nach", dst)
+    if n > 1:
+        hanoi(n-1, aux, dst, src)
+#+end_src
+
+* Hilbert-Kurve
+- nach dem "Erfinder" D. Hilbert (1891)
+- Hilbertkurve H_1 \hspace{1em}
+  #+ATTR_LaTeX: :width 0.4cm :placement [H]
+  [[./hilbert1.png]]
+- Hilbertkurve H_2 \hspace{1em}
+  #+ATTR_LaTeX: :width 0.8cm :placement [H]
+  [[./hilbert2.png]]
+- Hilbertkurve H_3 \hspace{1em}
+  #+ATTR_LaTeX: :width 1.6cm :placement [H]
+  [[./hilbert3.png]]
+
+* Hilbert-Kurve -- 2
+- Hilbertkurve H_4 \\
+  #+ATTR_LaTeX: :width 3.2cm :placement [H]
+  [[./hilbert4.png]]
+
+* Hilbert-Kurve -- 3
+\vspace{1em}
+- Hilbertkurve H_5 \\
+  #+ATTR_LaTeX: :width 6.4cm :placement [H]
+  [[./hilbert5.png]]
+
+* Hilbert-Kurve -- 4
+#+begin_src python
+def hilbert(level, angle=90):
+    if level:
+        right(angle)
+        hilbert(level - 1, -angle)
+        forward(size)
+        left(angle)
+        hilbert(level - 1, angle)
+        forward(size)
+        hilbert(level - 1, angle)
+        left(angle)
+        forward(size)
+        hilbert(level - 1, -angle)
+        right(angle)
+#+end_src
+
+* Reihenfolge von Befehlen
+- vor dem Aufruf:
+  #+begin_src python
+  def print_str(s):
+      print(s[0], end="")
+      if s[1:]:
+          print_str(s[1:])
+  #+end_src
+  liefert: =abc=
+\vspace{0.25em}
+- nach dem Aufruf:
+  #+begin_src python
+  def print_str(s):
+      if s[1:]:
+          print_str(s[1:])
+      print(s[0], end="")
+  #+end_src
+  liefert: =cba=
+
+* Theorie -- Allgemeines
+- Direkte Rekursion: Funktion f ruft sich selbst auf.
+- Indirekte Rekursion: Funktion f ruft Funktion g auf, die wiederum
+  Funktion f aufruft.
+- Umsetzung von Rekursion in Iteration
+  - Ist dies immer möglich?
+    - Ja, aber nicht immer sinnvoll! Siehe Vorteile!
+    - Jeder rekursiver Algorithmus in iterativer Variante möglich!
+
+* Endrekursion (tail recursion)
+\vspace{1em}
+- Eine rekursive Funktion f ist /endrekursiv/, wenn der rekursive
+  Funktionsaufruf die letzte Aktion zur Berechnung von f ist.
+  - Die Funktion =euklid3= ist endrekursiv.
+  - Die Funktion =fak= ist *nicht* endrekursiv.
+- Eine endrekursive Funktion ist strikt /endrekursiv/ (/strictly tail-recursive)/, wenn
+  im Funktionsaufruf genau/nur die die formalen Parameter
+  als Argumente übergeben werden.
+  - Achtung: Oft wird der Begriff /endrekursiv/ anstatt /strikt endrekursiv/
+    verwendet.
+- Strikt endrekursive Funktionen können in eine iterative
+  Form gewandelt werden!
+  - aber wie?
+
+* Umwandlung in iterative Form
+#+begin_src python
+def fak(n):
+   if n == 1:
+       return 1
+   else:
+       return fak(n - 1) * n
+#+end_src
+nicht endrekursiv!\pause\newline
+\hspace*{2em}da Multiplikation die letzte Operation darstellt
+
+* Umwandlung in iterative Form -- 2
+#+begin_src python
+def fak(n, acc=1):
+    if n == 1:
+        return acc
+    else:
+        return fak(n - 1, n * acc)
+#+end_src
+... Zwischenschritt: ein rekursiver Funktionsaufruf alleine
+(endrekursiv)
+
+* Umwandlung in iterative Form -- 3
+#+begin_src python
+def fak(n, acc=1):
+   if n == 1:
+       return acc
+   else:
+       acc = acc * n
+       n = n - 1
+       return fak(n, acc)
+#+end_src
+strikt endrekursiv!
+  
+* Umwandlung in iterative Form -- 4
+#+begin_src python
+def fak(n, acc=1):
+    while (True):
+        if n == 1:
+            return acc
+        else:
+            acc = acc * n
+            n = n - 1
+#+end_src
+iterativ!

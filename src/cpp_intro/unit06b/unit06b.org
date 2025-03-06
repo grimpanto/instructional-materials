@@ -1,0 +1,116 @@
+
+#+TITLE: Modernes C++\linebreak \small...für Programmierer \hfill Unit 06: Attribute
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Überblick
+- ~[[deprecated]]~
+- ~[[maybe_unused]]~
+- ~[[nodiscard]]~
+- ~[[fallthrough]]~
+- =[[noreturn]]=
+
+=g++ -Wall -Wextra -std=c++2a ...=
+
+* =[​[deprecated]]=
+\vspace{1em}
+#+header: :exports both :results output :tangle src/deprecated.cpp :flags -std=c++1y
+#+begin_src C++
+#include <iostream>  // deprecated.cpp
+using namespace std;
+
+[[deprecated]] int f() { return 1; }
+
+[[deprecated("g() is legacy; use h() instead")]]
+int g() { return 2; }
+
+int h() { return 3; }
+
+int main() {
+    cout << g() << endl;  // warning!
+}
+#+end_src
+
+#+RESULTS:
+: 2
+
+* \Large =[[nodiscard]]= und =[[maybe_unused]]=
+\vspace{1em}
+#+header: :exports both :results none :tangle src/nodiscard_unused.cpp :flags -std=c++1y
+#+begin_src C++
+#include <iostream>  // nodiscard_unused.cpp
+using namespace std;
+
+[[nodiscard]]
+int f(int x) { return x; }
+
+// warning: unused parameter...
+void g(int y) { cout << 42 << endl; }
+
+void h([[maybe_unused]] int y) { cout<<42<<endl; }
+
+int main() {
+    f(42);  // warning: ignoring return value...
+    g(1);
+    h(1);
+}
+#+end_src
+
+* =[[fallthrough]]=
+\vspace{1.7em}
+\small
+#+header: :exports both :results none :tangle src/fallthrough.cpp :flags -std=c++2a
+#+begin_src C++
+#include <iostream>  // fallthrough.cpp
+using namespace std;
+int main() {
+    enum class X {A, B, C, D};
+    X x{X::A};
+    switch (x) {
+      case X::A:
+        cout << "A" << endl;
+        break;
+      case X::B:
+        cout << "B" << endl;
+        [[fallthrough]];
+      case X::C:
+        // warning: this statement may fall through
+        cout << "C" << endl;
+      case X::D:
+        cout << "D" << endl;
+    }
+}
+#+end_src
+
+* =[[noreturn]]=
+\vspace{1.5em}
+#+header: :exports both :results none :tangle src/noreturn.cpp :flags -std=c++2a
+#+begin_src C++
+#include <cstdlib>  // fallthrough.cpp
+#include <string>
+using namespace std;
+
+// UB if f() returns!
+[[noreturn]] void f(bool x){
+    if (x)
+       throw "error";
+}
+
+[[noreturn]] void usage(std::string msg) {
+    std::exit(1);
+}
+
+int main() {
+}
+#+end_src
+

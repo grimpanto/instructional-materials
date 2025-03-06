@@ -1,0 +1,551 @@
+#+TITLE: Numerik
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+# +BEAMER_THEME: Metropolis
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+#+latex_header: \usepackage{cancel}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Numerik
+- Numerische Mathematik
+  - zahlenmäßige Berechnung von Lösungen mathematischer
+    Modelle, die durch Formeln, Gleichungen, als Grenzwerte,...
+    gegeben sind 
+  - Zahlendarstellung und Zahlenarithmetik
+- Warum?
+  - auf dem Papier nicht exakt berechenbar
+  - zwar exakt berechenbar, aber
+    - dies muss oftmalig passieren oder
+    - auf diese Weise zu langsam oder zu große Rechenfehler \to Näherungslösung
+      u.U. sinnvoller (wenn ausreichend genau)
+      
+* Akteure
+- Numerische Mathematiker (Numeriker)
+  - Aufbereitung der Modelle zur numerischen Behandlung
+- Informatiker
+  - Umsetzung
+  - Stichworte: Rechenzeit, Speicherbedarf, Cache-Effekte, Parallelrechner,
+    verwendete Rechnerarchitekturen, Compiler, Programmiertechniken
+
+* Anwendungen
+- Meteorologie, Strömungsberechnungen, Brückenbau,...
+- Simulationen (Crash-Tests, Flugzeug, Atomkraftanlagen, Chemieanlagen,
+  Berechnungen für Energienetze,...)
+- Computergraphik, Bildverarbeitung (Kompression, Analyse, Bearbeitung)
+- Neuronale Netze (Lernverfahren)
+- Steuerung von Raketen, Industrieroboter, Medizintechnik (z.B.
+  Infusionspumpen), Eisenbahnsicherungsanlagen, Antiblockiersysteme,...
+- Chip Design
+- Kryptographie
+
+* Probleme der Rechnerarithmetik
+\vspace{1.5em}
+- Die /endliche/ Menge $M \subset \R$, der in einem Rechner darstellbaren Zahlen
+  heißt Menge der Maschinenzahlen
+  - Es muss eine größte (kleinste) Maschinenzahl geben
+  - Nicht jede Zahl zwischen größter und kleinster Zahl aus $M$
+    ist in $M$ enthalten
+    - z.B. $M=\{0,1,2,3,4,5\}$, dann ist $\frac{2+3}{2} \notin M$
+- Prozessor kann Rechnungen nicht exakt ausführen
+
+* Rechnen mit ganzen Zahlen
+- Vergleich: VZ-behaftet und VZ-los
+- Überlauf und Unterlauf
+  - sowohl bei VZ-losen als auch bei VZ-behafteten Zahlen
+  - Addition, Substraktion, Multiplikation
+- Division
+  - Division liefert im Allgemeinen keine ganzzahligen Ergebnisse
+  - Division durch 0
+
+* Unsicherer Vergleich
+\vspace{1em}
+\small
+#+header: :exports code :results output :tangle src/int_compare.cpp :flags -std=c++20  :main no
+#+begin_src C++
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int x{-3};
+    unsigned int y{7};
+
+    cout << boolalpha;
+    cout << "-3 < 7: " << (x < y) << endl; // false
+    cout << "-3 <= 7: " << (x <= y) << endl; // false
+    cout << "-3 > 7: " << (x > y) << endl; // true
+    cout << "-3 => 7: " << (x >= y) << endl; // true
+} // x will be casted to unsigned!!!
+#+end_src
+
+* Sicherer Vergleich (in \cpp20)
+\vspace{1.5em}
+\small
+#+header: :exports code :results output :tangle src/int_compare2.cpp :flags -std=c++20  :main no
+#+begin_src C++
+#include <iostream>
+#include <utility>
+
+using namespace std;
+
+int main() {
+  int x{-3};
+  unsigned int y{7};
+
+  cout << boolalpha;
+  cout << "3 == 7: " << cmp_equal(x, y) << endl;
+  cout << "3 != 7: " << cmp_not_equal(x, y) << endl;
+  cout << "-3 < 7: " << cmp_less(x, y) << endl;
+  cout << "-3 <= 7: " << cmp_less_equal(x, y) << endl;
+  cout << "-3 > 7: " << cmp_greater(x, y) << endl;
+  cout << "-3 => 7: " << cmp_greater_equal(x, y)<< endl;
+} // expected results!
+#+end_src
+
+* Über/Unterlauf
+\vspace{2em}
+Überlauf (overflow) und Unterlauf (underflow) bei ganzen Zahlen!
+#+header: :exports code :results output :tangle src/int_overflow.cpp :flags -std=c++17 -lpthread :main no
+#+begin_src c++
+#include <iostream>
+#include <cstdint>
+using namespace std;
+int main() {
+    // sadly, it's an alias for unsigned char...
+    uint8_t i{253};
+    cout << +i++ << endl;  // -> 253
+    cout << +i++ << endl;  // -> 254
+    cout << +i++ << endl;  // -> 255
+    cout << +i-- << endl;  // -> 0
+    cout << +i << endl;    // -> 255
+    // ... so you can't omit the '+'!
+    cout << i + i << endl; // -> 510
+    i = i + i;
+    cout << +i << endl;    // -> 254
+}
+#+end_src
+
+* Über/Unterlauf -- 2
+- meistens nicht gewünscht, d.h.
+  - erkennen
+  - vermeiden
+- manchmal erwünscht, z.B.:
+  - Timer, Clocks
+  - gewisse Zähler (wie bei Ringpuffer)
+
+* Überlauf erkennen
+- ganze Zahlen
+  - Addition/Subtraktion positiver Zahlen \to darf nicht kleiner/größer sein
+    #+header: :exports code :results output :tangle src/int_overflow2.cpp :flags -std=c++17 -lpthread :main no
+    #+begin_src c++
+    #include <iostream>
+    #include <cstdint>
+    using namespace std;
+  
+    int main() {
+        uint8_t i{254};
+        uint8_t res;
+        res = i + i;
+        cout << +res << endl;  // -> 252
+        res = res - i;
+        cout << +res << endl;  // -> 254
+    }
+    #+end_src
+
+* Überlauf erkennen -- 2
+- Multiplikation positiver Zahlen
+  - Produkt kann größer sein, aber trotzdem falsch:
+
+  #+header: :exports code :results output :tangle src/int_overflow3.cpp :flags -std=c++17 -lpthread :main no
+  #+begin_src c++
+  #include <iostream>
+  #include <cstdint>
+  using namespace std;
+
+  int main() {
+      uint8_t i{90};
+      uint8_t res;
+      res = i * i;
+      cout << +res << endl;  // -> 164
+  #+end_src
+
+* Überlauf erkennen -- 3
+- \to in größerem Datentyp rechnen:
+  \vspace{1em}
+  #+header: :exports code :results output :tangle src/int_overflow3.cpp :flags -std=c++17 -lpthread :main no
+  #+begin_src c++
+      
+      uint16_t tmp;
+      tmp = i * i;
+      // erkennen und auf max setzen
+      res = (tmp < 255) ? tmp : 255;
+      cout << +res << endl;  // -> 255
+  
+      tmp = i * 2;
+      res = (tmp < 255) ? tmp : 255;
+      cout << +res << endl;  // -> 180
+  }
+  #+end_src
+
+* Überlauf erkennen -- 4
+\vspace{1em}
+- Gleitkommazahlen
+  #+header: :exports code :results output :tangle src/double_overflow.cpp :flags -std=c++17 -lpthread :main no
+  #+begin_src c++
+  #include <iostream>
+  #include <limits>
+  #include <cmath>
+  using namespace std;
+  
+  int main() {
+     double x{};
+     x = numeric_limits<double>::max();
+     cout << x << " is inf: " << isinf(x) << endl;
+     // -> 1.79769e+308 is inf: 0
+     x = numeric_limits<double>::infinity();
+     cout << x << " is inf: " << isinf(x) << endl;
+     // -> inf is inf: 1
+     cout << x + 1 << endl;  // -> inf
+  }
+  #+end_src
+
+* Überlauf vermeiden
+- abhängig von der jeweiligen Aufgabenstellung!
+- Mittelwert zweier Zahlen?
+  - ganze Zahlen
+    - VZ-lose vs VZ-behanftete Zahlen
+  - Gleitkommazahlen
+- Interpolation
+
+* Mittelwert zweier ganzen Zahlen?
+...Mittelpunkt zwischen zwei Zahlen am Zahlenstrahl
+\pause
+- Lösung
+  #+begin_src c++
+  c = (a + b) / 2;
+  #+end_src
+  - funktioniert für =int=, =unsigned= und Gleitkommazahlen\pause
+    - für ganze Zahlen: nicht unbedingt ohne Abschneiden der Nachkommastellen
+      beim Ergebnis
+  - aber: Überlauf kann auftreten!
+  \pause
+- Lösung für VZ-lose Zahlen, $b \ge a$
+  #+begin_src c++
+  c = a + (b - a) / 2;
+  #+end_src
+  - für VZ-behaftete Zahlen?\pause
+  - Annahme: 4 Bit VZ-behaftet in 2er Komplement
+    - Zahlenbereich: $[-8, 7]$
+    - $a = 5, b = -7 \to b - a = -12$ !!!\pause
+  - \to funktioniert, wenn nicht (immer) wenn verschiedene VZ
+    - auch wenn $b < a$
+
+* Mittelwert zweier ganzen Zahlen? -- 2
+\vspace{1em}
+\footnotesize
+#+header: :exports code :results output :tangle src/int_midpoint.cpp :flags -std=c++17 -lpthread :main no
+#+begin_src c++
+#include <iostream>
+#include <limits>
+#include <type_traits>
+
+using namespace std;
+
+// iff conversion from unsigned to signed preserves bit pattern (C++20!)
+template <typename Integer>  // iff int is two-complement
+constexpr Integer midpoint(Integer a, Integer b) noexcept {
+    using U = make_unsigned_t<Integer>;  // -> type_traits
+    return a > b ? a - (U(a) - b) / 2 : a + (U(b) - a) / 2;
+}
+
+int main() {
+   cout << numeric_limits<int>::min() << endl; // -2147483648
+   int a{-2147483640};
+   int b{10};
+   cout << a + (b - a) / 2 << endl;  // 1073741833
+   cout << midpoint(a, b) << endl;  // -1073741815
+   a = 11;
+   cout << a + (b - a) / 2 << endl;  // 11
+   cout << midpoint(a, b) << endl;  // 11
+}
+#+end_src
+
+* Mittelwert zweier Gleitkommazahlen?
+- keine der obigen Lösungen funktioniert!
+  - Überlauf bzw. nicht korrekte Rundung in Subtraktion und Addition\pause
+- Lösung für Gleitkommazahlen:
+  #+begin_src c++
+  c = a / 2 + b / 2;
+  #+end_src
+  aber: in Spezialfällen \to Rundungsfehler bei subnormalen Zahlen
+  - daher:
+    #+header: :exports code :results output :tangle src/double_midpoint.cpp :flags -std=c++17 -lpthread :main no
+    #+begin_src c++
+    #include <iostream>
+    #include <cmath>
+    using namespace std;
+    int main() {
+       double a{numeric_limits<double>::max()};
+       cout << a << endl; // 1.79769e+308
+       double b{a};
+       double c{(a + b) / 2};
+       cout << c << endl;  // inf
+       a = numeric_limits<double>::denorm_min();  // smallest denormalized number
+       b = a;
+       c = a / 2 + b / 2;
+       cout << c << endl;  // 0
+       // -> Unterlauf
+    }
+    #+end_src
+
+* Interpolation
+- i.A.: $a + t * (b - a) \ne b$ wenn $t=1$
+  #+begin_src c++
+  #include <iostream>
+  #include <cmath>  // -> M_PI
+  
+  using namespace std;
+  
+  int main() {
+      double b{0.1};
+      double a{M_PI};
+      double t{1};
+      cout << M_PI << endl; // 3.14159
+      cout << (a + t * (b - a)) << endl;  // 0.1
+      cout << (a + t * (b - a) == b) << endl;  // 0
+  }
+  #+end_src
+
+* Interpolation -- 2
+- Überlauf, wenn $a$, $b$ verschiedene Vorzeichen und größter Exponent
+  - \to $b - a$ !
+
+* Division ganzer Zahlen
+\vspace{1.5em}
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << 4 / 2 << endl;  // -> 2
+    cout << 5 / 2 << endl;  // -> 2
+    cout << -3 / 2 << endl; // -> -1
+    cout << 1 / 0 << endl;
+    // -> ...terminated by signal SIGFPE
+}
+#+end_src
+\vspace{-0.5em}
+- \to kann als Rundung zur Null interpretiert werden!
+- \to Division durch 0 \to Programmabsturz
+  - in diesem Fall: Warnung durch Compiler: =warning: division by zero [-Wdiv-by-zero]=
+  - daher: Divisor auf $0$ überprüfen!
+- Achtung in Python wie in Mathematik!
+  - daher: eigener Operator =//=
+
+* Rest ganzer Zahlen
+Def.: Rest der Division ganzer Zahlen $a$ (Dividend) und $b$ (Divisor):
+\[a = b \cdot q + r,\qquad 0 \le r < |b|\]
+
+- $a, b \in \N$ ... eindeutig definiert
+- $a, b \in \Z$ ... nicht eindeutig
+  - $5 \div -2 = -3R-1$
+    - Definition in der Mathematik: Rest hat VZ vom Divisor\pause
+  - aber: $5 \div -2 = -2R1$ !!
+
+* Rest ganzer Zahlen
+#+header: :exports both :results none :tangle src/mod.py :flags -std=c++17
+#+begin_src python
+print(5 // 2, 5 % 2)
+print(-5 // 2, -5 % 2)
+print(5 // -2, 5 % -2)
+print(-5 // -2, -5 % -2)
+#+end_src
+
+\pause
+
+: 2 1
+: -3 1
+: -3 -1
+: 2 -1
+
+d.h. wie in der Mathematik!
+
+* Rest ganzer Zahlen -- 2
+\vspace{1em}
+#+header: :exports both :results none :tangle src/mod.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << 5 / 2 << ' ' << 5 % 2 << endl;
+    cout << -5 / 2 << ' ' <<  -5 % 2 << endl;
+    cout << 5 / -2 << ' ' <<  5 % -2 << endl;
+    cout << -5 / -2 << ' ' <<  -5 % -2 << endl;
+}
+#+end_src
+
+\pause
+
+: 2 1
+: -2 -1
+: -2 1
+: 2 -1
+
+laut Spezifikation: "(a/b)*b + a%b is equal to a."
+
+* Rest ganzer Zahlen -- 3
+\vspace{1em}
+#+header: :exports both :results output :tangle src/mod2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>
+using namespace std;
+
+int mod(int a, int b) { return ((a % b) + b) % b; }
+
+int main() {
+    cout << mod(5, 2) << endl;
+    cout << mod(-5, 2) << endl;
+    cout << mod(5, -2) << endl;
+    cout << mod(-5, -2) << endl;
+}
+#+end_src
+
+#+RESULTS:
+: 1
+: 1
+: -1
+: -1
+
+* Rechnen mit Gleitkommazahlen
+- Darstellung von Gleitkommazahlen
+  - Abspeichern von Gleitkommazahlen
+  - \to Foliensatz "Gleitkommazahlen"
+- Fehler beim Rechnen
+- Überlauf
+- Unterlauf
+- NaN
+
+* Darstellung GKZ -- Python
+$0.1 + 0.1 + 0.1 = 0.3$ \pause\hspace{1em} aber:
+#+begin_src python
+>>> 0.1 + 0.1 + 0.1 == 0.3
+False
+#+end_src
+???\pause
+#+begin_src python
+>>> 0.1
+0.1
+>>> 0.1 + 0.1 + 0.1
+#+end_src
+\pause
+#+begin_src python
+0.30000000000000004
+#+end_src
+
+* 0.1_{10} im Binärsystem
+- Rechnet Python falsch? \pause nein! \to Darstellung von =0.1= ist
+  *nicht* exakt möglich! D.h. $0.1 \notin M$!
+  - $0.1$ kann kein Element von $M$ sein... warum?\pause
+    unabhängig davon wie Gleitkommazahlen abgespeichert werden...\pause
+- $0.1_{10} = 0.00011001100110011... = 0.0\overline{0011}$
+  | $0.1 \cdot 2$          | - |
+  | $0.2 \cdot 2$          | 0 |
+  | $0.4 \cdot 2$          | 0 |
+  | $0.8 \cdot 2$          | 0 |
+  | $\cancel{1}.6 \cdot 2$ | 1 |
+  | $\cancel{1}.2 \cdot 2$ | 1 |
+  | $0.4 \cdot 2$          | 0 |
+  | ...                |   |
+  
+* Darstellung GKZ -- \cpp
+\vspace{1.5em}
+- Beispiel -- \cpp
+  - $0.1 + 0.1 + 0.1 = 0.3$ \hspace{0.25em} in \cpp?
+    #+begin_src c++
+    #include <iostream>
+    #include <cmath>
+    
+    using namespace std;
+    
+    int main() {
+        cout << 0.1 << endl;
+    #+end_src
+    \pause \to =0.1=
+    #+begin_src c++
+    cout << 0.1 + 0.1 + 0.1 << endl;
+    #+end_src
+    \pause \to =0.3=\newline
+    \pause rechnet \cpp besser als Python?
+    #+begin_src c++
+    cout << (0.1 + 0.1 + 0.1 == 0.3) << endl;
+    #+end_src
+    \pause \to =0=\newline
+    \pause Was ist der Unterschied? \pause die Ausgabe!!!
+
+* Fehler beim Rechnen -- Python
+$f(n)=_{}(1+\frac{1}{n})^n \hspace{3em} \lim\limits_{n\to\infty}f(n) = e \hspace*{3em} e = 2.718281828459$
+
+\vspace{1em}
+- $n=10^3, f(n) = 2.7169239322355936$ \pause
+- $n=10^6, f(n) = 2.7182804690957534$ \pause
+- $n=10^9, f(n) = 2.7182820520115603$ \pause
+- $n=10^{12}, f(n) = 2.7185234960372378$ \pause
+- $n=10^{15}, f(n) = 3.035035206549262$ \pause
+- $n=10^{18}, f(n) = 1.0$
+
+* 

@@ -1,0 +1,454 @@
+#+TITLE: Aussagenlogik -- 2: Semantik
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Semantik
+\vspace{1em}
+- Die Bedeutung (Semantik) einer aussagenlogischen Formel besteht in den
+  Wahrheitsbedingungen.
+- Eine Bewertung $V$ (auch Interpretation genannt)
+  - ist eine Zuordnung von Wahrheitsbedingungen
+	zu allen Satzbuchstaben (atomaren Formeln).
+- Beispielformel: $p \conj q \disj r$
+  - Bewertung
+    - $V(p) =$ 8 ist durch 2 teilbar
+    - $V(q) =$ 6 ist das Produkt von 2 und 4
+    - $V(r) =$ alle geraden Zahlen sind durch 3 teilbar
+- Die Semantik zusammengesetzter Formeln \lto Junktoren.
+- D.h. $p \conj q \disj r$ ergibt mit der Bewertung $V$ den Wert 0.
+  - Anstatt false bzw. falsch: aussagenlogische Konstante 0.
+  - analog, true bzw. wahr: 1.
+
+* Junktoren 1
+\vspace{1em}
+- Negation (einstellig, unär)
+  #+begin_center
+  \small
+  #+ATTR_LATEX: :align c|c
+  | p | \lnegx p |
+  |---+---------|
+  | 0 |       1 |
+  | 1 |       0 |
+  #+end_center
+- Konjunktion (zweistellig, binär)
+  #+begin_center
+  \small
+  #+ATTR_LATEX: :align cc|c
+  | p | q | p \conj q |
+  |---+---+-----------|
+  | 0 | 0 |         0 |
+  | 0 | 1 |         0 |
+  | 1 | 0 |         0 |
+  | 1 | 1 |         1 |
+  #+end_center
+- Disjunktion und Antivalenz
+  #+begin_center
+  \small
+  #+ATTR_LATEX: :align cc|c|c
+  | p | q | p \disj q | p \anti q |
+  |---+---+-----------+-----------|
+  | 0 | 0 |         0 |         0 |
+  | 0 | 1 |         1 |         1 |
+  | 1 | 0 |         1 |         1 |
+  | 1 | 1 |         1 |         0 |
+  #+end_center
+
+* Junktoren 2
+\vspace{1em}
+- (materielle) Implikation, Subjunktion
+  #+begin_center
+  \small
+  #+ATTR_LATEX: :align cc|c
+  | p | q | p \imp q |
+  |---+---+----------|
+  | 0 | 0 |        1 |
+  | 0 | 1 |        1 |
+  | 1 | 0 |        0 |
+  | 1 | 1 |        1 |
+  #+end_center
+  - Wenn ein Viereck rund wäre, wäre 4 kleiner als 2 ... wahr!
+  - Wenn die Erde eine Sonne wäre, dann ist $1 < 2$ ... wahr!
+  - Wenn ich 10000€ gespart habe, dann \lto Weltreise
+    - mehr als Implikation: nicht genug Geld \lto keine Weltreise!
+
+- Biimplikation, Äquivalenz
+  #+begin_center
+  \small
+  #+ATTR_LATEX: :align cc|c
+  | p | q | p \biimp q |
+  |---+---+------------|
+  | 0 | 0 |          1 |
+  | 0 | 1 |          0 |
+  | 1 | 0 |          0 |
+  | 1 | 1 |          1 |
+  #+end_center
+
+* Junktoren 3
+- Präzedenz der Junktoren
+  1. \lnegx ... bindet am stärksten
+  2. \conj
+  3. \disj, \anti
+  4. \imp
+  5. \biimp ... bindet am schwächsten
+- Beispiel
+  - Unsere Zimmer sind mit Telefon und Radio oder Fernseher ausgestattet.
+    - p \conj q \disj r ... (p \conj q) \disj r oder p \conj (q \disj r)
+    - V(p) ... Zimmer hat Telefon
+    - V(q) ... Zimmer hat Radio
+    - V(r) ... Zimmer hat Fernseher
+
+* Wahrheitstafelmethode
+- p \conj q \disj r
+- Wahrheitstafel
+  #+ATTR_LATEX: :align |ccc|ccccc|
+  |---+---+---+----+---------+----+--------+---|
+  | p | q | r | (p | $\land$ | q) | $\lor$ | r |
+  |---+---+---+----+---------+----+--------+---|
+  | 0 | 0 | 0 |    |       0 |    |      0 |   |
+  | 0 | 0 | 1 |    |       0 |    |      1 |   |
+  | 0 | 1 | 0 |    |       0 |    |      0 |   |
+  | 0 | 1 | 1 |    |       0 |    |      1 |   |
+  | 1 | 0 | 0 |    |       0 |    |      0 |   |
+  | 1 | 0 | 1 |    |       0 |    |      1 |   |
+  | 1 | 1 | 0 |    |       1 |    |      1 |   |
+  | 1 | 1 | 1 |    |       1 |    |      1 |   |
+  |---+---+---+----+---------+----+--------+---|
+- Bildung der Formel aus Wahrheitstafel
+
+* COMMENT Formalisierung natürlicher Sprache
+\vspace{3ex}
+Ein Programm besteht aus Modul A und Modul B und kann eine Fehlerausgabe
+tätigen. Folgendes ist bekannt:
+
+- Modul A oder Modul B weist einen Fehler auf.
+- Wenn Modul A den Fehler aufweist, dann ist auch Modul B fehlerhaft.
+- Wenn Modul B den Fehler aufweist und die Fehlerausgabe getätigt
+  wurde, dann hat Modul A keinen Fehler.
+- Es ist eine Fehlerausgabe getätigt worden.
+
+Verwende folgende atomare Formeln:
+
+- p: Modul A defekt
+- q: Modul B defekt
+- r: Fehlermeldung
+
+* Aufgaben
+- Welche der folgenden Ausdrücke sind Aussagen?
+  - $x^2 + 1 > 0$
+  - Maxi ist älter als Mini.
+  - $x^2 + 3x - 5$
+  - Wie spät ist es?
+- Formuliere in "wenn...dann"
+  - Ich gehe jeden Freitag ins Kino
+  - Ich gehe nur freitags in Kino
+  - Freitags gehe ich nie ins Kino
+
+* Aufgaben -- 2
+- Aussagenlogische Formel für vorhergende Aussagen mit
+  - $V(p) =$ Es ist Freitag
+  - $V(q) =$ Ich gehe ins Kino
+- Wahrheitstafeln
+  - $\neg p \disj (p \imp \neg q)$
+  - $p \disj q \imp p \conj q$
+  - $p \imp \neg p$
+  - $(p \imp q) \imp r$
+  - $p \imp (q \imp r)$
+
+* Tautologie und Kontradiktion
+- Eine Formel $A$ von AL ist genau dann *logisch wahr*, wenn sich
+  allein aus der Bedeutung der Junktoren ergibt, dass A bzgl. aller
+  Bewertungen wahr ist (Tautologie)
+  - $p \disj \neg p$
+  - \lto allgemein gültig
+- Eine Formel $A$ von AL ist genau dann *logisch falsch*, wenn sich
+  allein aus der Bedeutung der Junktoren ergibt, dass A bzgl. aller
+  Bewertungen falsch ist (Kontradiktion)
+  - $p \conj \neg p$
+  - \lto unerfüllbar
+
+* Äquivalenz und Konsequenz
+- Zwei Formeln $F$ und $G$ heißen (logisch) äquivalent, wenn sie in
+  jeder Zeile ihrer Wahrheitstafeln übereinstimmen: $F \lequiv G$.
+  - $a \imp b \lequiv \neg a \lor b$
+  - Die beiden Formeln $F$ und $G$ sind genau dann äquivalent,
+    wenn die Formel $F \biimp G$ eine Tautologie ist.
+
+- Die Formel $G$ heißt eine (logische) Konsequenz, wenn in
+  jeder Zeile ihrer Wahrheitstafel in der $F$ wahr ist auch $G$
+  wahr ist: $F \limp G$.
+  - $q \limp p \imp q$
+  - Die Formel $G$ ist eine Konsequenz der Formel $F$, wenn die
+    Formel $F \imp G$ eine Tautologie ist.
+
+* Wichtige Äquivalenzen 1
+- $A \lequiv \neg \neg A$ (Gesetz der doppelten Negation)
+- $A \conj A \lequiv A$ (Idempotenz der Konjunktion)
+  - (Idem ... dasselbe, Potenz ... Leistungskraft)
+- $A \conj B \lequiv B \conj A$ (Kommutativität der Konjunktion)
+- $A \conj (B \conj C) \lequiv (A \conj B) \conj C$
+  (Assoziativität der Konjunktion)
+- $\neg (A \conj B) \lequiv \neg A \disj \neg B$ (1. Gesetz von
+  De Morgan)
+
+* Wichtige Äquivalenzen 2
+- $A \disj A \lequiv A$ (Idempotenz der Disjunktion)
+- $A \disj B \lequiv B \disj A$ (Kommutativität der Disjunktion)
+- $A \disj (B \disj C) \lequiv (A \disj B) \disj C$
+  (Assoziativität der Disjunktion)
+- $\neg (A \disj B) \lequiv \neg A \conj \neg B$ (2. Gesetz von
+  De Morgan)
+- $A \conj (B \disj C) \lequiv (A \conj B) \disj (A \conj
+  C)$ 1. Distributivgesetz
+- $A \disj (B \conj C) \lequiv (A \disj B) \conj (A \disj
+  C)$ 2. Distributivgesetz
+
+* Wichtige Äquivalenzen 3
+- $A \imp B \lequiv \neg A \disj B$
+- $A \imp B \lequiv \neg B \imp \neg A$
+- $A \biimp B \lequiv B \biimp A$ (Kommutativität der Biimplikation)
+- $A \biimp (B \biimp C)$ \lequiv $(A \biimp B) \biimp C$ (Assoziativität
+  der Biimplikation)
+- $A \biimp B \lequiv \neg A \biimp \neg B$
+- $\neg (A \biimp B) \lequiv A \; \anti \; B$
+- $A \biimp B \lequiv (A \imp B) \conj (B \imp A)$
+
+* COMMENT
+| A | B | \biimp | \not \biimp \equiv \anti |
+|---+---+--------+------------------|
+| 0 | 0 |      1 |                0 |
+| 0 | 1 |      0 |                1 |
+| 1 | 0 |      0 |                1 |
+| 1 | 1 |      1 |                0 |
+
+* Dualitätsprinzip
+- Sind zwei Formeln A und B, in denen nur die Junktoren \neg, \conj
+  und \disj vorkommen, äquivalent, dann sind auch die Formeln, die aus
+  A und B dadurch entstehen, dass alle auftretenden \conj durch \disj,
+  \disj durch \conj, 1 durch 0 und 0 durch 1 ersetzt werden, ebenfalls
+  äquivalent.
+- Beispiel
+  - a \conj 1 \lequiv a
+  - Daher gilt: a \disj 0 \lequiv a
+
+* Einsetzungstheorem
+- Wir bezeichnen mit A[p/B] diejenige Formel, die aus A dadurch
+  entsteht, dass für jedes Vorkommen der Aussagenvariablen p in A
+  die Formel B eingesetzt wird.
+  - A: (p \imp q) \biimp p
+  - B: (r \land s)
+  - A[p/B]: ((r \land s) \imp q) \biimp (r \land s)
+- Einsetzungstheorem:
+  Ist A eine Tautologie bzw. eine Kontradiktion, dann auch A[p/B].
+  - D.h. durch Einsetzen enstehen aus Tautologien wieder Tautologien
+    und aus Kontradiktionen wieder Kontradiktionen.
+
+* Ersetzung
+\vspace{1.5em}
+- Eine Teilformel ist:
+  - Jede Formel A ist eine Teilformel von sich selbst.
+  - Ist A eine zusammengesetzte Formel, etwa \lnegx p, p \land
+    q,...  dann sind auch p und q Teilformeln von A.
+  - Jede Teilformel einer Teilformel von A ist ebenfalls eine Teilformel
+    von A.
+- Beispiel
+  - A: p \imp ((\lnegx q \lor r) \imp s)
+  - Teilformeln von a:
+    - p \imp ((\lnegx q \lor r) \imp s)
+    - p, (\lnegx q \lor r) \imp s,...
+- Mit $A[[B/C]​]$ wird diejenige Formel bezeichnet, die aus A
+  dadurch entsteht, dass beliebig viele Vorkommnisse der
+  Teilformel B von A durch die Formel C ersetzt werden.
+- Ersetzungstheorem: Ist $B \lequiv C$, dann ist $A \lequiv A[[B/C]​]$.
+
+* Schaltjahr
+- Umlauf Erde um Sonne: 365.24219... Tage
+- Schaltjahr
+  - alle 4 Jahre ein Tag dazu
+  - dann allerdings: Schnitt 365.25 Tage
+    - daher alle 100 Jahre: kein Tag hinzu
+  - dann allerdings: Schnitt unter 355.24219...
+    - daher alle 400 Jahre: doch Tag hinzu
+
+* Schaltjahr -- 2
+- Algorithmus
+  #+begin_src python
+  def schaltjahr(jahr):
+      if jahr % 4 == 0:
+          if jahr % 100 == 0: 
+              if jahr % 400 == 0:
+                  return True
+              else:
+                  return False
+          else:
+              return True
+      else:
+          return False
+  #+end_src
+
+* Schaltjahr -- 3
+- Algorithmus 2: besser!
+  #+begin_src python
+  def schaltjahr(jahr):
+      if jahr % 4:
+          return False
+      elif jahr % 100:
+          return True
+      elif jahr % 400:
+          return False
+      else:
+          return True
+  #+end_src
+
+* Schaltjahr -- 4
+- Algorithmus 3: besser?
+  #+begin_src python
+  def schaltjahr(jahr):
+      return False if jahr % 4 else \
+             (True if jahr % 100 else
+             (False if jahr % 400 else True))
+  #+end_src
+  - =C++=, Java,...: =(jahr % 4) ? false : ...=
+      
+* Schaltjahr -- 5
+- Überlegungen zur Umsetzung von Algorithmus 2 in AL
+  - =q if p else r=
+    - in AL: $(p \imp q) \conj (\neg p \imp r)$
+  - =False if p else r=
+    - in AL: $(p \imp 0) \conj (\neg p \imp r) \lequiv$ \\
+      $(\neg p \disj 0) \conj (\neg \neg p \disj r) \lequiv$ \\
+      $\neg p \conj (p \disj r) \lequiv$ \\
+      $(\neg p \conj p) \disj (\neg p \conj r) \lequiv$ \\
+      $\neg p \conj r$
+  - =True if p else r=
+    - in AL: $(p \imp 1) \conj (\neg p \imp r) \lequiv$ \\
+      $(\neg p \disj 1) \conj (\neg \neg p \disj r) \lequiv$ \\
+      $1 \conj (p \disj r) \lequiv$ \\
+      $p \disj r$
+
+* Schaltjahr -- 6
+- Bewertung V
+  - $V(p) = \text{jahr} \mod 4 \neq 0$
+  - $V(q) = \text{jahr} \mod 100 \neq 0$
+  - $V(r) = \text{jahr} \mod 400 \neq 0$
+- in AL: $\neg p \conj (q \disj (\neg r \conj 1)) \lequiv$ \\
+  $\neg p \conj (q \disj \neg r)$
+- The winner is... Algorithmus 4:
+  #+begin_src python
+  def schaltjahr4(jahr):
+      return not jahr % 4 and \
+             (jahr % 100 or not jahr % 400)
+  #+end_src
+
+* Schlussfolgerung
+- ist eine der ältesten Anwendungen der Logik
+- ausgehend von gewissen Voraussetzungen (Prämissen) erhält man
+  unter Anwendung sogenannter Schlussregeln neue Aussagen (Konklusion).
+- die meisten Schlussfolgerungen des alltäglichen Lebens sind keine
+  logischen Folgerungen, sondern kommen aus der Erfahrung und Beobachtung:
+  daher kann die Konklusion auch falsch sein.
+- aussagenlogische Folgerungen sind immer richtig.
+
+* Schlussfolgerung -- 2
+\vspace{1em}
+- Verschiedene Formen der Tautologien können benutzt werden, um
+  Schlüsse zu ziehen. Diese werden als Inferenzregeln (to infer
+  ... folgern) bezeichnet.
+- Beispiele solcher Tautologien:
+  - $p \conj (p \imp q) \limp q$ ... modus ponens (Abtrennungsregel)
+  - Anwendung des logischen Schlusses (Syllogismus)
+  - Obersatz: p
+  - Untersatz: p \imp q
+  - Konklusion: q
+  - $\neg q \conj (p \imp q) \limp \neg p$ ... modus tollens (Widerlegungsregel)
+  - $q \conj (\neg p \imp \neg q) \limp p$ ... Kontrapositionsregel
+    - $\neg q \conj (\neg p \imp q) \limp p$ ... indirekter Beweis
+  - $(p \imp q) \conj (q \imp r) \limp p \imp r$ ... hypothetical syllogism
+
+* Aufgaben -- 3
+\vspace{2em}
+- Welche sind Tautologien, welche Kontradiktionen?
+  - $p \imp (q \imp p)$
+  - $p \disj (p \imp q)$
+  - $q \disj (p \imp q)$
+  - $p \conj \neg q \conj (p \imp q)$
+- Beweise, dass die folgenden Formeln äquivalent sind!
+  - $F = p \imp q, G = \neg q \imp \neg p$
+  - $F = p \biimp q, G = p \conj q \disj \neg p \conj \neg q$
+  - $F = \neg (p \biimp q), G = \neg p \biimp q$
+  - $F = p \imp (q \imp r), G = p \conj q \imp r$
+- Beweise, das G eine Konsequenz von F
+  - $F = (p \imp q) \conj (q \imp r), G = p \imp r$
+  - $F = \neg(p \imp q), G = p$
+  - $F = q, G = p \imp q$
+  - $F = p \conj (p \imp q), G = q$
+
+* Aufgaben -- 4
+\vspace{1em}
+- Vereinfache
+  - $p \imp (p \imp q)$
+  - $p \disj (q \conj \neg p)$
+  - $p \conj q \disj \neg p \conj q$
+  - $p \conj (q \disj r \conj p)$
+  - $p \conj (q \disj r \conj \neg p)$
+- Vereinfache
+  #+begin_src python
+  def f(p, q):
+      if p:
+          if q: return p
+          else: return False
+      else:
+          if not q: return False
+          else: return True
+  #+end_src
+

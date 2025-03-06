@@ -1,0 +1,494 @@
+#+TITLE: C# -- 3
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+# +LATEX_HEADER:\usepackage{enumitem}
+# +LATEX: \setlistdepth{4}
+# +LATEX: \renewlist{itemize}{itemize}{4}
+# +LATEX: \setitemize{label=\usebeamerfont*{itemize item}\usebeamercolor[fg]{itemize item}\usebeamertemplate{itemize item}}
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Generics
+- etwa wie in Java, aber
+  - auch für =int=,...
+  - besser integriert, z.B. Instanzierung von Objekt eines formalen
+    Typparameters möglich
+- Generics mit
+  - Klassen und Interfaces
+  - Strukturen
+    - wie Klassen aber ohne Vererbung
+  - Methoden
+  - Delegates
+
+* Generics -- 2
+\vspace{1em}
+\small
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+class WorkQueue<T> {
+    private Queue<T> queue=new Queue<T>(); 
+    public void put(T e) { queue.Enqueue(e); }
+    public T get() { return queue.Dequeue(); }
+}
+
+public class Program {
+    static public void Main() {
+        WorkQueue<int> wq=new WorkQueue<int>();
+        wq.put(2);
+        wq.put(1);
+        Console.WriteLine(wq.get());  // -> 2
+        Console.WriteLine(wq.get());  // -> 1
+    } }
+#+end_src
+
+* Generics -- 3
+\vspace{1.5em}
+\small
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+class WorkStack<T> {
+    //private T bottom=default(T);//"Defaultwert" setzen
+    private T bottom=default;  // ab C#7.1
+    private Stack<T> stack=new Stack<T>();
+    public WorkStack() { stack.Push(bottom); }
+    public void put(T e) { stack.Push(e); }
+    public T get() { return stack.Pop(); }
+}
+public class Program {
+    static public void Main() {
+        WorkStack<int> ws=new WorkStack<int>();
+        ws.put(1);
+        ws.put(2);
+        Console.WriteLine(ws.get());  // -> 2
+        Console.WriteLine(ws.get());  // -> 1
+        Console.WriteLine(ws.get());  // -> 0
+    } }
+#+end_src
+
+* Generics -- 4
+\vspace{1.5em}
+\small
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+class WorkPacket {}
+// von WorkPacket (Klasse/Interface) abgeleitet
+// alternativ: struct,class,(zusätzlich) new()
+class WorkQueue<T> where T:WorkPacket {
+    private Queue<T> queue=new Queue<T>(); 
+    public void put(T e) { queue.Enqueue(e); }
+    public T get() { return queue.Dequeue(); }
+}
+
+public class HelloWorld {
+  static public void Main() {
+    WorkQueue<WorkPacket> wq=new WorkQueue<WorkPacket>();
+    wq.put(new WorkPacket());
+    wq.put(new WorkPacket());
+    Console.WriteLine(wq.get());  // -> WorkPacket
+    Console.WriteLine(wq.get());  // -> WorkPacket
+  } }
+#+end_src
+
+* Generics -- 5
+\vspace{1.5em}
+\small
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+// new()->anlegbar (keine Parameter, nicht abstract)
+class WorkStack<T> where T:new() {
+    private T bottom=new T();
+    private Stack<T> stack=new Stack<T>();
+    public WorkStack() { stack.Push(bottom); }
+    public void put(T e) { stack.Push(e); }
+    public T get() { return stack.Pop(); }
+}
+public class HelloWorld {
+    static public void Main() {
+        WorkStack<int> ws=new WorkStack<int>();
+        ws.put(1);
+        ws.put(2);
+        Console.WriteLine(ws.get());
+        Console.WriteLine(ws.get());
+        Console.WriteLine(ws.get());
+    } }
+#+end_src
+
+* Generics -- 6
+\vspace{1.5em}
+\small
+#+begin_src csharp
+using System;
+
+public class Program {
+    // generic method
+    void swap<T> (ref T x, ref T y) {
+        T tmp;
+        tmp = x;
+        x = y;
+        y = tmp;
+    }
+    
+    public static void Main() {
+        Program prg=new Program();
+        int i=1;
+        int j=2;
+        prg.swap<int>(ref i, ref j);
+        Console.WriteLine($"{i}, {j}");
+    }
+}
+#+end_src
+
+* Generics -- Invariance
+\vspace{1.5em}
+\footnotesize
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+interface IQueue<T> {}
+
+// invariant interface
+class Queue<T> : IQueue<T> {}
+
+class Program {
+    static void doit(IQueue<String> q) {}
+
+    static void Main() {
+        IQueue<Object> iobj=new Queue<Object>();
+        IQueue<String> istr=new Queue<String>();
+        // invariant!
+        // will not compile -> Cannot implicitly convert type...
+        iobj = istr;
+        // will not compile ->  Argument 1: cannot convert from...
+        doit(iobj);
+    }
+}
+#+end_src
+
+* Generics -- Covariance
+\vspace{1.5em}
+\footnotesize
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+// covariant interface
+interface IQueue<out T> {}
+
+class Queue<T> : IQueue<T> {}
+
+class Program {
+    static void Main() {
+        IQueue<Object> iobj=new Queue<Object>();
+        IQueue<String> istr=new Queue<String>();
+        // covariant!
+        // now it /will/ compile!
+        iobj = istr;
+    }
+}
+#+end_src
+
+* Generics -- Contravariance
+\vspace{1em}
+\footnotesize
+#+begin_src csharp
+using System;
+using System.Collections.Generic;
+
+// contra-variant interface
+interface IQueue<in T> {}
+
+class Queue<T> : IQueue<T> {}
+
+class Program {
+    static void doit(IQueue<String> q) {}
+    static void Main() {
+        IQueue<Object> iobj=new Queue<Object>();
+        IQueue<String> istr=new Queue<String>();
+        // contra-variant!
+        // now it /will/ compile!
+        doit(iobj);
+    }
+}
+#+end_src
+
+* Delegates
+- typsichere "Funktionszeiger"
+- legt die Schnittstelle einer Methode fest
+- Delegate ist ein Typ: Anlegen mittels =new=
+- Delegates sind von der Klasse =Delegate= abgeleitet
+  - ...und sind =sealed= (d.h. kein Ableiten möglich)
+- Verwendung: Variable, Parameter
+- Achtung: Begriff wird sowohl für den Typ als
+  auch für die Instanz verwendet!
+
+* Delegates - statische Methode
+\small
+#+begin_src csharp
+using System;
+
+delegate double Mean(double a, double b);
+
+public class Program {
+    public static double arith_mean(double a, double b)
+        => (a + b) / 2;
+    
+    public static void Main() {
+        Mean mean = arith_mean;
+
+        Console.WriteLine(mean(3, 5));
+    }
+}
+#+end_src
+
+* Delegates - Instanzmethode
+\vspace{1.5em}
+\small
+#+begin_src csharp
+public delegate double Mean(double a, double b);
+
+public class MeanCalculator {
+    public double arith_mean(double a, double b) {
+        return (a + b) / 2;
+    }
+
+    public double geom_mean(double a, double b) {
+        return Math.Sqrt(a * b);
+    }
+}
+
+public static void Main() {
+    // ... vorherige Folie, dann:
+    MeanCalculator calc=new MeanCalculator();
+    mean = calc.arith_mean;
+    Console.WriteLine(mean(4, 6));
+    mean = calc.geom_mean;
+    Console.WriteLine(mean(6, 6));
+}
+#+end_src
+
+* Delegates - Multicasting
+\vspace{2em}
+- Mehr als eine Methode (\to =MulticastDelegate=)
+  - =+= und ~+=~: hinzufügen
+  - =-= und ~-=~: entfernen
+\small
+#+begin_src csharp
+using System;
+public class Program {
+    public delegate void Log(string msg);
+
+    public static void error_log(string msg) {
+        Console.Error.WriteLine(msg); }
+    public static void out_log(string msg) {
+        Console.WriteLine(msg); }
+    public static void debug_log(string msg) {
+        Console.Error.WriteLine($"Debug: {msg}"); }
+    public static void Main() {
+        Log log = error_log;
+        log = log + out_log;
+        log += debug_log;
+        log("Hello, world");  } }
+#+end_src
+
+* Delegates & Lamda Ausdrücke
+\small
+#+begin_src csharp
+using System;
+
+public class Program {
+  public static void Main() {
+      // Action: predefined without a return value
+      Action<string> log=msg => Console.WriteLine(msg);
+      log("Hello, World");
+    
+      // Func: predefined with a return value
+      // x, y, return
+      Func<double, double, double> mean=
+        (x, y) => (x + y) / 2;
+      Console.WriteLine(mean(3, 5));
+  }
+}
+#+end_src
+
+* Delegates & Lambda Anweisung -- 2
+\vspace{1em}
+\footnotesize
+#+begin_src csharp
+using System;
+
+public class Program {
+    public static void Main() {
+        // multiple code lines
+        Func<string, string> output=msg => {
+            string ret="Hello, ";
+            ret += msg;
+            return ret;
+        };
+        Console.WriteLine(output("World"));
+        // closures
+        double offset=1;
+        Func<double, double> adder=param => param + offset;
+        Console.WriteLine(adder(1));  // -> 2
+        offset = 2;
+        Console.WriteLine(adder(1));  // -> 3
+    }
+}
+#+end_src
+
+
+* Events
+- Events und Delegates sind dem Observer Pattern nachempfunden \to Sinn ist das
+  Benachrichtigen bei Änderungen!
+- Events sind eine Art von Delegate
+  - Rückgabewert immer =void=!
+- Events werden mittels eines Delegate definiert
+- Events können mehrere Eventhandler zugeordnet
+  werden, die dem definierten Delegate entsprechen müssen
+- Wenn ein Event gefeuert wird, dann werden die zugeordneten
+  Eventhandler aufgerufen
+- Events bilden eine zusätzliche Abstraktion über Delegates
+- Events bieten einen zusätzlichen Schutz gegenüber Delegates
+  - nur ~+=~ und ~-=~
+
+* Events -- 2
+[[./event-model.png]]
+
+* Events -- 3
+\vspace{1.5em}
+\small
+#+begin_src csharp
+using System;
+
+public class Program {
+    public delegate void AlarmHandler(string msg);
+    public static event AlarmHandler alarm;
+
+    public static void alarm_handler1(string msg) {
+        Console.WriteLine($"Handler1: {msg}");
+    }
+    public static void alarm_handler2(string msg) {
+        Console.WriteLine($"Handler2: {msg}");
+    }
+    public static void Main() {
+        // alarm += new AlarmHandler(alarm_handler1);
+        alarm += alarm_handler1;
+        alarm += alarm_handler2;
+
+        alarm("Feuer!");
+    } }
+#+end_src
+
+* Events -- 4
+\vspace{1em}
+- anstatt eigenem =delegate= gibt es vordefiniert =System.EventHandler<TEventArgs>=
+- Eventhandler hat dann folgende Signatur:
+  =void handler(object sender, EventArgs args)=
+- Definition der Argumentklasse
+  #+begin_src csharp
+  using System;
+  using static System.Console;
+  
+  public class AlarmEvtArgs : EventArgs {
+      public AlarmEvtArgs(string _msg) {
+          msg = _msg;
+      }
+      public string msg { get; }
+  }
+  #+end_src
+
+* Events -- 5
+\vspace{1.5em}
+- Definition des Events-Teils
+  \footnotesize
+  #+begin_src csharp
+  public class AlarmMachine {
+    public AlarmMachine(string _id) { id = _id; }
+    
+    public event EventHandler<AlarmEvtArgs> alarm_event;
+    
+    public void alarm_handler1(object s, AlarmEvtArgs e) {
+      WriteLine($"1: {((AlarmMachine)s).id}: {e.msg}");
+    }
+
+    public void alarm_handler2(object s, AlarmEvtArgs e) {
+      WriteLine($"2: {((AlarmMachine)s).id}: {e.msg}");
+    }
+
+    public void alarm() {
+      alarm_event(this, new AlarmEvtArgs("Feuer!"));
+    }
+    private string id;
+  }
+  #+end_src
+
+* Events -- 6
+- Definition der Verwendung
+  \small
+  #+begin_src csharp
+  public class Program {
+      public static void Main() {
+          AlarmMachine am=new AlarmMachine("am1");
+          am.alarm_event += am.alarm_handler1;
+          am.alarm_event += am.alarm_handler2;
+      
+          am.alarm();
+      }
+  }
+  #+end_src

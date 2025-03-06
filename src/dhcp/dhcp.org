@@ -1,0 +1,92 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill DHCP
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Überblick
+- Dynamic Host Configuration Protocol
+- Zweck: Host automatisch mit Konfigurationsparameter
+  versorgen, z.B.:
+  - IP Adresse
+  - Subnetzmaske
+  - Default-Router
+  - DNS-Server
+  - Proxy-Konfiguration
+  - NTP-Server
+  - SMTP-Server
+  - IMAP und POP-Server
+
+* Eckpunkte
+- Transportprotokoll: UDP
+- Ports
+  - Server: 67
+  - Client: 68
+- Zuordnungsarten (Server)
+  - Manuelle Zuordnung (statisches DHCP)
+  - Automatische Zuordnung: permanente Zuordnung aus einem Bereich von IP
+    Adressen
+  - Dynamische Zuordnung: temporäre Zuordnung \to Lease!
+
+* Anforderung
+\vspace{1.5em}
+a. Client schickt DHCPDISCOVER
+   - Zieladresse 255.255.255.255 (oder spezifsche Subnetz-Broadcastadresse, wenn
+     bekannt)
+   - Quelladresse 0.0.0.0
+b. Server schickt DHCPOFFER
+   - Zieladresse 255.255.255.255
+     - außer Client fordert Unicast an, dann an MAC-Adresse und
+       im DHCPDISCOVER-Request bereitgestellte Adresse
+
+* Anforderung -- 2
+c. Client wählt ein Angebot mit DHCPREQUEST aus
+   - Zieladdresse 255.255.255.255
+     - mit Serveridentifier
+     - andere Server werten dies als Absage
+d. Server antwortet mit DHCPACK
+   - Unicast!
+   - beinhaltet Lease-Zeit
+e. Client /sollte/ Adresse mittels ARP überprüfen
+   - wg. doppelter Vergabe durch mehrere Server
+   - wenn belegt \to DHCPDECLINE
+
+* Freigabe
+- Ablauf der Lease
+  - Nach Ablauf der Hälfte der Least-Zeit \to Ansuchen um Verlängerung:
+    DHCPREQUEST (Unicast)
+  - Server
+    - wird mit DHCPACK (oder DHCPNAK) antworten
+    - antwortet nicht: neuer Versuch nach ⅞ der Lease-Zeit (per Broadcast)
+    - antwortet überhaupt nicht: Neuanforderung!
+- Vorzeitige Rückgabe durch Client: DHCPRELEASE
+   
+* Interessante Aspekte
+- mehrere Server \to Redundanz
+- für jedes Teilnetz eigener Server? \to DHCP Relay-Agent
+  - leitet alle Anfragen per Unicast an Server weiter
+- DHCP und DNS: Dynamic DNS, DDNS, DynDNS
+  - gemäß RFC 2136: UDP, TCP und DNS Nachrichtenformat
+    - Weitere Entwicklungen: RFC 2137, RFC 3007
+  - DDNS über HTTP je Provider: für Home-Server,...
+
+* Sicherheit
+- keine Authentifizierung, keine Geheimhaltung, keine Integrität!
+- physischer Zugriff zum Netzwerk
+  - Eigener DHCP Server...
+    - umleiten auf fremde Server
+    - DoS (Denial of Service) -- Angriff: falsche Informationen \to kein regulärer Zugriff
+  - bösartiger DHCP Client...
+    - wiederholte Anforderung von IP Adressen bis keine mehr vorhanden

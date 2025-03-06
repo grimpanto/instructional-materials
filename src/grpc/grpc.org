@@ -1,0 +1,260 @@
+#+TITLE: gRPC
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* gRPC
+\vspace{1em}
+- high performance RPC Framework
+  - \to Microservices
+- cross-platform
+  - Windows, Linux, MacOS, Android, iOS
+  - Python, \cpp, Java, =C#=, PHP, Node.js, Ruby, Go, Objective-C
+    - weitere: Swift, Dart, Rust, Haskell, Erlang, Elixir,...
+- für: "low latency, highly scalable, distributed systems"
+  - wird auch für IoT propagiert ("power-efficient")
+- mittels Extensions: load balancing, tracing, health checking, Authentifizierung
+- basiert auf
+  - protobuf Version 3
+  - HTTP/2
+- Google, aber: open source
+
+* Name?
+- abhängig von Version!
+- 1.0: g ... gRPC
+- 1.1: g ... good
+- 1.2: g ... green
+- 1.3: g ... gentle
+- ...
+- 1.18: g ... goose (Gans?)
+- 1.19: g ... gold
+
+Quelle: https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md
+  
+* Features
+- (bidirektionales) Streaming
+  - nicht nur Request/Response
+    - \to HTTP/2
+- protobuf (anstatt z.B. JSON) \to schnelles Serialisierien und Deserialisieren!
+  - 2016: Google Data Center: ca. 10 Milliarden RPC Calls/s
+- kürzere Entwicklungszeit
+  - neue Endpunkte leicht aufsetzbar
+- Kontext je Funktionsaufruf \to Daten über APIs weiterreichen
+- eingebaute Authentifizierung
+  - je Funktionsaufruf oder je Verbindung
+- Eigenschaften...
+  - lightweight, efficient, scalable
+
+* Einsatz und Alternativen
+- Einsatz
+  - Microservices
+  - (meist) intern
+- Alternativen
+  - CORBA, DCOM, Java RMI,...
+  - XML-RPC, SOAP mit WSDL (und UDDI)
+  - JSON-RPC
+  - REST, GraphQL
+
+* gRPC vs. REST
+- gRPC
+  - schneller
+    - Latenz
+    - Durchsatz
+    - Wiederverwendung und gleichzeitige Verwendung von Verbindungen (\to HTTP/2)
+  - robuster \to IDL, Versionen
+  - bequemer
+  - Unterstützung im Browser noch nicht...
+- REST
+  - allgemeiner
+  - /alle/ Programmiersprachen
+  - Menschen-lesbar
+  - kein Schema notwendig...
+
+* Überblick
+#+attr_latex: :height 4cm
+[[file:./overview.pdf]]
+
+* Projekt aufsetzen
+#+begin_src sh
+$ python -m venv example
+$ source example/bin/activate
+$ cd example
+$ python -m pip install --upgrade pip
+...
+$ python -m pip install grpcio
+...
+$ python -m pip install grpcio-tools
+...
+$ mkdir proto
+$ mkdir client
+$ mkdir server
+#+end_src
+
+* Workflow
+a. Schreiben einer Service-Definition (in =.proto=-Datei)
+b. aus =.proto=-Datei gRPC Code generieren (\to =protoc=)
+c. Server implementieren (z.B. in =C++=)
+d. Client schreiben, der Service in Anspruch nimmt
+   - mittels generierten Stub
+e. Server und Clients starten
+
+* Definition des Service
+\vspace{2em}
+=greeter.proto=:
+#+begin_example
+syntax = "proto3";
+
+package greeter;
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string message = 1;
+}
+#+end_example
+
+* Code generieren
+#+begin_src sh
+$ cd proto
+$ python -m grpc.tools.protoc --python_out=.\
+  --grpc_python_out=. --proto_path=. greeter.proto
+$ cp *.py ../client
+$ cp *.py ../server
+#+end_src
+
+* Server implementieren
+\vspace{1em}
+\small
+#+begin_src python
+from concurrent import futures
+import time, grpc
+import greeter_pb2, greeter_pb2_grpc
+
+class Greeter(greeter_pb2_grpc.GreeterServicer):
+    def say_hello(self, request, context):
+        return greeter_pb2.HelloResponse(message="Hello "
+          + request.name)
+def serve():
+    server = grpc.server(
+      futures.ThreadPoolExecutor(max_workers=10))
+    greeter_pb2_grpc.
+       add_GreeterServicer_to_server(Greeter(), server)
+    server.add_insecure_port('localhost:8888')
+    server.start()
+    try: while True: time.sleep(60)
+    except KeyboardInterrupt: server.stop(0)
+serve()
+#+end_src
+
+* Client implementieren
+#+begin_src python
+import grpc
+
+import greeter_pb2
+import greeter_pb2_grpc
+
+def run():
+  channel = grpc.insecure_channel('localhost:8888')
+  stub = greeter_pb2_grpc.GreeterStub(channel)
+  response = stub.say_hello(
+    greeter_pb2.HelloRequest(name='Maxi'))
+  print("Greeter client received: " +
+    response.message)
+
+run()
+#+end_src
+
+* Server und Client starten
+#+begin_src sh
+$ cd server
+$ python server.py&
+...
+$ cd ../client
+$ python client.py
+Greeter client received: Hello Maxi
+#+end_src
+
+* Arten eines API
+- unary API: Nachricht hin und zurück
+  #+latex: { \footnotesize
+  #+begin_src proto
+  rpc say_hello(HelloRequest) returns (HelloResponse){}
+  #+end_src
+  #+latex: }
+- streaming
+  - client streaming API: Stream von Nachrichten hin und Nachricht zurück
+    #+latex: { \footnotesize
+    #+begin_src proto
+    rpc many_reqs(stream HelloRequest) returns
+      (HelloResponse){}
+    #+end_src
+    #+latex: }
+  - server streaming API: Nachricht hin und Stream von Nachrichten zurück
+    #+latex: { \footnotesize
+    #+begin_src proto
+    rpc many_replies(HelloRequest) returns
+      (stream HelloResponse){}
+    #+end_src
+    #+latex: }
+  - bidirectional streaming API

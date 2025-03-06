@@ -1,0 +1,519 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Threadsafe Interfaces
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Problem gelöst?
+- Jeder kritische Abschnitt wird thread-safe gemacht
+  - d.h. mittels Mutex geschützt\pause
+- Keine Pointer oder Referenzen aus den kritischen Abschnitten herausführen:
+  - durch Zurückgeben eines Rückgabewertes
+  - durch Speichern in globaler (oder sonstig zugreifbarer) Variable
+  - durch Weitergeben an Funktionen, die nicht unter unserer Kontrolle stehen *(!!!)*\pause
+- Damit können also keine race conditions mehr auftreten! \pause
+  - *NEIN!*
+
+* Thread-safe Interface?
+#+begin_src C++
+// similiar to std::stack
+template<typename T>
+class Stack {
+  public:
+    int size() const;
+    bool empty() const;
+    T& top();  // undefined if empty
+    T const& top() const;
+    void push(T const&);
+    void push(T&&);
+    void pop();  // undefined if empty
+};
+#+end_src
+
+Probleme?
+
+* Thread-safe Interface? -- 2
+#+begin_center
+~s.size() == 1~
+#+end_center
+
+#+ATTR_LATEX: :align l|l
+| =t1=                       | =t2=                       |
+|--------------------------+--------------------------|
+| ~if (!s.empty()) {~        |                          |
+|                          | ~if (!s.empty()) {~        |
+| \hspace{5ex} ~v = s.top()~ |                          |
+|                          | \hspace{5ex} ~v = s.top()~ |
+|                          | \hspace{5ex} ~s.pop()~     |
+| \hspace{5ex} =// ...=      |                          |
+| \hspace{5ex} ~s.pop()~     |                          |
+
+\pause
+\to =s.pop()= wird aufgerufen, obwohl Stack leer ist \to undefiniertes Verhalten!\newline
+\to =v= verweist auf nicht existentes Objekt\newline
+
+* Thread-safe Interface: Lösungen
+- einfachste Lösung: =top= wirft Exception, wenn kein
+  Element am Stack ansonsten liefert es Kopie zurück.
+- Problem gelöst \pause ...ja, aber...
+  - Exception muss abgefangen werden und das macht
+    die Programmierung gegen diese Schnittstelle
+    mühsamer
+  - Aufruf von =empty()= ist jetzt redundant
+  - mehrmalige Verarbeitung eines Elementes
+
+* Thread-safe Interface? -- 3
+#+begin_center
+~s.size() == 2~
+#+end_center
+
+#+ATTR_LATEX: :align l|l
+| =t1=                       | =t2=                       |
+|--------------------------+--------------------------|
+| ~if (!s.empty()) {~        |                          |
+|                          | ~if (!s.empty()) {~        |
+| \hspace{5ex} ~v = s.top()~ |                          |
+|                          | \hspace{5ex} ~v = s.top()~ |
+| \hspace{5ex} =// ...=      | \hspace{5ex} =// ...=      |
+| \hspace{5ex} ~s.pop()~     |                          |
+|                          | \hspace{5ex} ~s.pop()~     |
+|                          |                          |
+
+\pause
+\to 1 Wert wird 2 Mal verarbeitet und ein Wert wird nicht gelesen (aber
+gelöscht)!\newline\pause
+\to Race condition!
+
+* Thread-safe Interface: Lösungen -- 2
+- einfachste Lösung:
+  - =top= wirft Exception, wenn kein Element am Stack ansonsten liefert es Kopie
+    zurück und
+  - =pop= wirft Exception, wenn Stack leer und =pop= vor Verarbeitung aufrufen.
+- Problem gelöst \pause ...ja, aber...
+  - Exception muss abgefangen werden und das macht
+    die Programmierung gegen diese Schnittstelle
+    mühsamer
+  - Aufruf von =empty()= ist jetzt redundant
+
+* Thread-safe Interface: Lösungen -- 3
+\vspace{1.5em}
+- Zusammenlegen von =top= und =pop=...
+  - =pop= liefert das oberste Element zurück
+  - =pop= wirft Exception, wenn kein Element am Stack
+- Problem gelöst \pause
+  - ja, aber...
+    #+begin_src C++
+    stack<vector<int>> s;
+    ...
+    v = s.pop();  // copy constructor
+    #+end_src
+    =vector= ist dynamische Datenstruktur \to heap!
+  - Wenn der Kopierkonstruktor eine =bad_alloc= Exception wirft, dann sind die
+    Daten verloren (vom Stack weg und nicht in =v= angekommen)!
+  - Lösung: aufsplitten in =top= und =pop=... \pause \to Race condition!!
+
+* Thread-safe Interface: Lösungen -- 4
+1. Referenzparameter:
+   #+begin_src C++
+   vector<int> result;
+   s.pop(result);
+   #+end_src
+   - Nachteile
+     - Instanz muss vorher angelegt werden
+     - Konstruktor könnte Parameter benötigen, die vorweg nicht verfügbar sind
+     - gespeicherter Typ muss zuweisbar sein
+
+* Thread-safe Interface: Lösungen -- 5
+2. [@2] Kopierkonstruktor oder Verschiebekonstruktor werfen keine Exception\newline
+   - Nachteile
+    - Tja, das muss erst einmal so sein
+3. Rückgabe eines Pointers auf das zurückgegebene Objekt
+   - Nachteile
+     - im Kontext von Nebenläufigkeit!
+     - manuelle Speicherverwaltung bei rohen Pointern:
+       daher =shared_ptr= sinnvoller
+     - Overhead bei einfachen Typen wie =int=
+4. Kombination von 1 mit 2 oder 3
+
+* Thread-safe Interface: Stack
+#+begin_src C++
+struct EmptyStack : public std::exception {};
+
+template<typename T>
+class ThreadsafeStack {
+  public:
+    ThreadsafeStack();
+    ThreadsafeStack(const ThreadsafeStack&);
+    ThreadsafeStack& operator=(
+      const ThreadsafeStack&) = delete;
+    bool empty() const;  // not needed any more
+    void push(T);
+    shared_ptr<T> pop();  // EmptyStack!
+    void pop(T&);  // EmptyStack!
+};
+#+end_src
+
+* Thread-safe Interface: Stack -- 2
+\vspace{1em}
+#+header: :exports code :results output :tangle src/stack.h :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <exception>  // stack.h
+#include <mutex>
+#include <stack>
+struct EmptyStack : public std::exception {};
+
+template<typename T>
+class ThreadsafeStack {
+    std::stack<T> data;
+    // because of copy-cons and empty()
+    mutable std::mutex m;
+  public:
+    ThreadsafeStack() {}
+    ThreadsafeStack(const ThreadsafeStack& o) {
+        std::lock_guard<std::mutex> lock(o.m);
+        // don't do it in member initializer list!
+        // don't forget: you need the lock!
+        data = o.data;  }
+#+end_src
+
+* Thread-safe Interface: Stack -- 3
+\vspace{1.25em}
+#+header: :exports code :results output :tangle src/stack.h :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    ThreadsafeStack& operator=(
+      const ThreadsafeStack&) = delete;
+    void push(T value) {
+        std::lock_guard<std::mutex> lock(m);
+        data.push(value);
+    }
+    std::shared_ptr<T> pop() {
+        std::lock_guard<std::mutex> lock(m);
+        if (data.empty()) throw EmptyStack();
+        auto const res{std::make_shared<T>(
+          data.top())};
+        data.pop();
+        return res;
+    }
+#+end_src
+\vspace{-0.75em}
+- =shared_ptr=, =weak_ptr:= sind thread-safe, aber *nicht* die Ressource auf
+  die zugegriffen wird!
+
+* Thread-safe Interface: Stack -- 4
+#+header: :exports code :results output :tangle src/stack.h :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    void pop(T& value) {
+        std::lock_guard<std::mutex> lock(m);
+        if (data.empty()) throw EmptyStack();
+        value = data.top();
+        data.pop();
+    }
+    // not recommended:
+    // if (!s.empty())
+    //   s.pop(); // exc. EmptyStack may occur!
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(m);
+        return data.empty();
+    }
+};
+#+end_src
+
+* Thread-safe Interface: Stack -- 5
+#+header: :exports code :results output :tangle src/teststack.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // teststack.cpp
+#include <thread>
+#include "stack.h"
+using namespace std;
+
+void reader(ThreadsafeStack<int>& s) {
+    int i;
+    while (true) {
+        this_thread::sleep_for(500ms);
+        //s.pop(i);    // per reference
+        i = *s.pop();  // using shared pointer
+        cout << i << endl;
+    }
+}
+#+end_src
+
+* Thread-safe Interface: Stack -- 6
+#+header: :exports code :results output :tangle src/teststack.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+void writer(ThreadsafeStack<int>& s) {
+    int i{};
+    while (true) {
+        s.push(i);
+        ++i;
+        this_thread::sleep_for(500ms);
+    } }
+    
+int main() {
+    ThreadsafeStack<int> s;
+    thread r{reader, ref(s)};
+    thread w{writer, ref(s)};
+    r.join();
+    w.join();  }
+#+end_src
+
+* Granularität beim Locken
+- feingranulares Locking (fine-grained) vs. grobgranulares Locking
+  (coarse-grained)
+  - Wird Lock zu lange gehalten, dann sinkt Performance\pause
+    - \to Lock frühzeitig zurückgeben, z.B. mit =unique_lock=\pause
+  - Wird Lock zu kurz gehalten, dann Race Condition\pause
+- Ein Lock soll nur die kürzest notwendige Zeit gehalten werden,
+  um die Operation auszuführen.
+
+* Lazy initialization
+- Wann muss nicht gelockt werden?
+  - bei ausschließlichen read-only Zugriff
+- Was ist, wenn Daten nur erzeugt, aber
+  dann nicht mehr verändert werden...
+- Zwei Möglichkeiten
+  - globale Daten initialisiert zur Übersetzungszeit oder
+    beim Starten des Programmes (vor Lesezugriff)
+    - kein Lock notwendig
+    - aber Speicher wird auch verbraucht, wenn diese Daten
+      u.U. überhaupt nicht gelesen werden\pause
+  - Daten werden initialisiert, wenn diese benötigt werden
+    (lazy initialization) \to Lock nur bei der Initialisierung
+    notwendig (da mehrfaches Initialisieren!)
+
+* Lazy initialization -- 2
+#+begin_src C++
+shared_ptr<Element> ptr;
+void use_ptr() {
+    if (!ptr) {
+        ptr.reset(new Element);
+    }
+    ptr->do_something();
+}
+#+end_src
+\to nicht threadsafe!
+
+* Lazy initialization -- 3
+#+begin_src C++
+shared_ptr<Element> ptr;
+mutex m;
+void use_ptr() {
+    lock_guard<mutex> lock{m};
+    if (!ptr) {
+        ptr.reset(new Element);
+    }
+    ptr->do_something();
+}
+#+end_src
+\to threadsafe\pause,
+- aber Lock auch beim Lesen notwendig
+- fehleranfällig
+- Flaschenhals des Locks: Serialisierung!
+
+* Lazy initialization -- 4
+\vspace{1em}
+Double checked locking:
+\vspace{1em}
+#+begin_src C++
+shared_ptr<Element> ptr;
+mutex m;
+void use_ptr() {
+    if (!ptr) {  // <--
+        lock_guard<mutex> lock{m};
+        if (!ptr) {
+            ptr.reset(new Element);
+        }
+    }
+    ptr->do_something();
+}
+#+end_src
+\pause \to Race condition möglich!\newline
+\pause Abfrage des Pointers ist *nicht* synchronisiert mit
+Setzen (in =reset=)!
+
+* Lazy initialization -- 5
+\vspace{1em}
+#+header: :exports code :results output :tangle src/once.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // once.cpp
+#include <thread>
+#include <mutex>
+
+using namespace std;
+shared_ptr<int> ptr;
+once_flag resource_flag;
+void init_resource() {
+    ptr.reset(new int{42});
+    cout << "ptr reset to " << *ptr << endl;
+}
+
+void use_ptr() {
+    call_once(resource_flag, init_resource);
+    cout << *ptr << endl;
+}
+#+end_src
+
+* Lazy initialization -- 6
+#+header: :exports code :results output :tangle src/once.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    thread t1{use_ptr};
+    thread t2{use_ptr};
+    t1.join(); t2.join();
+}
+#+end_src
+
+: ptr reset to 42
+: 42
+: 42
+
+* Rekursives Locken
+#+header: :exports code :results output :tangle src/nonrecursive_locking.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // nonrecursive_locking.cpp
+#include <thread>
+#include <mutex>
+
+using namespace std;
+
+class Counter {
+    int data;
+    mutex m;
+  public:
+    bool zero() {
+       lock_guard<mutex> lock{m};
+       return data == 0;
+    }
+#+end_src
+
+* Rekursives Locken -- 2
+#+header: :exports code :results output :tangle src/nonrecursive_locking.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    void incr() {
+        lock_guard<mutex> lock{m};
+        ++data;
+    }
+    void decr() {
+        lock_guard<mutex> lock{m};
+        if (!zero()) { --data; }
+    }
+};
+int main() {
+    Counter cnt;
+    cnt.decr();
+}
+#+end_src
+
+\pause terminiert auf meinem System nicht!
+
+* Rekursives Locken -- 3
+- Nicht korrekt! \pause
+- da mehrfaches Locken in einem Thread ein nicht definiertes Verhalten aufweist!
+- =mutex= muss gegen =recursive_mutex= ausgetauscht werden!
+  - Ressourcen-intensiver: Zähler + Thread-ID müssen verwaltet und gespeichert
+    werden
+  \pause
+- oder: Aufteilung in private und öffentliche Methoden!
+  - öffentliche Methoden thread-sicher
+    - rufen private Methoden auf
+  - private Methoden nicht thread-sicher
+
+* Rekursives Locken -- 4
+\vspace{1em}
+#+header: :exports code :results output :tangle src/recursive_locking.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // recursive_locking.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+class Counter {
+    int data;
+    recursive_mutex m;
+  public:
+    bool zero() {
+       lock_guard<recursive_mutex> lock{m};
+       return data == 0;
+    }
+    void incr() {
+        lock_guard<recursive_mutex> lock{m};
+        ++data;
+    }
+#+end_src
+
+* Rekursives Locken -- 5
+#+header: :exports code :results output :tangle src/recursive_locking.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    void decr() {
+        lock_guard<recursive_mutex> lock{m};
+        if (!zero()) {
+            --data;
+        }
+    }
+};
+
+int main() {
+    Counter cnt;
+    cnt.decr();
+}
+#+end_src
+
+* private/öffentliche Methoden
+#+header: :exports code :results output :tangle src/private_public.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // private_public.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+class Counter {
+    int data;
+    mutex m;
+    bool zero_() {
+       return data == 0;
+    }
+    void incr_() {
+        ++data;
+    }
+#+end_src
+
+* private/öffentliche Methoden -- 2
+#+header: :exports code :results output :tangle src/private_public.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    void decr_() {
+        if (!zero_()) {
+            --data;
+        }
+    }
+  public:
+    bool zero() {
+        lock_guard<mutex> lock{m};
+        return zero_();
+    }
+    void incr() {
+        lock_guard<mutex> lock{m};
+        incr_();
+    }
+#+end_src
+
+* private/öffentliche Methoden -- 3
+#+header: :exports code :results output :tangle src/private_public.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+    void decr() {
+        lock_guard<mutex> lock{m};
+        decr_();
+    }
+};
+
+int main() {
+    Counter cnt;
+    cnt.decr();
+}
+#+end_src

@@ -1,0 +1,692 @@
+#+TITLE: Datentypen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+# +LATEX_HEADER:\usepackage{enumitem}
+# +LATEX: \setlistdepth{4}
+# +LATEX: \renewlist{itemize}{itemize}{4}
+# +LATEX: \setitemize{label=\usebeamerfont*{itemize item}\usebeamercolor[fg]{itemize item}\usebeamertemplate{itemize item}}
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Daten
+- Analoge Daten
+  - Bild, Sprache, Messwerte,...
+  - \to AD und DA Wandler
+- Digitale Daten
+  - Zeichendaten
+    - Text (unformatiert)
+    - Formatierte Daten
+  - Binärdaten
+
+* Digitale Daten
+- unstrukturiert
+  - Textdaten: Folge von Zeichen
+  - Binärdaten: Folge von Bits/Bytes
+- strukturiert
+  - Textdaten: CSV, XML, JSON, YAML,...
+  - Binärdaten: Zahlen, PNG, JPEG, GIF,...
+    - Objekte: z.B. Java, C#, Python,...
+      
+* strukturiert vs. semi-strukturiert
+- strukturierte Daten
+  - Daten müssen einem definierten Datenbankmodell entsprechen
+- semi-strukturierte Daten
+  - Daten unterliegen keiner formalen Struktur eines Datenbankmodells
+    - z.B. Datenbankschema
+  - Daten tragen einen Teil der Strukturinformation in sich tragen
+  - gebräuchliche Datenformate
+    - XML
+    - JSON
+
+* Informationsgehalt
+\vspace{1.5em}
+- Ein /Bit/ ist
+  - die Maßeinheit für die Datenmenge digitaler Daten
+  - die Stelle einer Binärzahl
+- Einheiten
+  \vspace{-0.5em}
+  \small
+  #+attr_latex: :align llllp{3cm}
+  | Einheit  | Präfix | Abkürzung | Anzahl    | Menge                                                 |
+  |----------+--------+-----------+-----------+-------------------------------------------------------|
+  | Bit      |        | b         |           | ja/nein                                               |
+  | Byte     |        | B         | 2^3 Bits   | ein ASCII-Zeichen                                     |
+  | Kibibyte | Kibi   | KiB       | 2^{10} Bytes | halbe Seite Text                                      |
+  | Mebibyte | Mebi   | MiB       | 2^{20} Bytes | Buch ohne Bilder                                      |
+  | Gibibyte | Gibi   | GiB       | 2^{30} Bytes | 2 Musik CDs                                           |
+  | Tebibyte | Tebi   | TiB       | 2^{40} Bytes | Textmenge einer großen Bibliothek                     |
+  | Petibyte | Pebi   | PiB       | 2^{50} Bytes | ca. Datenmenge: Augen und Ohren in 100 Jahren     |
+  | Exibyte  | Exbi   | EiB       | 2^{60} Bytes | ...                                                   |
+  - Achtung: 100 GB \ne 100 \times 2^{30} = 107'374'182'400
+
+* Variable
+- in Programmiersprache (wie Java, C# oder \cpp)
+- beinhaltet digitale Daten
+- Merkmale
+  - Bezeichner (identifier)
+  - (konkreter) Datentyp (\to statische Typbindung!)
+    - \to Größe
+  - Adresse
+- aber: Variable vs. Name (\to Python)
+
+* Datentyp
+\vspace{1em}
+- Definition: Datentyp (engl. data type), kurz: Typ
+  - definiert Menge von Operationen
+- Operation ... Verhalten
+  - in OO Programmiersprachen: Methode (method), in \cpp: member function
+  - \to Signatur + Spezifikation des Verhaltens
+  - Signatur
+    - Name der Operation
+    - Anzahl und Reihenfolge der Parametertypen
+    - Rückgabewert zählt in Java, C, \cpp *nicht* zur Signatur\\
+      (\to Überladen)
+  - Prototyp
+    - Begriff in C und \cpp
+    - Rückgabetyp, Name der Funktion, Anzahl und Reihenfolge der Parametertypen
+      (\to Headerdatei)
+
+* Typspezifikation
+- Angabe der Signatur
+  - unterspezfiziert
+  - \to *Interface*
+- Axiomatische oder algebraische Spezifikation
+  des Verhaltens
+  - voll spezifiziert
+  - \to *abstrakter Datentyp* (abstract data type, ADT)
+    - Achtung: hat nichts mit einer /abstrakten Klasse/ zu tun
+- Spezifikation der Implementierung
+  - überspezifiziert
+  - \to konkreter Datentyp
+  - \to *Klasse* ...und vordefinierte Typen wie =int=, =bool=, usw.
+
+* Unterscheidungen
+- Art des Typs
+  - Werttypen: keine Identität, nur Wert
+    - primitive oder fundamentale Typen\\
+      -- eingebaut, keine Methoden\\
+      -- z.B. Java: =int= vs. =Integer=
+    - \to Wertobjekte
+  - Objekt- oder Referenztypen
+- Eingebaut (built-in) oder benutzerdefiniert (user defined)
+- Multpilizität: skalar oder mehrwertig
+
+* Skalar vs. mehrwertig
+\vspace{1em}
+- skalare Datentypen (einwertig, engl. scalar)
+- mehrwertige Datentypen (engl. multi-valued)
+  - zusammengesetzte DT (engl. compound, composite, structure, aggregate data
+    type, record)
+    - z.B. =struct=, =class=, =union=
+    - Bitfield, z.B. in \cpp:
+      #+begin_src C++
+      struct IOPort {
+          unsigned read:4,
+          unsigned write:4
+      };
+      #+end_src
+  - Container DT
+    - Sequenz: Reihenfolge!
+    - mengenwertig: keine Reihenfolge!
+    - Abbildungstyp (mapping; assoziatives Array, Dictionary, Map, Multimap)
+    - Tree, Graph
+
+* Skalare Datentypen
+\vspace{1.5em}
+- arithmetischer Typ
+  - Integraler Typ (siehe C, \cpp): rechnen und bitweise Operationen!
+    - Ganze Zahlen, wie z.B. =int=, =long=
+    - Boolscher Typ: =bool=
+    - Zeichentyp: =char=
+  - Gleitkommazahl, wie z.B. =float=, =double=, =long double=
+  - komplexe Zahl
+    - Python: =numbers.Complex=
+    - \cpp: =std::complex=
+- Aufzählungstyp, wie z.B. =enum=
+- Zeiger, Referenzen
+\vspace{.1em}
+- ordinale Typen (diskrete Werte)\\
+  \hspace{1em}\to Integrale und Aufzählungstypen
+  
+* Sequenztypen
+- String: index, nur Zeichen, je nach Implementierung veränderbar oder nicht
+- Liste: index, veränderbar
+- Tupel: index, nicht veränderbar (zumindest nicht Größe)
+- Array (Feld): index, Größe nicht veränderbar, Elemente des /selben/ Typs,
+  liegen /hintereinander/ im Speicher
+  - 2 Arten von mehrdimensionalen Arrays
+    - rechteckige sequentielle Arrays
+    - Array von Arrays
+- Stream: nur sequentieller Zugriff!
+
+* 2-dim Arrays in \cpp
+- rechteckige sequentielle Arrays
+  #+latex: { \small
+  #+begin_src C++
+  char ttt_field[3][3]{
+      {'x', 'o', 'x'},  // (0,0), (0,1), (0,2)
+      {'o', 'o', 'x'},  // (1,0),...
+      {'o', 'x', 'x'}  
+  };
+  #+end_src
+  #+latex: }
+  \vspace{1em}
+- Array von Arrays
+  #+latex: { \small
+  #+begin_src C++
+  // e.g. an array of C-strings
+  char* days[]{"montag", "dienstag", /* ... */ };
+  #+end_src
+  #+latex: }
+
+* 2-dim Arrays in Java
+- "zweidimensionale" Arrays sind /immer/ Arrays von Arrays
+  \vspace{0.5em}
+- Beispiel 1
+  #+latex: { \small
+  #+begin_src java
+  String[][] day_entries = new String[31][];
+  day_entries[0] = new String[1];
+  day_entries[0][0] = "my first daily log";
+  day_entries[1] = new String[3];
+  day_entries[1][0] = "my second daily log";
+  day_entries[1][1] = "my third daily log";
+  #+end_src
+  #+latex: }
+  \vspace{1em}
+- Beispiel 2
+  #+latex: { \small
+  #+begin_src java
+  char[][] chess_field = new int[8][8];
+  chess_field[0][0] = 'T';
+  chess_field[0][7] = 'T';
+  #+end_src
+  #+latex: }
+
+* 2-dim Arrays in C#
+- rechteckige sequentielle Arrays
+  #+latex: { \small
+  #+begin_src java
+  //             rows x columns
+  int[,] mat=new int[3,3];
+  mat[0,0] = 1;
+  mat[0,1] = 2;
+  mat[0,2] = 3;        
+  #+end_src
+  #+latex:}
+- non-rectangular (jagged)
+  \footnotesize
+  #+begin_src csharp
+  int[][] nonrect={
+      new int[]{0},
+      new int[]{1,2},
+      new int[]{3,4,5},
+      new int[]{6,7,8,9}};
+  WriteLine(nonrect[2][1]); // -> 4
+  #+end_src
+  
+* Listen in Python
+\vspace{1.5em}
+- "zweidimensionale" Listen sind immer eine Liste von Listen
+  #+latex: { \footnotesize
+  #+begin_src python
+  >>> mat = [[0,0,0],[0,0,0],[0,0,0]]
+  >>> mat
+  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+  >>> mat[0][1] = 1
+  >>> mat
+  [[0, 1, 0], [0, 0, 0], [0, 0, 0]]
+  #+end_src
+  #+latex:}
+- Sequenzmultiplikation
+  #+latex: { \footnotesize
+  #+begin_src python
+  >>> "a" * 3
+  'aaa'
+  >>> lst = [1] * 9
+  >>> lst
+  [1, 1, 1, 1, 1, 1, 1, 1, 1]
+  >>> mat2 = [[0, 0, 0]] * 3
+  >>> mat2
+  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+  >>> mat2[0][1] = 1
+  >>> mat2
+  #+end_src
+  \pause
+  #+begin_src python
+  [[0, 1, 0], [0, 1, 0], [0, 1, 0]]
+  #+end_src
+  #+latex:}
+
+* Lexikographisches Vergleichen
+- Vergleichen siehe Folien Mengen bzgl. Totalordnung
+  - $2.7182818 \le 3.1415926$ aber $1+2.718j \nleq 1+3.141j$
+- Und mit Sequenzen?
+  - Lexikographisch \equiv Sortieren wie im Lexikon
+  - in Python
+    - ="abc" < "abd"= \to =True=
+    - =(1, 1) < (1, 2)= \to =True=
+    - =[1, 2, 3] < [1, 2, 4]= \to =True=\pause
+  - in =C++=
+    - ="abc" < "abd"= \to =true=
+    - =std::pair{1, 1} < std::pair{1, 2}= \to =true=
+    - =std::tuple{1, 2, 3} < std::tuple{1, 2, 4}= \to =true=
+    - =std::vector{1, 2, 3} < std::vector{1, 2, 4}= \to =true=
+    - =operator<= überladen!
+      
+* Mengenwertige und Abbildungs DT
+\vspace{1.5em}
+- Mengenwertige DT
+  - Keine Reihenfolge!
+  - Set: keine Doppelten!
+  - Bag: mehrfache Vorkommen!
+  - Bitstring (bit set, bit array, bit vector, bit map): Folge von Bits im
+    Speicher mit effizientem Zugriff auf einzelne Bits (setzen, zurücksetzen,
+    abfragen, maskieren)
+- Abbildungs DT
+  - Key \to Value
+  - /Menge/ von Keys
+    - Keine doppelten Keys! (außer so etwas wie Multi-Map)
+    - aber: Reihenfolge bei gewissen Implementierungen gegegeben
+  - Values: keine Einschränkung
+- Keys: oft nicht veränderbar oder undefiniertes Verhalten!
+    
+* Eigenschaften
+\vspace{1.5em}
+- Nicht veränderbar
+  - wie implementiert?
+    - \to /immutable objects/
+- Keine Doppelten \to keine gleichen Elemente
+  - wie ist Gleichheit definiert?
+    - Gleichheit der Werte bzw. Gleichheit der Identität\\
+      \to gleich vs. dasselbe
+  - wie wird Gleichheit implementiert?
+    - z.B. in Java: Methoden =equals= und =hashCode=
+  - Erstellung eines gleichen Objektes: Kopie!
+    - Beachte: Übergabe per-value vs. per-reference!
+    - \to seicht vs. tief (engl. shallow vs. deep)!
+- Reihenfolge vs. keine Reihenfolge
+  - wie ist Reihenfolge definiert?
+    - z.B. lexikographische Ordnung bei Strings
+  - wie wird diese Reihenfolge implementiert?
+    - z.B. in Java: Interface =Comparable=
+
+* Immutable objects
+\vspace{1.5em}
+- Keine Veränderung /nach/ der Initialisierung
+- Implementierung entweder
+  - Markierung mittels Schlüsselwörter
+    - wie =const=, =final= je nach Programmiersprache
+  - Datentyp lässt keine Veränderung zu
+    - z.B. Klasse =String= in Java, Python, C#
+- Warum?
+  - kein Kopieren notwendig
+  - Referenz (Pointer): ohne Bedenken weitergeben!
+  - können gut als Keys in Abbildungs DT verwendet werden
+  - automatisch thread-safe
+
+\small
+#+begin_quote
+Classes should be immutable unless there's a very good reason to make them
+mutable....If a class cannot be made immutable, limit its mutability as much as
+possible. \hfill  -- Joshua Bloch (Effective Java)
+#+end_quote
+
+* Value Object (Wertobjekt)
+\vspace{1em}
+- Was?
+  - Gleichheit basiert nur auf Wert (Inhalt)
+    - nicht auf Identität
+  - keine Identität
+    - u.U. vorhanden, wie z.B. Adresse
+    - \to werden bei Übergabe kopiert (nicht in Java!)
+  - sind immutable objects
+    - Achtung aber in C#: =System.ValueType=!
+- z.B. eine Münze
+  - Wert und Währung
+  - unabhängig von einer Seriennummer (id)
+  - zwei Münzen sind gleich, wenn Wert und Währung gleich
+  - kann nicht geändert werden
+- z.B. =str=, =tuple= in Python, =String= in Java und C#,...
+- Gegenteil: Entity Object (oder kurz Entity)
+
+* Parameterübergabe
+\vspace{1.5em}
+- per-value
+  - es wird kopiert: Achtung bei großen Datentypen
+- per-reference
+  - als Ein/Ausgabeparameter verwendbar
+  - es wird die Adresse kopiert \to Performance
+  \pause
+  \footnotesize
+  #+header: :exports both :results output :tangle src/parameter.cpp :flags -std=c++17
+  #+begin_src C++
+  #include <iostream>
+  #include <vector>
+  using namespace std;
+  
+  void scale(vector<double>& v, const double& factor) {
+      for (size_t i{}; i != v.size(); ++i) {
+          v[i] /= factor;  }}
+  
+  int main() {
+      vector<double> values{5, 4, 3, 2, 1};
+      scale(values, values[0]);
+      for (const auto& v : values)
+          cout << v << ' ';  }
+  #+end_src
+
+  #+RESULTS:
+  : 1 4 3 2 1
+
+* COMMENT In \cpp
+- /object/ \equiv Speicher, der
+  - Adresse hat
+  - einen Typ hat und einen
+  - Wert (/value/) beinhaltet
+- /value/ \equiv 
+
+* Gleich vs. dasselbe
+\vspace{1.5em}
+- "das gleiche Fahrrad" vs. "dasselbe Fahrrad"
+  - gleich: Gleichheit bezüglich Daten
+  - dasselbe: Gleichheit bezüglich Identidät
+- Beispiel
+  \small
+  #+begin_src python
+  >>> a = [1, 2, 3]; b = [1, 2, 3]
+  >>> a == b
+  True
+  >>> a is b
+  False
+  >>> id(a)  # z.B.:
+  3068807852
+  >>> id(b)
+  3068807852
+  >>> c = a  # Kopie der Referenz!
+  >>> id(a) == id(c)
+  True
+  #+end_src
+  - Referenztypen in Java defaultmäßig gleich bzgl. Identität!
+
+* Kopieren: seicht vs. tief
+\vspace{1.5em}
+\small
+#+begin_src python
+>>> arr1 = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+>>> arr2 = arr1  # Kopie der Referenz!
+>>> arr2[0][0] = "X"
+>>> arr1
+[['X', 2, 3], [4, 5, 6], [7, 8, 9]]
+>>> arr3 = arr1.copy()  # seichte Kopie!
+>>> arr3[0] = [1, 2, 3]
+>>> arr1
+[['X', 2, 3], [4, 5, 6], [7, 8, 9]]
+>>> arr3[1][1] = "Y"
+>>> arr1
+[['X', 2, 3], [4, 'Y', 6], [7, 8, 9]]
+>>> import copy
+>>> arr4 = copy.deepcopy(arr1)  # tiefe Kopie!
+>>> arr4[2][2] = "Z"
+>>> arr4
+[['X', 2, 3], [4, 'Y', 6], [7, 8, 'Z']]
+>>> arr1
+[['X', 2, 3], [4, 'Y', 6], [7, 8, 9]]
+#+end_src
+
+* Datentyp vs. Datenstruktur
+\vspace{1.5em}
+- Datentyp: legt Verhalten fest
+- Datenstruktur: legt Struktur fest
+  - um (neuen) Datentyp zu /implementieren/
+  - wird in der Regel nur für mehrwertige DT verwendet
+- Datenstrukturen
+  - Array
+  - Liste: sll, dll, Array
+  - Set: BSB (bst), Hasharray
+  - Map: bst, hasharray
+  - Stack: Array, sll
+  - Queue, Deque: sll, dll, Array
+  - Ringbuffer: Array
+  - Heap: Array
+  - Priority Queue: Heap
+  - Graph: Array, Map
+
+* Abstrakter Datentyp (ADT)
+\vspace{1em}
+- Ein ADT...
+  - definiert einen Typ
+  - definiert eine Menge von Operationen (genannt Interface)
+    - beschreibt WAS aber *nicht* WIE (durch formale Definition)
+  - beschränkt Zugriff auf Typ über Operationen
+    - kein direkter Zugriff auf die Daten
+- Formale Beschreibung
+  - mathematisch-axiomatisch
+  - mathematisch-algebraisch
+
+* Was also /ist/ ein ADT?
+- So etwas ähnliches wie eine Klasse (mit Instanzvariable und Methoden)?
+  - NEIN, denn:
+    - beschreibt WIE
+- dann vielleicht eine abstrakte Klassen?
+  - NEIN, denn:
+    - beschreibt teilweise WIE
+- aha, also so etwas wie Java Interfaces?
+  - NEIN, denn:
+    - beschreibt weder WAS noch WIE
+    - nur Signatur der Operationen!
+
+* Stack -- Signatur
+\begin{align*}
+&empty\_stack:\; \to Stack\\
+&is\_empty: Stack \to bool\\
+&push: Stack \times Element \to Stack\\
+&pop: Stack \to Stack\\
+&top: Stack \to Element
+\end{align*}
+
+* Stack -- Semantik: axiomatisch
+\begin{align*}
+&x : Element\\
+&s : Stack\\
+&is\_empty(empty\_stack()) = true\\
+&is\_empty(push(empty\_stack(), x)) = false\\
+&pop(empty\_stack()) \to \text{Error}\\
+&pop(push(s, x)) = s\\
+&top(empty\_stack()) \to \text{Error}\\
+&top(push(s, x)) = x\\
+&push(pop(s), top(s)) = 
+\begin{cases}
+s & \text{falls }\hspace{1em} is\_empty(s) = false\\
+\to \text{Error} &  \text{sonst}
+\end{cases}
+\end{align*}
+
+* Stack -- Semantik: algebraisch
+\begin{align*}
+&s \in \{()\} \cup \{(x_1,...,x_n) | x_i \in Element, n \in N, n \ge 1\}\\
+&empty\_stack() = ()\\
+&is\_empty(s) = (s = ())\\
+&push(s, x) =
+\begin{cases}
+(x,) & \text{falls } s = ()\\
+(x_1,...,x_n,x) & \text{falls } s = (x_1,...,x_n)
+\end{cases}\\
+&top(x) = 
+\begin{cases}
+x_n & \text{falls } s = (x_1,...,x_n)\\
+\to \text{Error} &  \text{sonst}
+\end{cases}\\
+&pop(s) = (x_1,...,x_{n-1}) \quad \text{falls } s = (x_1,...,x_n)\\
+&pop(s) = 
+\begin{cases}
+() & \text{falls } s = (x)\\
+\to \text{Error} & \text{sonst}
+\end{cases}
+\end{align*}
+
+* Generische DT
+\vspace{1em}
+- betrifft statisch getypte Programmiersprachen
+  - z.B. Java, \cpp, C#
+- Definition eines DT enthält Typvariable
+- Ziel: Verwendung eines DT (Datenstruktur) mit verschiedenen Typen
+- prinzipiell 2 Möglichkeiten
+  - derselbe Code für jeden konkreten Typ und dynamische Bindung
+    - Java (nur Objekttypen!), C#
+  - Ersetzung des Typparameters mit dem konkreten Typ
+    - \cpp, eingeschränkt: C# (bei Werttypen)
+- Möglichkeiten bzw. Komplexität steigend: Java \to C# \to \cpp
+
+* Generische Programmierung
+\vspace{1em}
+- Definition einer Funktion (oder auch Klasse samt Methoden) enthält
+  Typvariablen
+  - aber: unabhängig von Klassen oder Vererbung!
+- Ziel: Verwendung einer Funktion mit verschiedenen Typen
+- Beispiel: Entwicklen einer Funktion =add(x, y)=
+  - Lösung in \cpp mit mehreren überladenen Funktionen:
+    #+begin_src C++
+    int add(int x, int y) {
+        return x + y;
+    }
+    double add(double x, double y) {
+        return x + y;
+    }
+    // ...
+    #+end_src
+  - \to immer der "gleiche" Code!
+
+* Generische Programmierung -- 2
+- Beispiel:
+  - Lösung mit einem (Funktions)Template:
+    
+    #+latex: { \scriptsize
+    #+begin_src C++
+    // Voraussetzung: Operator + ist überladen
+    // anderenfalls Compilerfehler!
+    template <typename T>
+    T add(T x, T y) { return x + y; }
+    
+    int main() {
+        cout << add(1, 2) << endl;
+        cout << add(1.0, 2.0) << endl;
+        // cout << add("abc", "def") << endl;  // -> error
+        cout << add(string{"abc"}, string{"def"}) << endl;
+    }
+    #+end_src
+    #+latex: }
+- \to Reduzierung der Implementierung
+
+* (Template) Meta-Programming
+\vspace{1em}
+\scriptsize
+#+begin_src C++
+#include <iostream>
+
+using namespace std;
+using ull = unsigned long long;
+
+template <ull n>
+struct Factorial {
+    static constexpr ull value{n * Factorial<n - 1>::value};
+};
+
+template <>
+struct Factorial<0> {
+    static constexpr ull value{1};
+};
+
+int main() {
+    Factorial<0> f0;
+    cout << f0.value << endl;  // -> 1
+    cout << Factorial<1>::value << endl;  // -> 1
+    cout << Factorial<2>::value << endl;  // -> 2
+    cout << Factorial<64>::value << endl;  // -> 9223372036854775808
+}
+#+end_src
+
+* COMMENT Spezifische Aspekte
+\vspace{2em}
+- Python: kennt nur Objekte
+  - Sequenzen
+    - unveränderlich: Strings, Tupels, Bytes
+    - veränderlich: Listen, Bytearrays
+  - Mengen: Mengen, unveränderliche Mengen (=frozenset=)
+  - Mappings: Dictionaries
+  - Callable Typen: Funktionen, Methoden,...
+  - Module, Klassen, Instanzen
+- \cpp
+  - fundamentale Datentypen: arithmetische, =void=, =nullptr_t=
+  - zusammengesetzte (auch compound)
+    - benutzerdefinierte Datentypen: Klassen, Strukturen, Union
+    - abgeleitete (derived) Datentypen (auch compound): Referenzen, Pointer,
+      Arrays, Funktionen, Aufzählungen
+
+* COMMENT Spezifische Aspekte -- 2
+\vspace{1em}
+- Java
+  - primitive Datentypen: =int=, =double=,...
+  - Objekt-(oder Referenz-)Typen: =class=, =enum=, Arrays, =interface=
+- C#
+  - Unterscheidung in
+    - eingebaute (built-in) Typen
+    - custom Typen
+  - Werttypen (value types) (von =System.ValueType= abgeleitet)
+    - integrale Typen: =byte=, =sbyte=, =int=,...
+    - =enum=
+    - =struct=
+  - Referenztypen (nicht von =System.ValueType= abgeleitet): =class=, =delegate=,
+    Array, =interface=
+

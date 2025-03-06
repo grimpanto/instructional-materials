@@ -1,0 +1,224 @@
+#+LaTeX_CLASS: beamer
+#+TITLE: Prädikatenlogik
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\overline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Motivation
+- Argument
+  - Alle Menschen sind sterblich.
+  - Sokrates ist ein Mensch.
+  - Also: Sokrates ist sterblich.
+- Intuitiv: deduktiv gültig
+- Aber: mit AL nicht nachzuweisen
+  - $V(p) =$ Alle Menschen sind sterblich.
+  - $V(q) =$ Sokrates ist ein Mensch.
+  - $V(r) =$ Sokrates ist sterblich.
+  - $r$ folgt in AL sicher nicht aus $p$ und \(q\)!
+
+* Erweiterungen zur Aussagenlogik
+- Eigenschaften zu einem Objekt
+  - z.B., dass Sokrates ein Grieche ist
+- Beziehungen zwischen Objekten beschreiben
+  - z.B., dass Maxi mit Mini verheiratet ist
+- existentielle Aussagen treffen: /es gibt ein x, so dass.../
+  - z.B., dass es mindestens Griechen, der Sokrates heißt
+- universelle Aussagen treffen: /für jedes x gilt, dass.../
+  - z.B., dass alle Menschen sterblich sind
+
+* Begriffe
+- einfache Aussagen
+  - Satzgegenstand: Subjekte, Individuen
+    - z.B. Sokrates, Maxi, Mini
+    - Alle betrachteten Gegenstände (Objekte, Individuen) werden in einer Menge
+      zusammengefasst: Individuenbereich
+  - Satzaussage: Prädikate
+    - z.B. sterblich, ist verheiratet mit
+- komplexe Aussagen
+  - Verknüpfung mittels und, oder, nicht
+- quantifizierende Aussagen
+  - Alle...
+  - Es existiert ein..
+
+* Die Syntax der Prädikatenlogik
+- Grundzeichen
+- Terme
+- Formeln
+- Freie und gebundene Variablen
+
+* Syntax - Grundzeichen
+\vspace{1.5em}
+- Individuenkonstanten: $a$, $b$, $c$,... wenn nötig mit Indizes $a_1$, $a_2$,...
+- Individuenvariablen: $x$, $y$, $z$, wenn nötig mit Indizes
+  - Achtung: diese haben nichts mit den aussagenlogischen Variablen
+    gemein!
+- Funkionssymbole: $f$, $g$,...
+- Prädikatssymbole: $P$, $Q$, $R$..., wenn mit Indizes
+- Jedem Funktionssymbol bzw. Prädikatssymbol ist eine
+  Stelligkeit zugeordnet
+- Junktoren: $\neg$, \conj, \disj, \imp, \biimp
+- Quantorenzeichen:
+  - Allquantor: $\forall$
+  - Existenzquantor: $\exists$
+- Hilfszeichen: (, )
+
+* Syntax - Terme
+- Definition eines Terms
+  - Jede Konstante ist ein Term
+  - Jede Variable ist ein Term
+  - Ist $f$ ein n-stelliges Funktionssymbol und sind $t_1,t_2,...,t_n$
+	  Terme, dann ist auch $f(t_1,t_2,...,t_n)$ ein Term.
+- Beispiele für Terme, wenn natürliche Zahlen Konstanten sind und
+  Addition ("add") und Multiplikation ("mul") Funktionen sind:
+  - $42$
+  - $\text{add}(x, 7)$
+  - $\text{add}(3, \text{mul}(4, 2))$
+
+* Syntax - Formeln
+- Definition einer Formel (Zeichen: $A,B,C,D,E,F,G$)
+  - Ist $P$ ein n-stelliges Prädikatensymbol und sind $t_1,t_2,...,t_n$
+	Terme, so ist $P(t_1,t_2,...,t_n)$ eine (atomare) Formel.
+  - Für jede Formel $F$ ist auch $\neg F$ eine Formel.
+  - Für alle Formeln $F$ und $G$ sind auch $F \conj G$, $F \disj G$, 
+    $F \imp G$ oder $F \biimp G$ Formeln.
+  - Ist $x$ eine Variable und $F$ eine Formel, so sind auch
+	$\exists x: F$ und $\forall x: F$
+	Formeln.
+- Beispiele für Formeln, wenn "even" ein einstelliges und "equal"
+  ein zweistelliges Prädikat sind:
+  - $\text{even}(42)$
+  - $\text{equal}(42, \text{add}(2, \text{mul}(4, 10))$
+  - $\forall x: \text{even}(\text{mul}(2, x))$
+  - $\exists x: (\forall y: \text{equal}(\text{add}(x, y), y))$
+
+* Syntax - Freie & gebundene Var.
+Jede Gegenstandsvariable x, die im Bereich eines Quantors
+$\forall x:$ oder $\exists x:$ liegt, heißt /gebundene
+Variable/, anderenfalls /freie Variable/.
+
+Eine Variable kann in einer Formel sowohl frei als auch gebunden
+vorkommen:
+
+\[\forall x:(\exists y:(P(x,y) \conj Q(y,z,x)) \imp R(y,x)) \lequiv S(x,z)\]
+
+Eine Formel, die keine freien Variablen enthält, nennt man
+/geschlossene Formel/.
+
+* Die Semantik der Prädikatenlogik
+- Allgemeines
+- Beispiel einer Interpretation
+
+* Semantik - Allgemeines
+- Grundzüge ähnlich der AL
+- Anstatt Bewertung gibt es die Interpretation I:
+  - Angabe einer nichtleeren Menge D, die den Bereich
+    festlegt, auf den sich die Quantoren beziehen.
+  - Zuordnung von Individuenkonstante zu Gegenstand
+    aus D.
+  - Bedeutung der Prädikatbuchstaben
+    - Jedem einstelligen Prädikat wird eine Eigenschaft
+      zugeordnet, die Individuen aus D haben können.
+    - Jedes mehrstelliges Prädikat legt eine Beziehung zwischen
+      Individuen aus D fest.
+    - D.h. Prädikate sind n-stellige Relationen über dem
+      Individuenbereich D.
+- Wie bei AL hängt die Wahrheit eines Satzes von PL immer
+  von der Interpretation ab.
+
+* Semantik - Bsp. einer Interpretation
+\vspace{1em}
+- Interpretation I:
+  - $D =$ Menge der natürlichen Zahlen
+  - $a:$ 1 
+  - $b:$ 2 
+  - $c:$ 3 
+  - $d:$ 4 
+  - $e:$ 5
+  - $P(x), \text{even}(x):$ x ist eine gerade Zahl
+  - $Q(x), \text{odd}(x):$ x ist eine ungerade Zahl
+  - $R(x), \text{prim}(x):$ x ist eine Primzahl
+  - $S(x, y), \text{less}(x, y):$ x ist kleiner als y
+  - $T(x, y), \text{greater}(x, y):$ x ist größer als y
+  - $U(x, y), \text{divisible}(x, y):$ x ist teilbar durch y
+  - $V(x, y, z):$ x ist die Summe von y und z
+- \lto Weitere Formalisierung der Semantik wird weggelassen
+
+* Äquivalenzen und Konsequenzen
+- Äquivalenzen
+  - $\neg \forall x:A \lequiv \exists x:\lnegx A$
+    - $\forall x:P(x) \lequiv \neg \exists x:\lnegx P(x)$
+    - `Alle Menschen haben eine Mutter' \lequiv `Es gibt keinen Mensch, der keine Mutter hat'.
+  - $\neg \exists x:A \lequiv \forall x:\lnegx A$
+  - $\forall x:A \conj \forall x:B \lequiv \forall x: (A \conj B)$
+  - $\exists x: A \disj \exists x:B \lequiv \exists x: (A \disj B)$
+  - $\forall x: (\forall y:A) \lequiv \forall y:(\forall x:A)$
+  - $\exists x: (\exists y:A) \lequiv \exists y:(\exists x:A)$
+- Konsequenzen
+  - $\forall x: A \disj \forall x:B \limp \forall x: (A \disj B)$
+  - $\exists x: (A \conj B) \limp \exists x: A \conj \exists x:B$
+  - $\exists x: (\forall y:A) \limp \forall y:(\exists x:A)$
+
+* Schlüsse
+Analog zu den aussagenlogischen Schlüssen lassen sich auch
+prädikatenlogischen Schlussregeln finden, wie z.B.:
+- $A \conj \forall x:(A \imp B) \limp B$
+- $\forall x:A \conj (\exists x:A \imp B) \limp \exists x:B$
+
+* Übergang zur PL höherer Stufe
+- Prädikatenlogik erster Stufe
+  - Die Individuenvariable generalisiert über Individuen
+  - Für Prädikate gibt es keine Variable!
+- Prädikatenlogik höherer Stufe
+  - Auch über Prädikate wird generalisiert
+    - Für alle Eigenschaften gilt,...
+    - Es gibt ein Prädikat...

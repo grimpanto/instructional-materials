@@ -1,0 +1,186 @@
+#+TITLE: JDBC
+#+AUTHOR: Dr. Günter Kolousek
+#+EMAIL:  ko@htlwrn.ac.at
+#+DATE:   2012-09-09
+
+#+SETUPFILE: "../beamer_latex.org"
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation]
+#+BEAMER_FRAME_LEVEL: 2
+#+BEAMER_HEADER_EXTRA: \usetheme{boxes}\addheadbox{structure}{\tiny\quad\insertsection\qquad\insertsubsection\hfill\insertpagenumber\quad}\useinnertheme{rectangles}\usecolortheme[RGB={0,118,190}]{structure}\usefonttheme{structurebold}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* Allgemeines
+
+*** Zweck und Aufbau
+	- Zweck
+	  - ("low level") Zugriff auf relationale DB
+	  - 3 Tätigkeiten
+		- Mit DB verbinden
+		- Anweisungen über Verbindung senden
+		- Ergebnisse lesen
+	- Aufbau: 4 Teile
+	  - JDBC API
+	  - JDBC Driver Manager
+	  - JDBC Test Suite
+	  - JDBC-ODBC Bridge
+
+*** Arten von JDBC Treibern 
+	- Typ 1: Mapping zu anderem DB-API (z.B. ODBC)
+	- Typ 2: Teilweise in Java, teilweise native
+	- Typ 3: In Java, via Middleware Server zum DBMS
+	- Typ 4: In Java, mittels Netzwerk zum DBMS
+
+*** Sqlite
+	- http://sqlite.org
+	- inprocess DB (vs. Client/Server)
+	- DB in einer Datei
+	- plattformübergreifend
+	  - 32 vs. 64 Bit
+	  - big-endian vs. little-endian
+	- verschiedene Programmiersprachen
+	- "small"
+	- Alternativen: Oracle, MS-SQL, PostgreSQL, MySQL, Java DB (Apache Derby)
+
+
+* Verbindungen
+
+*** Verbindung herstellen
+	- DriverManager laden
+	  #+begin_src java
+	  Class.forName("org.sqlite.JDBC");
+      #+end_src
+	- Verbindung herstellen
+      #+begin_src java
+      Connection conn =
+        DriverManager.getConnection("jdbc:sqlite:guestbook.db");
+	  #+end_src
+	  - Connection String von Driver abhängig
+		- Meist: =jdbc:dbms:dbname=
+	  - überladene Methoden
+		- mit Benutzername und Passwort
+		- mit =Properties= Objekt (auch Benutzer & Passwort)
+	- Alles im =java.sql= Paket!
+
+
+* Anweisungen
+
+*** Einfache Anweisungen 1
+	- Anweisung anlegen
+	  #+begin_src java
+	  Statement stat = conn.createStatement();
+      // ...
+      stat.close();
+	  #+end_src
+	- Update
+      #+begin_src java
+      stat.executeUpdate("drop table if exists guestbook");
+      int count = stat.executeUpdate(
+        "update guestbook set text='x' where email='x@y.z'");
+	  #+end_src
+
+*** Einfache Anweisungen 2
+    - Query
+	  #+begin_src java
+	  ResultSet rs = 
+          stat.executeQuery("select * from guestbook");
+	  #+end_src
+	- Allgemein
+	  #+begin_src java
+	  boolean type = stat.execute("select * from guestbook");
+      // true -> ResultSet
+      // false -> update count oder kein Ergebnis
+	  #+end_src
+
+*** =ResultSet= 1
+	- Ergebnismenge einer Abfrage
+	- verwaltet Cursor zur aktuellen Row (kein DB Cursor!)
+	- iterierbar mit Methode =next=
+	  - =true= weitere Row vorhanden
+      - =false= keine weitere Row
+	- Defaultmäßig
+	  - nur eine Richtung iterierbar
+      - nur ein Mal iterierbar
+	  - nicht veränderbar
+	- Verschiedene Methoden für Spaltenzugriff
+	  - mittels Name, z.B.: ~rs.getString("email");~
+      - mittels Spaltenindex (beginnt mit 1!), z.B. =rs.getInt(1);=
+	  - verschiedene Typen, z.B.: =getBoolean=, =getDate=, =getDouble=
+
+*** =ResultSet= 2 
+	#+begin_src java
+	ResultSet rs = stmt.executeQuery("SELECT a, b, c FROM tab1");
+
+    while (rs.next()) {
+        int a = rs.getInt("a");
+        String b = rs.getString(2);
+        float c = rs.getFloat("c");
+    }
+	#+end_src
+
+*** =ResultSet= 3
+	- Verändern:
+	  #+begin_src java
+	  rs.updateString("email", "x.y@example.com");
+	  rs.updateRow();
+	  #+end_src
+    - Einfügen:
+	  #+begin_src java
+	  rs.moveToInsertRow();
+	  rs.updateInt("age", 46);
+	  rs.insertRow();
+	  rs.moveToCurrentRow();
+	  #+end_src
+	- Löschen: =rs.deleteRow();=
+
+*** Transaktionen
+	- Default: autocommit
+	  - jede SQL-Anweisung = eigene Transaktion
+	- =conn.setAutoCommit(false);=
+	- =conn.commit();=
+	- =conn.rollback();=
+	- Weiters, z.B.:
+	  - =Savepoint s1 = conn.setSavepoint(); ... conn.rollback(s1);=
+	  - =conn.releaseSavepoint(s1);=
+	  - Isolation Levels:
+		- =out.println(conn.getTransactionIsolation())=
+		- =int level = Connection.TRANSACTION_READ_COMMITTED;=
+		  =conn.setTransactionIsolation(level);=
+
+*** =PreparedStatement=
+	- beliebig oft ausführbar (mit verschiedene Werten)
+	- mit SQL Statement angelegt
+	- zum DBMS gesendet, dort übersetzt
+	- Beispiel:
+	  #+begin_src java
+      String update = "update users " +
+        "set email= ? where name= ?";
+	  PreparedStatement prep = conn.prepareStatement(update);
+      while (evenMoreUpdates) {
+          prep.setString(1, "a@b.c");
+          prep.setString(2, "a");
+          int count = prep.executeUpdate();
+          // auch: executeQuery bzw. execute
+      }
+	  #+end_src
+
+
+* Alternativen
+
+*** Alternativen
+	- Object-Relational Mapping
+	  - JEE: Java Persistence API (JPA)
+	  - Hibernate (auch mit JPA)
+	  - Apache JDO: Übermenge von JPA, "beliebige Datenquellen"
+		- DataNucleus: RDBMS, Excel, XML, JSON, db4o, LDAP
+	- OO Datenbank
+	  - db4o für Java *und* .Net
+	- NoSQL
+	  - Dokumentenorientiert: MongoDB
+	  - Graphen DB: Neo4j
+	  - Key-value: Berkley DB
+		- Datenstrukturorientiert: Redis
+      - ...

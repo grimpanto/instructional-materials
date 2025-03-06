@@ -1,0 +1,180 @@
+
+
+#+TITLE: Python \hfill Unit 12\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \setminted{escapeinside=´´}
+
+* Dictionary - 1
+#+BEGIN_SRC python
+>>> phone_book = {}
+>>> phone_book
+{}
+>>> type(phone_book)
+<class 'dict'>
+>>> phone_book["maxi"] = 4711
+>>> phone_book
+{'maxi': 4711}
+>>> phone_book["anton"] = 1234
+>>> phone_book
+{'maxi': 4711, 'anton': 1234}
+>>> len(phone_book)
+2
+#+END_SRC
+
+* Dictionary - 2
+#+BEGIN_SRC python
+>>> phone_book["anton"]
+1234
+>>> phone_book["mini"]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+KeyError: 'mini'
+>>> "anton" in phone_book
+True
+>>> "mini" in phone_book
+False
+#+END_SRC
+
+* Dictionary - 3
+#+BEGIN_SRC python
+>>> phone_book = {"maxi": 4711, "anton": 1234, 1234: "anton"}
+>>> for key in phone_book:
+...     print(key, phone_book[key])
+...
+1234 anton
+maxi 4711
+anton 1234
+>>> for key, value in phone_book:
+...     print(key, value)
+...
+1234 anton
+maxi 4711
+anton 1234
+#+END_SRC
+
+* Dictionary - 4
+#+BEGIN_SRC python
+>>> phone_book.keys()
+dict_keys([1234, 'maxi', 'anton'])  # "fauler" Typ
+>>> keys = _
+>>> type(keys)
+<class 'dict_keys'>
+>>> 1234 in keys
+True
+>>> for k in keys:
+...     print(k, end=" ")
+...
+1234 maxi anton >>>
+>>>
+#+END_SRC
+
+* Dictionary - 5
+#+BEGIN_SRC python
+>>> list(keys)
+[1234, 'maxi', 'anton']
+>>> tuple(keys)
+(1234, 'maxi', 'anton')
+>>> values = phone_book.values()
+>>> print(values)
+dict_values(['anton', 4711, 1234])  # "fauler" Typ
+>>> print(phone_book.items())
+dict_items([(1234, 'anton'), ('maxi', 4711), ('anton', 1234)])
+>>> for key, value in phone_book:
+...     print(key, value)
+...
+#+END_SRC
+
+* Datei - 1
+#+BEGIN_SRC python
+>>> f = open("todo.org", "w")
+>>> type(f)
+<class ´'´_io.TextIOWrapper'>
+>>> print(f)
+<_io.TextIOWrapper name='todo.org' mode='w' encoding='UTF-8'>
+>>> f.closed
+False
+>>> f.write("* TODO Milch kaufen\n")
+20
+>>> f.close()
+>>> f.closed
+True
+#+END_SRC
+
+* Datei - 2
+#+BEGIN_SRC python
+>>> f = open("todo.org", "r")
+>>> f.read()
+'* TODO Milch kaufen\n'
+>>> f.close()
+>>> f = open("todo.org", "w")
+>>> f.write("* TODO Brot kaufen\n")
+19
+>>> f.close()
+>>> f = open("todo.org", "r")
+>>> f.read()
+'* TODO Brot kaufen\n'
+>>> f.close()
+#+END_SRC
+
+* Datei - 3
+#+BEGIN_SRC python
+>>> f = open("todo.org", "a")
+>>> f.write("* TODO Milch kaufen\n")
+20
+>>> f.writelines(["* TODO Senf kaufen\n",\
+ "* TODO Wurst kaufen\n"])
+>>> f.close()
+>>> f = open("todo.org", "r")
+>>> f.readlines()
+['* TODO Brot kaufen\n', '* TODO Milch kaufen\n',\
+ '* TODO Senf kaufen\n', '* TODO Wurst kaufen\n']
+>>> f.readlines()
+[]
+#+END_SRC
+
+* Datei - 4
+#+BEGIN_SRC python
+>>> f.seek(0)
+0
+>>> print(f.readline())
+´*´ TODO Brot kaufen
+
+>>> print(f.readline().strip())
+´*´ TODO Milch kaufen
+>>> print(f.readline().rstrip())
+´*´ TODO Senf kaufen
+>>> print(f.readline().strip())
+´*´ TODO Wurst kaufen
+>>> print(f.readline().strip())
+
+>>> f.close()
+#+END_SRC
+* Datei - 5
+#+BEGIN_SRC python
+>>> f = open("todo.org", "r")
+>>> for line in f:
+...     print(line, end="")
+...
+´*´ TODO Brot kaufen
+´*´ TODO Milch kaufen
+´*´ TODO Senf kaufen
+´*´ TODO Wurst kaufen
+>>> f.tell()
+78
+>>> f.seek(0)
+0
+>>> f.tell()
+0
+>>> f.close() 
+#+END_SRC

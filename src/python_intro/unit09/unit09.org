@@ -1,0 +1,79 @@
+
+
+#+TITLE: Python \hfill Unit 09\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Priorität der Operatoren
+\setbeamertemplate{itemize/enumerate body begin}{\footnotesize}
+a. Klammern: =()=
+b. Indexzugriff: =x[]=
+c. =**=
+d. unär: =+x=, =-x=, =~x=
+e. =*=, =/=, =//=, =%=
+f. =+=, =-=
+g. ~<<~, ~==~
+h. =&=
+i. =^=
+j. =|=
+k. =in=, =not in=, =<=, =<==, ~==~, =!==, =>==, =>=
+l. =not=
+m. =and=
+n. =or=
+
+* =while=
+#+BEGIN_SRC python
+>>> i = 0
+>>> while i < 5:
+...     print(i)
+...
+0
+1
+2
+3
+4
+#+END_SRC
+
+* =random=
+#+BEGIN_SRC python
+>>> import random
+>>> random.randint(1, 10)
+9
+>>> random.randint(1, 10)
+4
+>>> random.randint(1, 10)
+1
+>>> random.random()  # [0, 1)
+0.8272398647717966
+>>> random.random()
+0.18698048453531002
+#+END_SRC
+
+* =finally=
+#+BEGIN_SRC python
+def div(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        print("division by zero")
+    finally:
+        print("last words")
+
+>>> div(4, 2)
+last words
+2.0
+>>> div(4, 0)
+division by zero
+last words
+>>>
+#+END_SRC

@@ -1,0 +1,483 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Synchronisation
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Threads und gemeinsame Daten
+- Ein (Haupt)Vorteil von Threads ist...\newline \pause Zugriff auf gemeinsame Daten\pause
+- Regelung des Zugriffes auf gemeinsame Ressourcen von kritischen Abschnitten (engl. critical sections)\pause
+  - \to Race conditions (...Wettkampfbedingung, Gleichzeitigkeitsbedingung)
+    - Ergebnis einer Operation hängt von der zeitlich verschränkten Ausführung
+      mit Operationen ab
+  - \to Synchronisation um wechselseitigen Ausschluss (engl. mutual exclusion)
+    zu erreichen
+  - \to zustandsabhängige Steuerung
+  - nicht verteilt vs. verteilt
+
+* Problematik
+#+header: :exports code :results none :tangle src/problem.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // problem.cpp
+#include <thread>
+using namespace std;
+int balance{15};
+
+void withdraw(int amount, bool& success) {
+    if (balance >= amount) {
+        balance -= amount;
+        success = true;
+    } else {
+        success = false;
+    }
+}
+#+end_src
+
+* Problematik -- 2
+#+header: :exports code :results none :tangle src/problem.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    bool success1{};
+    bool success2{};
+    thread t1{withdraw, 10, ref(success1)};
+    thread t2{withdraw, 6, ref(success2)};
+    t1.join();
+    t2.join();
+    cout << balance << ' ' << success1 << ' ';
+    cout << success2 << endl;
+}
+#+end_src
+
+Erwartetes Ergebnisse wären: =9 0 1= oder =5 1 0=\newline \pause
+allerdings geht auch: =-1 1 1=\newline \pause
+oder z.B. auch: =9 1 1= (!)
+
+* Problematik -- 3
+| =t1=             | =t2=             | =balance= |
+|----------------+----------------+---------|
+| ~15 >= 10~       |                | =15=      |
+| ~balance - 10~   |                | =15=      |
+|                | ~15 > 6~         | =15=      |
+|                | ~balance - 6~    | =15=      |
+| ~balance = 5~    |                | =5=       |
+|                | ~balance = 9~    | =9=       |
+|                | ~success = true~ |         |
+| ~success = true~ |                |         |
+
+* Race Conditions
+- mehrere Threads greifen zumindest schreibend auf gemeinsame Ressource zu
+  - Write/Write
+  - Read/Write
+- data race
+  - \cpp Begriff für Race Condition, die sich auf ein einziges Speicherobjekt bezieht
+  - \to undefiniertes Verhalten!
+
+* Race Conditions -- 2
+- Write/Write\newline
+  mind. 2 Threads schreiben
+  #+begin_src C++
+  void double() {
+      x = x * 2;  // write
+  }
+
+  void halve() {
+      x = x / 2;  // write
+  }
+  #+end_src
+
+* Race Conditions -- 3
+- Read/Write\newline
+  ein Thread liest, einer schreibt
+  #+begin_src C++
+  void calc_sides(double r, double phi) {
+      a = r * sin(phi);  // write
+      b = r * cos(phi);
+  }
+
+  void calc_area() {
+      A = (a * b) / 2;  // read
+  }
+  #+end_src
+
+* Lösung
+\vspace{1.5em}
+- Erreichung eines wechselseitigen Ausschlusses (engl. mutual exclusion)
+- durch Synchronisation
+- verschiedene Synchronisationsmechanismen existieren
+- in \cpp wird hauptsächlich der Synchronisationmechanismus "Mutex" verwendet!
+  - Klasse =mutex=
+    - =lock()= und =unlock()=
+    - wenn schon gelockt und =lock()=:\\
+      \to anderer Thread: blockiert\\
+      \to gleicher Thread: undefiniertes Verhalten\\
+    - =unlock()= nur vom gleichen Thread, ansonsten undefiniertes Verhalten
+  - Klasse =recursive_mutex=
+- lösen lediglich der data race Situation:
+  - =atomic<int> balance{15};= \hfill (aus =<atomic>=)
+
+* Mutex
+\vspace{1em}
+#+header: :exports code :results none :tangle src/mutex.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // mutex.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int balance{15};
+mutex m;
+void withdraw(int amount, bool& success) {
+    m.lock();
+    if (balance >= amount) {
+        balance -= amount;
+        success = true;
+    } else {
+        success = false;
+    }
+    m.unlock();
+}
+#+end_src
+
+#+header: :exports none :results output :tangle src/mutex.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    bool success1{};
+    bool success2{};
+    thread t1{withdraw, 10, ref(success1)};
+    thread t2{withdraw, 6, ref(success2)};
+    t1.join();
+    t2.join();
+    cout << balance << ' ' << success1 << ' ';
+    cout << success2 << endl;
+}
+#+end_src
+
+* Mutex und Exceptions
+\vspace{1em}
+Was wäre wenn eine Exception vor =unlock()=...?\newline\pause
+abfangen... ist aber auch mühsam (und fehleranfällig)\pause
+
+#+header: :exports code :results none :tangle src/mutex2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // mutex2.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int balance{15};
+mutex m;
+void withdraw(int amount, bool& success) {
+    lock_guard<mutex> guard{m};
+    if (balance >= amount) {
+        balance -= amount;
+        success = true;
+    } else { success = false; } }
+#+end_src
+
+#+header: :exports none :results output :tangle src/mutex2.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+int main() {
+    bool success1{};
+    bool success2{};
+    thread t1{withdraw, 10, ref(success1)};
+    thread t2{withdraw, 6, ref(success2)};
+    t1.join();
+    t2.join();
+    cout << balance << ' ' << success1 << ' ';
+    cout << success2 << endl;
+}
+#+end_src
+
+* Begriffe
+- Synchronisation
+  #+begin_quote
+  Synchronisation (griechisch: syn \equiv „zusammen“, chrónos \equiv „Zeit“)
+  bezeichnet das zeitliche Aufeinander-Abstimmen von Vorgängen, Uhren und
+  Zeitgebern. Synchronisation sorgt dafür, dass Vorgänge gleichzeitig (synchron)
+  oder in einer bestimmten Reihenfolge ablaufen. \hfill Wikipedia
+  #+end_quote
+
+  \pause
+
+  Synchronisation beschreibt ein Verfahren wie Prozesse oder Threads sich
+  untereinander abstimmen, um Aktionen in einer bestimmten Reihenfolge
+  auszuführen.
+
+* Begriffe -- 2
+- Betriebsmittel, Ressource (engl. resource): Speicher, Dateien, I/O Kanäle,
+  Netzwerkverbindungen, Locks, Prozessor, Bildschirm, Drucker
+- Kritischer Abschnitt (engl. critical section): Programmcode von dem auf
+  gemeinsam genutzte Ressourcen zugegriffen wird
+- Wechselseitiger Ausschluss (engl. mutual exclusion): Verfahren, das anderen
+  Prozessen (oder Threads) den Zutritt in kritischen Abschnitt verwehrt,
+  solange ein Prozess (oder Thread) sich in solch einem befindet.
+
+* Deadlock
+#+header: :exports code :results output :tangle src/deadlock.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // deadlock.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int main() {
+    mutex m1{};
+    mutex m2{};
+    thread t1{[&]() { m1.lock(); m2.lock();  //...
+                     m1.unlock(); m2.unlock(); }};
+    thread t2{[&]() { m2.lock(); m1.lock();  //...
+                      m2.unlock(); m1.unlock(); }};
+    t1.join();
+    t2.join();
+}
+#+end_src
+
+\pause
+\to Lösung: Locken in gleicher Reihenfolge (geht aber nicht immer)!
+
+* Deadlock -- 2
+- Deadlock: Eine Situation in der eine Gruppe von Prozessen (Threads)
+  für immer blockiert ist, weil jeder der Prozesse auf Ressourcen
+  wartet, die von einem anderem Prozess in der Gruppe gehalten werden.
+
+- Achtung: Deadlocks auch ohne Locks möglich, z.B.
+  | =t1=         | =t2=         |
+  |--------------+--------------|
+  | ~t2.join();~ |              |
+  |              | ~t1.join();~ |
+
+* Deadlock -- 3
+Notwendige Bedingungen, damit ein Deadlock entsteht (Coffman)
+- Circular wait: Zwei oder mehr Prozesse bilden eine geschlossene
+  Kette von Abhängigkeiten insoferne, dass ein Prozess auf die Ressource des
+  nächsten Prozesses wartet.
+- Hold and wait: Processe fordern neue Ressourcen an, obwohl sie
+  den Zugriff auf andere Ressourcen behalten.
+- Mutual exclusion: Der Zugriff auf die Ressourcen ist exklusiv
+- No preemption: Ressourcen können Prozessen nicht entzogen
+  werden.
+
+* Vermeiden eines Deadlocks
+... indem eine der Bedingungen nicht erfüllt ist!
+
+- Circular wait: Ressourcen werden in gleicher Reihenfolge angeordnet
+  und so vergeben (siehe oben).
+- Hold and wait: Alle Ressourcen werden auf einmal zugeteilt (wenn frei)
+  oder keine Ressourcen werden zugeteilt.
+- Mutual exclusion: exklusiven Zugriff z.B. durch Spooling auflösen (z.B.
+  Drucker)
+- No preemption: Ressource wird Prozess entzogen und anderem Prozess
+  zugeteilt.
+
+* Funktion =std::lock=
+#+header: :exports code :results output :tangle src/lock.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // lock.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int main() {
+    mutex m1{};  mutex m2{};
+    thread t1{[&]() { lock(m1, m2);  //...
+              m1.unlock(); m2.unlock(); }};
+    thread t2{[&]() { lock(m1, m2);  //...
+              m2.unlock(); m1.unlock(); }};
+    t1.join();  t2.join();
+}
+#+end_src
+
+* =lock= & =lock_guard=
+\vspace{1em}
+#+header: :exports code :results output :tangle src/lock.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // lock.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int main() {
+    mutex m1{};  mutex m2{};
+    thread t1{[&]() { lock(m1, m2);
+          lock_guard<mutex> lock1(m1, adopt_lock);
+          lock_guard<mutex> lock2(m2, adopt_lock);
+          /* ... */ }};
+    thread t2{[&]() { lock(m1, m2);
+          lock_guard<mutex> lock1(m1, adopt_lock);
+          lock_guard<mutex> lock2(m2, adopt_lock);
+          /* ... */ }};
+    t1.join();  t2.join();
+}
+#+end_src
+
+* =scoped_lock= (ab =C++17=)
+\vspace{1em}
+Äquivalent zur vorhergehenden Lösung!
+#+header: :exports code :results output :tangle src/scoped_lock.cpp :flags -std=c++1y -lpthread :main no
+#+begin_src C++
+#include <iostream>  // scoped_lock.cpp
+#include <thread>
+#include <mutex>
+using namespace std;
+int main() {
+    mutex m1{};  mutex m2{};
+    thread t1{[&]() {
+          scoped_lock sl(m1, m2);
+          /* ... */ }};
+    thread t2{[&]() {
+          scoped_lock sl(m1, m2);
+          /* ... */ }};
+    t1.join();  t2.join();
+}
+#+end_src
+
+* Auflösen eines Deadlocks
+1. Erkennen des Deadlocks
+2. Deadlock beseitigen
+  - Ressource entziehen (siehe oben)
+  - Prozess terminieren
+
+* Konkrete Tipps zum Vermeiden
+- Locks immer gleichzeitig (atomar) anfordern (=lock= verwenden)
+  - nicht immer einfach/möglich!
+- keinen weiteren Lock anfordern, wenn schon einer gehalten wird (nested locks)
+- keine benutzerdefinierte Funktionen aufrufen, wenn ein Lock gehalten wird
+  - dieser könnte einen weiteren Lock anfordern (\to nested locks)
+- Locks in gleicher Reihenfolge anfordern
+  - nicht immer einfach/möglich!
+
+* Interface von =mutex=
+#+begin_src C++
+constexpr mutex() noexcept;
+mutex(const mutex&) = delete;
+void lock();  // system_error
+bool try_lock();  // non blocking
+void unlock();
+#+end_src
+
+- d.h. kein Kopieren eines =mutex= möglich
+- gibt auch nicht blockierende Lösung mit =try_lock=
+
+* Konkrete Tipps zum Vermeiden -- 2
+\vspace{1em}
+- Vor Eintritt eines Deadlocks einen "Schritt zurück" (engl. backoff)
+  und eine oder mehrere Locks freiwillig zurückgeben:
+
+  #+begin_src C++
+  while (true) {
+      m1.lock();
+      if (m2.try_lock()) {
+          break;
+      }
+      m1.unlock();
+  }
+  
+  // critical section
+
+  m2.unlock();
+  m1.unlock();
+  #+end_src
+  
+* Interface von =lock_guard=
+#+begin_src C++
+explicit lock_guard(mutex_type&);
+// adopt... assume that mutex is already locked
+lock_guard(mutex_type&, adopt_lock_t);
+lock_guard(const lock_guard&) = delete;
+#+end_src
+
+- kann ebenfalls nicht kopiert werden
+- gibt aber Lock *immer* frei!!
+
+* Weitere Aspekte
+- =lock()= kann von einem Thread nicht mehrmals aufgerufen werden \to
+  =recursive_mutex= (sinnvoll bei Methoden von Klassen)
+- =lock()= hat kein Timeout \to =timed_mutex=
+  - außerdem: =recursive_timed_mutex=
+- =mutex= und =lock_guard= können nicht in anderen Gültigkeitsbereich
+  verschoben werden \to =unique_lock=
+- keine Differenzierung in lesende und schreibende Zugriffe
+- keine Zugriffskontrolle: jeder kann =lock()= aufrufen
+    
+* COMMENT Synchronisierte Ausgabe
+#+header: :exports code :tangle src/syncout.cpp
+#+begin_src C++
+#include <iostream>  // span.cpp
+#include <syncstream>
+#include <semaphore>
+
+using namespace std;
+
+int main() {
+    {
+        osyncstream synced_out(std::cout); // synchronized wrapper for std::cout
+        synced_out << "Hello, ";
+        synced_out << "World!";
+        synced_out << std::endl; // flush is noted, but not yet performed
+        synced_out << "and more!\n";
+    } // right now, all will be written
+    osyncstream(std::cout) << "Hello, " << "World!" << '\n';
+}
+#+end_src
+
+* Grundlegende Probleme
+- Deadlock (siehe oben)
+- Starvation (dt. verhungern)
+  - Thread/Prozess wird andauernd Zugriff auf Ressource verweigert
+    (und kann damit nicht fertig werden)
+  - Beispiele
+    - stark befahrene Vorrangstraße mit Kreuzung
+    - Thread mit niedriger Priorität kommt nicht zur Ausführung...
+- Livelock
+  - kein Fortschritt von zwei abhängigen Threads, obwohl beide nicht blockiert
+    sind
+  - Bsp.: Eingangstüre und 2 Personen wollen eintreten, aber beide wollen
+    jeweils dem Anderen den Vortritt geben
+
+* Livelock
+\vspace{1em}
+#+header: :exports code :results output :tangle src/livelock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+#include <thread>  // livelock
+#include <mutex>
+#include <functional>
+using namespace std;
+//using namespace std::literals;
+void enter(mutex& me, mutex& other) {
+    bool entered{};
+    while (!entered) {
+        me.lock();
+      // simulate both reaching door simultaneously
+        this_thread::sleep_for(500ms);
+        if (other.try_lock()) {// should fail often
+            me.unlock();   other.unlock();
+            entered = true;
+        } else me.unlock();  // ...the other first!
+        } }
+#+end_src
+
+* Livelock - 2
+#+header: :exports code :results output :tangle src/livelock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+int main() {
+    mutex a_enters;
+    mutex b_enters;
+
+    thread friend_a{enter,
+                    ref(a_enters), ref(b_enters)};
+    thread friend_b{enter,
+                    ref(b_enters), ref(a_enters)};
+
+    friend_a.join();
+    friend_b.join();
+}
+#+end_src
+
+
+
+

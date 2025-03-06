@@ -1,0 +1,613 @@
+#+TITLE: Compilertechnologie
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* (C/\cpp -) Übersetzungsmodell
+\vspace{1.5em}
+1. (Coding)
+2. Präprozessor (preprocessor)
+   - Input: =.c=, =.cpp=, =.h=
+   - Aufgabe: Headerdateien einbinden, Macros expandieren
+   - Output: =.i= (C), =.ii= (\cpp)
+3. Übersetzer (compiler)
+   - Aufgabe: Übersetzung in Assembler (oder gleich Maschinenspracheanweisungen)
+   - Output: =.s=
+4. Assembler (assembler)
+   - Aufgabe: Übersetzung in Maschinensprache
+   - Output: =.o= (Windows: =.obj=)
+5. Linker (linker, link editor)
+   - optional zusätzlicher Input: =.a= (Windows: =.lib=)
+   - Aufgabe: Erstellung eines ausführbaren Programmes
+   - Output: keine Endung (Windows: =.exe=)
+6. (Loader)
+
+* Präprozessor
+- Aufgabe: Textersetzung
+  - Headerdateien inkludieren
+    #+begin_src C++
+    #include "mathutils.h"
+    #+end_src
+  - Macros expandieren
+    #+begin_src C++
+    #ifndef MATHUTILS_H
+    #define MATHUTILS_H
+    
+    #endif
+    #+end_src
+
+* Prinzip eines Compilers
+- Compiler: Quelltext \lto Übersetzer \lto Zielcode
+  - Quelltext, z.B.: C, \cpp, Go, Objective-C, D, Modula,..., Java, C#,
+    Python, Ruby,...
+  - Übersetzer: Fehlermeldungen sind wichtig!
+  - Zielcode: Zwischencode, Assembler, Maschinencode
+- Syntax und Semantik muss bekannt sein
+
+* Anwendungen eines Compilers
+- Programmiersprachen: Compiler (vs. Interpreter)
+- Pretty print Programme
+- Query-Interpreter, z.B. SQL
+- Silicon-Compiler: Programm in Schaltplan
+- Struktureditoren, wie z.B. in Eclipse oder Netbeans
+- Textformatierung mit Steuerzeichen, z.B. Postscript, PDF, RTF, \LaTeX
+
+* Anforderungen an Compiler
+- /muss/ fehlerfrei übersetzen
+- /muss/ jeden Fehler im Programmcode erkennen und zuverlässig melden
+- /soll/ möglichst effizienten Code erzeugen
+- /soll/ möglichst schnell übersetzen
+
+* COMMENT Struktur des Übersetzungsmodelles
+\vspace{1em}
+1. (Coding)
+2. Preprocessor
+   - Input: Programmtext (source code)
+   - Output: Programmtext
+3. Compiler
+4. Assembler
+5. Linkeditor (linker)
+   - zusätzlicher Input: Bibliotheken (libraries)
+   - statisches Linken vs. dynamisches Linken
+   - Speicherlayout (memory layout)
+6. (Loader)
+
+* Speicherlayout
+\vspace{-1em}
+#+ATTR_LaTeX: :width 8cm :angle 90
+[[./memorylayout.pdf]]
+\hspace{-1cm}Quelle:?
+
+* Speicherlayout -- 2
+- uninitialized data
+  #+begin_src C++
+  int x;  // will be initialized by exec!
+  void f() {
+      static double y; //initialized by exec!
+  }
+  int main() {}
+  #+end_src
+- initialized data
+  #+begin_src C++
+  int i{123};
+  
+  char s[]{"abc"};  // inside read/write area
+  
+  const char* pc{"abc"};  // inside read-only
+
+  int main() {}
+  #+end_src
+
+* Phasenmodell (des Compilers)
+1. Analysephase
+   - Überprüfung der Syntax
+   - Aufbau der Zwischendarstellung
+   - besteht aus:
+     a. Syntaxanalyse
+     b. Semantischer Analyse
+2. Synthesephase
+   - Erzeugung des Maschinencodes
+   - eventuell: Codeoptimierung
+
+* Syntaxanalyse
+\vspace{1em}
+a. lexikalische Analyse (Scanner oder Tokenizer)
+   - liest Quelltext als eine Folge von Zeichen
+   - erzeugt Liste der lexikalische Tokens (Symbole)
+     - Identifier
+     - Keyword
+     - Operator
+     - Delimiter
+     - Literal
+   - baut Symboltabelle auf (\lto Namen)
+b. syntaktische Analyse (Parser)
+   - überprüft Grammatik
+     - Eingabe dann syntaktisch korrekt, wenn
+       Syntaxbaum bzw. eine Ableitung gemäß Regeln der Grammatik
+       konstruierbar.
+   - erzeugt Syntaxbaum
+   - ergänzt Symboltabelle um Art und Typ
+
+* Semantische Analyse
+- inhaltliche Prüfung des Quelltextes
+  - Überprüfung der Deklarationen
+  - Berechnung von Typkonversionen
+  - Eindeutigkeitsprüfung
+  - Gültigkeitsprüfung
+- erzeugt Zwischencode
+- ergänzt Symboltabelle um Gültigkeitsbereich
+
+* Scanner-Parser-Semantische A.
+[[./scanner_parser.png]]
+
+* Synthesephase
+1. Codeoptimierung
+   - erzeugt optimierter Zwischencode
+   - Beispiele der Optimierung
+     - Algebraische Vereinfachung: \\
+       =x * 1= \lto =x=\\
+       =x * 2 ** i= \lto ~x <​< i~
+     - Unterdrückung von Laufzeitüberprüfungen:\\
+       z.B. Indexüberprüfung, wenn Index immer im gültigen Bereich
+     - Fortpflanzen von Zuweisungen:\\
+       ~x = a + b; y = a + b;~ \lto ~x = a + b; y = x;~
+     - Entfernen von redundanten Codeteilen
+     - Entfernen von Codeteilen, die nicht durchlaufen werden
+2. Codeerzeugung
+   - erzeugt Zielcode
+
+* Arten von Fehlern
+- lexikalische Fehler
+  - falsches Anfangszeichen bei Identifier
+  - Literal nicht im zulässigen Wertebereich
+- syntaktische Fehler
+  - schließende Klammer fehlt
+- semantische Fehler
+  - falsche Typen für Operator
+- logische Fehler
+
+* Formen von Compilern
+- Einteilung in Phasen (Durchgang, engl. pass)
+  - gemäß folgender Kriterien
+    - Anforderungen der Programmiersprache
+    - Speicherbedarf (Code, Daten)
+    - Optimierung
+    - Zeitbedarf der Übersetzung
+    - Modularität des Übersetzers
+
+* Formen von Compilern -- 2
+- Einteilung
+  - Ein-Pass-Compiler
+  - Mehr-Pass-Compiler
+    - Front-End: hängen von Quellsprache ab, Analysephase bis
+      tw. Codeoptimierung
+    - Back-End: maschinenabhängig, tw. Codeoptimierung, Codeerzgeugung
+  - Vor-/Nachteile: Geschwindigkeit, Anpassung an HW und Quellsprache
+  - Beispiele:
+    - Frontend: C, Backends: Win, Linux
+    - Frontends: C, Java Backend: Linux
+
+* Formen von Compilern -- 3
+- Compiler
+  - Beispiele: C, \cpp, D, Go, Eiffel, Fortran, Ada, Cobol
+- Interpreter
+  - Jede Anweisung und Deklaration: sequentiell analysiert und unmittelbar
+    ausgeführt
+    - Beispiele: Basic, Tcl, Bash
+  - Zwischenform: Übersetzung in Zwischencode
+    - interpretieren
+    - tw. Übersetzung in Maschinensprache zur Laufzeit (JIT)
+    - Beispiele: Java, C#, Python, Ruby, LISP, Prolog
+
+* Syntaktische Analylse -- Beispiel
+- $G = (\Phi, \Sigma, P, S)$ \\
+  $\Phi = \{S\}$ \\
+  $\Sigma = \{x, y, z\}$ \\
+  $P = \{S \imp S + S|S * S|(S)|x|y|z\}$ \\
+  $S = S$
+- Ableitung 1
+#+attr_latex: :width \textwidth
+[[./compiler_exa1.png]]
+
+* Syntaktische Analyse -- Beispiel -- 2 
+- Ableitung 2
+  [[./compiler_exa2.png]]
+- Ableitung 3
+  [[./compiler_exa3.png]]
+
+* Syntaktische Analyse -- Beispiel -- 3
+- Ableitung 1 ist ungleich Ableitung 2
+- Ableitung 1 ist nur unwesentlich verschieden zu Ableitung 2
+  - da Syntaxbäume gleich sind
+- Syntaxbaum 3 ist ungleich Syntaxbaum 1 und ungleich Syntaxbaum 2
+
+* Begriffe
+\vspace{1.5em}
+- Eine KF Grammatik heißt *mehrdeutig*, wenn
+  - es zu mind. 1 einem ableitbaren Wort 2 verschiedene
+    Syntaxbäume gibt.
+- Eine Ableitung heißt *linkskanonisch*, wenn
+  - in einem Ableitungsschritt das jeweils am weitesten links
+    stehende Non-Terminalsymbol ersetzt wird.
+- Es gilt: Eine KF Grammatik ist *mehrdeutig*, wenn
+  - es für mind. 1 ein Wort 2 verschiedene linkskanonische Ableitungen
+    gibt.
+- A \to \sigma heißt rekursiv, wenn A in \sigma vorkommt.
+- A \to \sigma heißt linksrekursiv, wenn \sigma mit A beginnt.
+- Top-Down-Analyse: eine Ableitung der Tokenfolge des Quellprogrammes aus
+  dem Startsymbol zu bilden, die nur Linksableitungen enthält.
+
+* Vorgang der Top-Down-Analyse
+1. Wurzel wird mit dem Startsymbol markiert.
+2. Wiederhole:
+   a. Aktuellen Knoten betrachten:
+      - Wenn ein NT-Symbol: in Abhängigkeit des nächsten zu
+        lesenden Zeichens eine der Produktionen wählen und für
+        jedes Grammatiksymbol der rechten Seite einen Knoten als
+        Nachfolger anlegen.
+      - Wenn ein T-Symbol und dieses stimmt mit dem zu
+        nächsten zu lesenden Zeichen überein, dann: im Parsebaum
+        als auch in der Eingabe einen Schritt weiter gehen.
+   b. Nächsten zu behandelnden Knoten suchen: Sind die Nachfolger
+      eines Knoten erzeugt, so behandeln wir als nächstes diese Nachfolger
+      von links nach rechts.
+
+* Beispiele
+- $G = (\Phi, \Sigma, P, S)$ \\
+  $\Phi = \{S\}$ \\
+  $\Sigma = \{x, y, z, (, ), +, *\}$ \\
+  $P = \{S \imp S + S|S * S|(S)|x|y|z\}$ \\
+  $S = S$ \\
+  ges.: Ableitung und Syntaxbaum für =x + y * z=
+
+- $G = (\Phi, \Sigma, P, S)$ \\
+  $\Phi = \{S\}$ \\
+  $\Sigma = \{a, b, c, +, -\}$ \\
+  $P = \{S \imp a + S|b - S|(S)|c\}$ \\
+  $S = S$ \\
+  ges.: Ableitung und Syntaxbaum für =a + b - c=
+
+* Probleme
+Parser sind so zwar einfach zu konstruieren, aber:
+a. Wenn es zu einem abzuleitenden NT-Symbol mehrere Ableitungsregeln gibt,
+   muss anhand des aktuellen Eingabetokens entschieden werden, welche
+   Regel anzuwenden ist. Dadurch: Sackgassen \lto Backtracking!
+
+   - =x + y * z= mit vorhergehender Grammatik \lto S \limp S + S \limp
+     x + S \limp x + y!!!
+
+b. Weiters können Endlosschleifen bei links-rekursiven Produktionen auftreten
+
+   - S \limp _S_ + S \limp _S_ + S \limp ...
+
+* Top-Down-Parser -- Impl.
+1. recursive-descent: Jedes NT-Symbol entspricht einer Prozedur.
+   Das Anhängen von Knoten an den Parse-Baum geschieht durch einen
+   Prozeduraufruf.
+2. tabellengesteuert: funktioniert mit einer Grammatik-spezifischen
+   Tabelle und die Verwaltung des Ableitungsprozesses wird mit Hilfe
+   eines Stacks realisiert.
+
+* LL(1) Grammatiken
+- ohne Linksrekursion für die eine Sackgassen-freie Top-Down-Analyse
+  möglich ist.
+- Wenn Produktion X \imp \sigma_1|\sigma_2|..., dann muss alleine
+  durch Betrachten des nächsten Zeichens (look-ahead symbol) klar
+  sein, welche der Alternativen zu wählen ist.
+- Ein LL(1) Parser für eine LL(1) Grammatik
+  - liest und untersucht das Eingabewort von \underline{l}inks nach rechts.
+  - liefert immer eine \underline{l}inkskanonische Ableitung, wenn
+    eine Ableitung möglich ist.
+  - liest genau _1_ Zeichen voraus.
+
+* LL(1) Grammatiken -- 2
+\vspace{1.5em}
+- Satzform: eine beliebige Folgen von T bzw. NT-Symbolen der Grammatik G
+- First-Menge
+  - FIRST($\sigma$) = 
+    - $\{t \in \Sigma|\sigma \limp^* t...\} \cup \{\eps\}$, falls $\sigma
+      \limp^* \eps$
+    - $\{t \in \Sigma|\sigma \limp^* t...\}$ anderenfalls
+- Follow-Menge
+  - $A \in \Phi, \text{FOLLOW}(A) =$
+    - $\text{FOLLOW}(A) = \{t \in \Sigma|S \limp^* \alpha A t \beta, \alpha, \beta \text{beliebig}\}$
+- Beispiel
+  - $G = (\Phi, \Sigma, P, S)$ \\
+    $\Phi = \{S\}$ \\
+    $\Sigma = \{a, +\}$ \\
+    $P = \{S \imp S + a|\eps\}$ \\
+    $S = S$ \\
+    ges.: FIRST($S + a$), FIRST($\eps$), FOLLOW($S$)
+
+* LL(1) Grammatiken -- 3
+- Eine KF Grammatik ist eine LL(1) Grammatik, wenn die
+  beiden folgenden Bedingungen gelten:
+  1. Falls zu einem NT-Symbol N zwei alternative Produktionen N
+    \imp \sigma_1 und N \imp \sigma_2 gibt, muss gelten:
+     - $\text{FIRST}(\sigma_1) \cap \text{FIRST}(\sigma_2) = \{\}$
+  2. Falls aus einem NT-Symbol der Leerstring \eps abgeleitet werden
+     kann, muss gelten:
+     - $\text{FIRST}(N) \cap \text{FOLLOW}(N) = \{\}$
+- Beispiel
+  - $G = (\Phi, \Sigma, P, S)$ \\
+    $\Phi = \{A, T, F\}$ \\
+    $\Sigma = \{x, y, +, -, *, /, (, )\}$ \\
+    $P = \{A \imp A + T|A - T|T, T \imp T * F|T / F|F, F \imp x|y|(A)\}$ \\
+    $S = A$
+
+* Recursive-Descent Parser
+\vspace{1.5em}
+G ist LL(1)\\
+$\phi = \{S, S_1, S_2,...S_n\}$, $S = S$
+
+\vspace{1em}
+Parser hat folgende Struktur:
+\vspace{0.5em}
+\footnotesize
+#+begin_src python
+symbol = 0  # Token als ganze Zahl
+def error():
+    pass
+
+def s1():
+    pass
+...
+def sn():
+    pass
+def s():
+    pass
+
+def main():
+    getsym()  # erstes Zeichen von Scanner
+    s()       # Los geht's
+#+end_src
+
+* Recursive-Descent Parser -- 2
+\vspace{1em}
+- Auswahl
+
+  #+Attr_LaTeX: :height 3cm
+  [[./recursive_descent_selection.png]]
+
+  \footnotesize
+  #+begin_src python
+  if symbol in FIRST(T1): # T1 ... Teilgraph 1 der Syntax
+      P(T1)  # Code fuer Teilgraph 1
+  elif symbol in FIRST(T2):
+      P(T2)
+  ...
+  elif symbol in FIRST(Tn):
+      P(Tn)
+  else:
+      error()
+  #+end_src
+
+* Recursive-Descent Parser -- 3
+- Sequenz
+
+  #+Attr_LaTeX: :width 5cm
+  [[./recursive_descent_sequence.png]]
+
+  #+latex: {
+  \footnotesize
+  #+begin_src python
+  P(T1)
+  P(T2)
+  ...
+  P(Tn)
+  #+end_src
+  #+latex: }
+
+- Optionale Produktion
+
+  #+Attr_LaTeX: :width 2.5cm
+  [[./recursive_descent_optional.png]]
+
+  \footnotesize
+  #+begin_src python
+  if symbol in FIRST(T):
+      P(T)
+  #+end_src
+
+* Recursive-Descent Parser -- 4
+\vspace{1em}
+- Iteration
+  #+Attr_LaTeX: :width 2.5cm
+  [[./recursive_descent_iteration.png]]
+
+  #+latex: {
+  \footnotesize
+  #+begin_src python
+  while symbol in FIRST(T): P(T)
+  #+end_src
+  #+latex: }
+
+- Non-Terminalsymbol
+  #+Attr_LaTeX: :width 2.5cm
+  [[./recursive_descent_nonterminal.png]]
+
+  #+latex: {
+  \footnotesize
+  #+begin_src python
+  X()
+  #+end_src
+  #+latex: }
+
+- Terminalsymbol
+  #+Attr_LaTeX: :width 2.5cm
+  [[./recursive_descent_terminal.png]]
+
+  \footnotesize
+  #+begin_src python
+  if symbol == a:
+      getsym()
+  else:
+      error();
+  #+end_src
+
+* Bottom-Up Analyse
+- Man geht von einem gegebenen Satz aus und reduziert diesen schrittweise
+  bis Startsymbol erreicht ist.
+- LR(k) Grammatik: Eingabestring von \underline(l)inks nach rechts
+  gelesen und Reduktionen anwenden, sodass rechtskanonische Ableitungen
+  entstehen. _k_ ist die Anzahl der Look-ahead Symbole.
+- Bottum-Up Parser sind /immer/ tabellengesteuert
+- Aufwand zum Erstellen der Tabellen groß!
+  - daher eigene Programme (klassisch: lex, yacc) \to ply
+
+* COMMENT Bottom-Up Analyse -- 2
+- Beispiel
+  - $G = (\Phi, \Sigma, P, S)$ \\
+    $\Phi = \{S, E, T\}$ \\
+    $\Sigma = \{a, +\}$ \\
+    $P = \{S \imp E, \hfill (1)$ \\
+        \hspace{0.9cm}$E \imp E + T|T, \hfill (2), (3)$ \\
+        \hspace{0.9cm}$T \imp a\} \hfill (4)$ \\
+    $S = S$
+
+  - Eingabestring: a + a + a
+
+    #+ATTR_LaTeX: :align r|l|r|c
+    | Schritt | Aktion    | Produktion | Stack |
+    |---------+-----------+------------+-------|
+    |       1 | Lese a    |            | a     |
+    |       2 | Reduziere | 4          | T     |
+
+* Tools
+- lex und yacc \hfill (Yet Another Compiler Compiler)
+  - bzw. flex und bison (für viele Programmiersprachen)
+- ply
+  - einfache Umsetzung von lex und yacc in Python
+  - http://www.dabeaz.com/ply/
+- ANTLR
+  - LL(k)
+  - in Java
+  - für: Java, C#, Python, \cpp, JavaScript, Go, Swift
+  - http://www.antlr.org/
+- PEGTL (Parser Expression Grammar Template Library)
+  - https://github.com/taocpp/PEGTL
+
+* Assembler
+- Aufgabe: Assemblerbefehle in Maschinensprachebefehle
+- Beispiel (von wikipedia)
+  - Übersetze: =MOV AL, 61h=
+    - verschiebe den Wert 0x61 (8 Bitwert) in das Register =AL=
+  - In: =10110000 01100001=
+    - =10110000= ... lade 8-Bitwert in Register =AL=\\
+      =10011= ... lade 8-Bitwert\\
+      =000= ... Register =AL=
+    - =01100001= ... 0x61
+
+* Linker
+- Linker (dt. Binder) oder Link Editor
+  - verbindet ein oder mehrere Objektdateien und Bibliotheken
+    zu einem ausführbaren Programm (executable) oder einer Bibliothek
+- Der Vorgang wird als Linken (engl. linking) bezeichnet
+  - statisches Linken
+  - dynamisches Linken
+- Loader (oder linker and loader)
+
+* Artefakte
+- Artefakt: ein Produkt im SW-Entwicklungsprozess
+- Objektdateien
+  - Dateinamenerweiterung: =.o= (Unix) bzw. =.obj= (Windows)
+- Arten von Bibliotheken
+  - statische Bibliothek (static library)
+    - Linken zur Übersetzungszeit
+    - Dateinamenerweiterung: =.a= (Unix) bzw. =.lib= (Windows)
+    - unter Unix: Dateiname beginnt mit =lib=
+  - dynamische Bibliothek (dynamic library, shared library, shared object)
+    - Linken zur Laufzeit
+    - Dateinamenerweiterung: =.so= (Unix) bzw. =.dll= (Windows)    
+
+* Statisches Linken
+- Vorteile
+  - leichtere Portabilität
+    - keine dynamische Bibliothek erforderlich
+  - keine Installation notwendig
+- Nachteile
+  - wenn mehrere Programme dieselbe Library verwenden:
+    - größere Executables: \to mehr Hauptspeicher- und Festplattenverbrauch
+  - erneutes Linken und Ausliefern bei jeder kleiner Änderung
+
+* Dynamisches Linken
+- Vorteile
+  - wenn mehrere Programme dieselbe Library verwenden:
+    - kleinere Executables: \to weniger Hauptspeicher- und Festplattenverbrauch
+  - Plugins können leichter realisiert werden
+- Nachteile
+  - fehlende Bibliotheken bei der Ausführung
+  - falsche Versionen der Bibliotheken bei der Ausführung
+  - etwas größere Zeiten beim Starten des Programmes
+
+* Loader
+- Programm starten
+  1. Rechte überprüfen
+  2. Speicher reservieren
+  3. Programm von der Festplatte laden
+     - wenn nicht schon einmal geladen (gestartet)
+  4. benötigte dynamische Bibliothek laden
+     - wenn nicht schon geladen
+  5. Linker anstoßen
+  6. u.U. Kommandozeilenparameter auf Stack
+  7. Prozess starten
+* COMMENT Test
+#+begin_src dot :file test.png :cmdline -Kdot -Tpng
+digraph G {
+  step1 -> step2 -> step3 -> step4;
+  step2 -> maybe_error;
+}
+#+end_src
+
+#+RESULTS:
+[[file:test.png]]

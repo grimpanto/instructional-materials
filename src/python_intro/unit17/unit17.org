@@ -1,0 +1,77 @@
+
+
+#+TITLE: Python \hfill Unit 17\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \setminted{escapeinside=´´}
+
+* Menü
+#+BEGIN_EXAMPLE
+Please choose one of the following actions:
+
+(1) new ship
+(2) move ship
+(3) shoot
+(4) set mine
+(5) remove mine
+(6) quit
+
+Enter selection: 
+#+END_EXAMPLE
+
+* InsertionSort - 1
+- Idee
+  1. Lege eine neue Ergebnisliste mit dem ersten Element der zu
+     sortierenden Liste an.
+  2. Gehe alle Elemente der zu sortierenden Liste von Position 2 
+     bis zum Ende durch und füge das aktuelle Element in der 
+     Ergebnisliste an der richtigen Position ein.
+- Name
+  - Einfügen in Ergebnisliste
+- Beispiel
+  - =[15, 2, 43, 17, 4, 8, 47]=
+  - =[15]=, =[2, 43, 17, 4, 8, 47]=
+  - =[2, 15]=, =[43, 17, 4, 8, 47]=
+  - =[2, 15, 43]=, =[17, 4, 8, 47]=
+  - ...
+
+* InsertionSort - 2
+- Prinzip
+  #+begin_example
+  Für jede Stelle i von 2 bis zur Letzten:
+    Wert val mit Wert von Stelle i belegen
+    Index j mit i belegen
+    Endlosschleife
+      Wenn j == 0 -> Schleife beenden
+      Wenn Wert an j-1 <= val -> Schl. beend.
+      Element an Pos. j mit Pos. j-1 belegen
+      j dekrementieren
+    Liste an der Position j mit val belegen
+  #+end_example
+
+* InsertionSort - 3
+- Algorithmus
+  #+begin_src python
+  def insert(seq):
+      # vom 2. Element bis zum letzten Elem.
+      for i in range(1, len(lst)):
+          val = lst[i]
+          j = i
+          while True:
+              if j == 0 or lst[j - 1] <= val:
+                  break
+              lst[j] = lst[j - 1]
+              j -= 1
+          lst[j] = val
+      return lst
+  #+end_src

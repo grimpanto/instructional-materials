@@ -1,0 +1,126 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill TCP/IP Programmierung 3 - Server (synchron)
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Passive Sockets (Server)
+1. Anlegen
+   #+BEGIN_SRC C++
+   tcp::endpoint ep{tcp::v4(), 9999};
+   tcp::acceptor acceptor{ctx};
+   #+END_SRC
+2. Öffnen
+   #+BEGIN_SRC C++
+   // also with error_code (as usually)
+   acceptor.open(ep.protocol());
+   // 1 & 2:
+   //tcp::acceptor acceptor{ctx,ep.protocol()};
+   // → third param: reuse_addr=true !!
+   // but this can throw an exception!
+   #+END_SRC
+3. Setzen von Optionen (optional)
+   #+BEGIN_SRC C++
+   // allows to bind even if in TIME-WAIT
+   acceptor.set_option(
+     tcp::acceptor::reuse_address{true});
+   #+END_SRC
+
+* Passive Sockets (Server) - 2
+4. [@4] Binden
+   #+BEGIN_SRC C++
+   acceptor.bind(ep);
+   // 1, 2 & 4
+   // tcp::acceptor acceptor{ctx, ep};
+   #+END_SRC
+5. Listen
+   #+BEGIN_SRC C++
+   // unnecessary because it's the default ↓
+   acceptor.listen(tcp::socket::max_connections);
+   #+END_SRC
+6. Verbindungsanfrage akzeptieren
+   #+BEGIN_SRC C++
+   tcp::socket sock{ctx};  // create active socket
+   // use this socket for next connection
+   acceptor.accept(sock);  // blocking!
+   #+END_SRC
+7. Schließen (wenn keine weitere Verbindung)
+   - =acceptor.close()= ... schließen
+
+* Synchroner Echo-Server
+#+header: :exports code :results code :tangle src/sync_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_server.cpp
+#include <asio.hpp>
+using namespace std; using namespace asio::ip;
+int main() { asio::io_context ctx;
+    tcp::endpoint ep{tcp::v4(), 9999};
+    tcp::acceptor acceptor{ctx, ep};
+    acceptor.listen();
+    tcp::socket sock{ctx};
+    acceptor.accept(sock);
+    // from now no further accept possible
+    acceptor.close();
+#+end_src
+
+* Synchroner Echo-Server - 2
+#+header: :exports code :results code :tangle src/sync_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+    asio::streambuf buf;
+    asio::read_until(sock, buf, '\n');
+    string reply;
+    istream is{&buf};
+    getline(is, reply);
+    asio::write(sock, asio::buffer(reply,
+        reply.size()));
+    cout << "sent: " << reply << endl;
+    cout << "local port: "  // → 9999
+      << sock.local_endpoint().port() << endl;
+    cout << "remote port: "
+      << sock.remote_endpoint().port() << endl;
+    sock.close();  }
+#+end_src
+
+* Synchroner MT Echo-Server
+#+header: :exports code :results code :tangle src/mt_sync_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // mt_sync_echo_server.cpp
+#include <thread>
+#include <asio.hpp>
+using namespace std; using namespace asio::ip;
+void serve_client(tcp::socket&& sock) {
+    asio::streambuf buf;
+    asio::read_until(sock, buf, '\n');
+    string reply;
+    istream is{&buf};
+    getline(is, reply);
+    asio::write(sock, asio::buffer(reply,
+        reply.size()));
+    cout << "sent: " << reply << endl;
+    sock.close();
+}
+#+end_src
+
+* Synchroner MT Echo-Server - 2
+#+header: :exports code :results code :tangle src/mt_sync_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+int main() { asio::io_context ctx;
+    tcp::endpoint ep{tcp::v4(), 9999};
+    tcp::acceptor acceptor{ctx, ep};
+    acceptor.listen();
+    while (true) {
+        tcp::socket sock{ctx};
+        acceptor.accept(sock);
+        thread thd{serve_client, move(sock)};
+        thd.detach();
+    }
+  }
+#+end_src

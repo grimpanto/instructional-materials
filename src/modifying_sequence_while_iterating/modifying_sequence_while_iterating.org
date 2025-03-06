@@ -1,0 +1,326 @@
+
+#+TITLE: Verändern einer Sequenz beim Iterieren
+#+SUBTITLE: POS
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: 2016
+# +EXCLUDE_TAGS: question note
+# +OPTIONS: date:nil author:nil tags:nil
+#+STARTUP: align
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [DIV=17,no-math]
+#+LATEX_HEADER: \usepackage{typearea}
+#+LATEX_HEADER:\usepackage{hyperref}
+
+#+LATEX_HEADER: \usepackage{lastpage}
+#+LATEX_HEADER: \usepackage{scrlayer-scrpage}
+#+LaTeX_HEADER: \renewcommand*{\titlepagestyle}{scrheadings}
+#+LATEX_HEADER: \cfoot{}
+#+LATEX_HEADER: \ifoot{© Dr. Günter Kolousek}
+#+LATEX_HEADER: \ofoot{\thepage\ / \pageref*{LastPage}}
+#+LATEX_HEADER: \pagestyle{scrheadings}
+
+# use it to insert break just before a subsection
+# +LATEX_HEADER: \usepackage{titlesec}
+# +LATEX_HEADER: \newcommand{\subsectionbreak}{\clearpage}
+
+# +LATEX_HEADER: \usepackage{unicode-math}% lädt fontspec
+#+LATEX_HEADER: \setmainfont{TeX Gyre Pagella}
+# +LATEX_HEADER: \setmathfont{TeX Gyre Pagella Math}
+
+# +LATEX: \setmainfont{TeX Gyre Bonum}
+# +LATEX: \setmainfont{TeX Gyre Schola}
+# +LATEX: \setmainfont{TeX Gyre Pagella}
+
+# +LATEX_HEADER: \usepackage{fontspec}
+# +LATEX_HEADER: \usepackage{xunicode}
+# +LATEX_HEADER: \usepackage{xltxtra}
+# +LATEX_HEADER: \usepackage[libertine]{newtxmath}
+# +LATEX_HEADER: \setmainfont[Mapping=tex-text]{Linux Libertine}
+# +LATEX_HEADER: \setsansfont[Mapping=tex-text]{Linux Biolinum}
+
+#+LATEX_HEADER: \setkomafont{title}{\sffamily\bfseries}
+#+LATEX_HEADER: \setkomafont{author}{\sffamily}
+#+LATEX_HEADER: \setkomafont{date}{\sffamily}
+
+#+LATEX_HEADER: \usepackage{pifont}  % necessary for "ding"
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{✔}{{\ding{52}}}
+
+#+LATEX_HEADER: \usepackage{parskip}
+
+# +LATEX_HEADER: \frenchspacing
+
+#+OPTIONS: toc:nil
+
+# +LATEX: \addtokomafont{disposition}{\normalfont\rmfamily\bfseries\color{blue}}
+
+# latexmk -pvc -pdf -xelatex -view=none --latexoption=-shell-escape themenbereiche.tex
+
+[[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+* Problematik
+Betrachten wir die Aufgabenstellung, dass aus einer Liste von Wörtern alle
+Wörter mit einer Länge kleiner oder gleich 2 gelöscht werden sollen.
+
+Der naive Ansatz sieht folgendermaßen aus:
+
+#+name: exa1
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ghi", "jkl"]
+
+i = 0
+for w in lst:
+    if len(w) <= 2:
+        del lst[i]
+    i += 1
+
+print(lst)
+#+end_src
+
+Damit kommt es zu folgender erwarteter Ausgabe:
+
+#+RESULTS: exa1
+: ['abc', 'def', 'ghi', 'jkl']
+
+Ändert man die Liste in diesem Programm allerdings ab, dann erhält
+man *nicht* mehr das erwartete Ergebnis:
+
+#+name: exa2
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+i = 0
+for w in lst:
+    if len(w) <= 2:
+        del lst[i]
+    i += 1
+
+print(lst)
+#+END_SRC
+
+Das Ergebnis enthält noch immer den String =​'ab'​=:
+
+#+RESULTS: exa2
+: ['abc', 'def', 'ab', 'ghi', 'jkl']
+
+Woran liegt das? Das liegt daran, dass der Index um eins weitergestellt wird,
+aber im gleichen Schritt das Element aus der Liste gelöscht wird. Damit wird das
+zweite kurze Wort einfach übersprungen.
+
+* Lösung mit Kopie
+Eine einfache Lösung besteht darin, dass man das Iterieren über die Sequenz von
+den Löschoperationen trennt. Das kann man dadurch erreichen, dass man eine
+Kopie der Liste anlegt und über die Kopie iteriert und die Löschoperationen
+in dem Originalobjekt durchführt.
+
+#+name: exa3
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+lst2 = lst
+i = 0
+for w in lst2:
+    if len(w) <= 2:
+        del lst[i]
+    i += 1
+
+print(lst)
+#+END_SRC
+
+Das Ergebnis ist allerdings in dieser Form ebenfalls *nicht* richtig:
+
+#+RESULTS: exa3
+: ['abc', 'def', 'ab', 'ghi', 'jkl']
+
+Das funktioniert so nicht, da wir keine Kopie des
+Objektes sondern nur einen neuen Namen angelegt haben. Wir benötigen
+eine Kopie!
+
+#+name: exa4
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+lst2 = lst.copy()  # creates a shallow copy
+i = 0
+for w in lst2:
+    if len(w) <= 2:
+        del lst[i]
+    i += 1
+
+print(lst)
+#+END_SRC
+
+Allerdings führt auch dies alleine *nicht* zum gewünschten Ergebnis:
+
+#+RESULTS: exa4
+: ['abc', 'def', 'ab', 'jkl']
+
+In diesem Fall liegt das Problem noch immer daran, dass wir weiterzählen, obwohl
+wir gar nicht weiterzählen dürften, wenn wir ein Element herauslöschen:
+
+#+name: exa5
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+lst2 = lst.copy()
+i = 0
+for w in lst2:
+    if len(w) <= 2:
+        del lst[i]
+    else:
+        i += 1
+
+print(lst)
+#+end_src
+
+Damit kommt es zu der korrekten Ausgabe:
+
+#+RESULTS: exa5
+: ['abc', 'def', 'ghi', 'jkl']
+
+Diese Lösung hat den prinzipiellen Vorteil, dass diese auch im Kontext
+von nebenläufigen Operationen auf der selben Datenstruktur funktioniert
+(solange die Kopie thread-safe erstellt wurde).
+
+* Lösung mit korrekten Indizes
+Obwohl die vorhergehende Lösung funktioniert, hat diese den Nachteil, dass eine
+Kopie der ursprünglichen Liste erstellt wird. Das Erstellen als auch das
+Entfernen der Kopie benötigt Zeit und die Kopie selber bedingt einen zusätzlichen
+Speicherbedarf. Daher ist eine Lösung vorzuzuiehen, die /ohne/ eine Kopie der
+Liste auskommt.
+
+Nachfolgend eine Lösung basierend auf eine =while=-Schleife. Um die Funktion
+dieser Schleife besser verstehen zu können, habe ich noch eine zusätzliche
+Ausgabe eingefügt:
+
+#+name: exa6
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+i = 0
+j = 0
+max_idx = len(lst) - 1
+while True:
+    print(i, lst[i])
+    if len(lst[i]) <= 2:
+        del lst[i]
+    else:
+        i += 1
+    if j == max_idx:
+        break
+    j += 1
+
+print(lst)
+#+end_src
+
+Hier wiederum die Ausgabe:
+
+#+results: exa6
+: 0 abc
+: 1 def
+: 2 xy
+: 2 ab
+: 2 ghi
+: 3 jkl
+: ['abc', 'def', 'ghi', 'jkl']
+
+Allerdings ist die Verwendung einer "Endlosschleife" mit "break" nicht
+sonderlich elegant. Man kann diese leicht in eine range-basierte Schleife
+umformen:
+
+#+name: exa7
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+i = 0
+for j in range(len(lst)):
+    if len(lst[i]) <= 2:
+        del lst[i]
+    else:
+        i += 1
+
+print(lst)
+#+end_src
+
+Hier die Ausgabe:
+
+#+RESULTS: exa7
+: ['abc', 'def', 'ghi', 'jkl']
+
+Diese Lösung benötigt noch immer eine zusätzliche Variable ("i").
+
+* Lösung mit Iterieren vom Ende
+Um sich auch noch die zusätzliche Variable zu ersparen kann man die Iteration
+vom Ende weg zum Anfang hin vornehmen. Damit erspart man sich auch die Abfrage,
+ob weitergezählt werden soll oder nicht:
+
+#+name: exa8
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+i = len(lst) - 1
+for w in lst[::-1]:
+    if len(w) <= 2:
+        del lst[i]
+    i -= 1
+
+print(lst)
+#+end_src
+
+Und hier wiederum die Ausgabe:
+
+#+RESULTS: exa8
+: ['abc', 'def', 'ghi', 'jkl']
+
+Mittels =lst[::-1]= kann die Liste umgekehrt werden und damit gegensinnig
+durchlaufen werden. Allerdings wird damit ebenfalls eine zusätzliche Liste
+erstellt, die man einfach vermeiden kann:
+
+#+name: exa9
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+i = len(lst) - 1
+while i >= 0:
+    if len(lst[i]) <= 2:
+        del lst[i]
+    i -= 1
+
+print(lst)
+#+end_src
+
+Nochmals die korrekte Ausgabe:
+
+#+RESULTS: exa9
+: ['abc', 'def', 'ghi', 'jkl']
+
+Verwendet man allerdings die Funktion =range= dann wird keine Liste erstellt.
+=range= liefert ein Objekt zurück, das einen "faulen" Datentyp darstellt und
+nicht eine Liste! =range= kann leicht in einer Schleife verwendet werden,
+wodurch die Lösung nochmals einfacher wird:
+
+#+name: exa10
+#+header: :results output :exports both
+#+begin_src python
+lst = ["abc", "def", "xy", "ab", "ghi", "jkl"]
+
+for i in range(len(lst) - 1, -1, -1):
+    if len(lst[i]) <= 2:
+        del lst[i]
+
+print(lst)
+#+end_src
+
+Ausgabe:
+
+#+RESULTS: exa10
+: ['abc', 'def', 'ghi', 'jkl']

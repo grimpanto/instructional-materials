@@ -1,0 +1,195 @@
+#+TITLE: Darstellung Gleitkommazahlen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Zahlen
+- ganze Zahlen
+  - vorzeichenlos
+  - vorzeichenbehaftet
+    - mit designierten VZ-Bit
+    - Einerkomplement
+    - Zweierkomplement
+- Kommazahlen
+  - Festkommazahlen
+  - Gleitkommazahlen
+
+* Festkommazahlen
+- Position des Komma ist fixiert
+- Beispiele
+  - $9.87654321$ ... große Genauigkeit
+  - $98765432.1$ ... großer Wertebereich
+  - $9876.54321$ ... Kompromiss
+- Problem: Welche Position soll gewählt werden?
+- Genauigkeit im gesamten Bereich gesichert
+  - dezimale Festkommazahlen zur Rechnung mit Geldbeträgen!
+    - z.B. =decimal= in =C#=
+
+* Überblick Gleitkommazahlen
+- Gleitkommazahlen
+  - vs. rationale/reelle Zahlen
+  - alternative Namen
+    - Gleitpunktzahlen, Fließkommazahlen, Fließpunktzahlen
+    - floating point numbers
+- IEEE 754
+  - binäre Formate: 16 Bits, 32 Bits, 64 Bits, 128 Bits
+    - nicht standardisiert: 80 Bits (z.B. IA-32 Prozessoren)
+  - dezimale Formate: 32 Bits, 64 Bits, 128 Bits
+
+* Gleitkommazahlen
+- Komma "gleitet"
+- Gleitkommadarstellung
+  - $s \cdot m \cdot b^e$
+    - $s$ ... Vorzeichen
+    - $m$ ... Mantisse
+    - $b$ ... Basis
+    - $e$ ... Exponent
+  - Beispiel: $123.456 = +1 \cdot 0.123456 \cdot 10^3$
+    - z.B. in \cpp:\hspace{1em} =0.123456e3=
+  - Beispiel: $123.456 = +1 \cdot 1234.56 \cdot 10^{-}1$
+  - Welche Darstellung soll zur Abspeicherung verwendet werden?\pause
+    - \to Normalisierung!
+  - Wie wird Exponent abgespeichert?
+    - \to Charakteristik!
+
+* Gleitkommazahlen -- 2
+- binäre Exponentialdarstellung
+  - $11.1_2 = 11.1_2 \cdot 2^0$
+  - $11.1_2 = 1.11_2 \cdot 2^1$
+  - $11.1_2 = 0.111_2 \cdot 2^2$
+  - $11.1_2 = 0.0111_2 \cdot 2^3$
+- /Normalisierung/
+  - Vorkommastelle ist 1
+    - da immer 1 \to muss nicht mitgespeichert werden!
+    - $11.1_2 = 1.11_2 \cdot 2^1$ \to Speicherdarstellung für Mantisse: =11=
+
+* IEEE Zahlenformat
+IEEE Zahl besteht aus 3 Teilen:
+1. Getrenntes Vorzeichenbit S
+   - S = 0 \to positiv, S = 1 \to negativ
+   - d.h.: $s = (-1)^S$
+2. Exponent E (auch Charakteristik genannt)
+   - $E = e + B$, B ... Biaswert
+   - d.h. $e = E - B$
+3. Mantisse M
+   - in normalisierter Darstellung
+   - ohne Abspeicherung der führenden 1
+
+* IEEE Zahlenformat -- 2
+- Exponent
+  - $E=0$
+    - $M=0$ \to Gleitkommazahl 0
+    - $M>0$ \to denormalisierte Zahlen ($m$ nicht mehr normalisiert)
+  - $E$ lauter 1er
+    - $M=0$ \to =inf=
+    - $M>0$ \to =nan=
+- Spezielle Werte
+  - 0
+    - vorzeichenbehaftet, d.h. +0 und -0
+    - $1 / (-0)$ liefert =-inf=!
+  - =+inf= und =-inf=
+  - =nan=, z.B. =0.0 / 0.0=
+
+* IEEE Zahlenformat -- 3
+- half, single, double, extended
+- single
+  - Exponent: 8 Bits ($B=127$), Mantisse: 23 Bits
+  - ca. 7.2 Dezimalstellen
+- double
+  - Exponent: 52 Bits ($B=1023$), Mantisse: 52 Bits
+  - ca. 15.9 Dezimalstellen
+     
+* Gleitkommadarstellung?
+1. Vorkommazahl ermitteln
+2. Nachkommazahl ermitteln
+3. Normalisieren
+4. Exponent ermitteln
+5. Vorzeichen bestimmen
+6. Gleitkommazahl bilden
+
+\pause
+\vspace{2em}
+\hspace*{8em}$19.2$ in binärer Darstellung?
+
+* Umrechnen -- 1
+\vspace{1.5em}
+1. Vorkommazahl ermitteln
+   - $19 \div 2 = 9R1$
+   - $9 \div 2 = 4R1$
+   - $4 \div 2 = 2R0$
+   - $2 \div 2 = 1R0$
+   - $1 \div 2 = 0R1$
+   $19_{10} = 10011_2$
+2. Nachkommazahl ermitteln
+   - $0.2 \cdot 2 = 0.4 \to 0$
+   - $0.4 \cdot 2 = 0.8 \to 0$
+   - $0.8 \cdot 2 = 1.6 \to 1$
+   - $0.6 \cdot 2 = 1.2 \to 1$
+   - $0.2 \cdot 2 = 0.4 \to 0$
+   - $0.4 \cdot 2 = 0.8 \to 0$
+   - $0.8 \cdot 2 = 1.6 \to 1$
+   - ...
+   $0.2 = 0.00\overline{1100}$
+
+* Umrechnen -- 2
+3. [@3] Normalisieren
+   $19.2_{10} = 1.001100\overline{1100} \cdot 2^4 = 1.00\overline{1100} \cdot 2^4$
+4. Exponent ermitteln: $4 + B$
+
+* vs. Festkommadarstellung?
+- Nachteile gegenüber Festkomma
+  - Rechenaufwand prinzipiell höher
+  - Genauigkeit nicht im gesamten Wertebereich gesichert
+- Vorteile gegenüber Festkomma
+  - Adaption des Wertebereiches und der Genauigkeit
+  - Berechnung in FPU (Gleitkommaeinheit)

@@ -1,0 +1,252 @@
+#+TITLE: UML -- Strukturdiagramme
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Klassendiagramm
+- stellt Klassen (samt Aufbau) und Zusammenhänge dar
+- werden verwendet um
+  - konzepitionelle Sicht (WAS)
+  - Realisierung (WIE)
+  darzustellen
+- Klasse \equiv Rechteck
+  1. Stereotyp, Klassenname, Eigenschaften \hfill (obligatorisch)
+  2. Attribute \hfill (optional)
+  3. Methoden \hfill (optional)
+  4. meist für Invarianten \hfill (optional)
+
+* Klasse
+\vspace{1.5em}
+#+Attr_LaTeX: :height 8cm
+[[./simple_classes.png]]
+
+* Stereotypen & Eigenschaften
+\vspace{1.5em}
+- vordefinierte Schlüsselwerte & Stereotypen für Klassen
+  - =interface=
+  - =type= ... Typ, d.h. keine Instanzen
+  - =implementationClass= ... implementiert einen Typ
+  - =metaClass= ... Metaklasse
+  - =entity=: persistentes Objekt, das ein Businesskonzept darstellt
+  - =focus=: Objekt, das Teil der "core logic" ist
+  - =auxiliary:= Objekt, das ein =focus= Objekt unterstützt
+  - =control=: Steuerungsklassen: Ablauf-, Steuerungs-, Berechnungsvorgänge
+  - =utility=: keine Instanzen, nur statische Methoden und Attribute
+  - =enumeration=
+- vordefinierte Eigenschaften:
+  - =abstract= (\to kursiv!): Klasse und Operation
+  - =query=: Operation ohne Nebeneffekt
+  - =leaf=: nicht überschreibbare Operation
+
+* Property
+- /property/: /attribute/ oder /association end/
+- property modifier
+  - =readOnly=
+  - =id= ... Teil des Identifiers
+  - =ordered=
+    - vs. =unordered=
+  - =nonunique= ... doppelte Elemente erlaubt
+    - in mehrwertigen Properties
+    - vs. =unique=
+  - =subsets <property-name>=
+  - =redefines <property-name>= ... überschreibt vererbtes Attribut
+  - =seq= ... =nonunique= \wedge =ordered=
+  - oder "property constraint"
+
+* =unique= vs. =ordered=
+#+attr_latex: :align llp{2cm}p{3cm}
+| Eindeutigkeit | Ordnung   | Kombination   | Beschreibung            |
+|---------------+-----------+---------------+-------------------------|
+| =unique=        | =unordered= | =set=           | Menge (default)         |
+| =nonunique=     | =unordered= | =bag=           | Multimenge              |
+| =unique=        | =ordered=   | =ordered=       | Geordnete Menge         |
+| =nonunique=     | =ordered=   | =sequence=, =seq= | \raggedright geordnet mit Duplikaten |
+
+* Multiplizitäten
+- =1= :: exakte Angabe, d.h. genau 1
+- =1,2= :: Aufzählung, d.h. 1 oder 2
+- =0..1= :: Bereich, d.h. =0,1= bzw. optional
+- =*= :: beliebig, d.h. =0..*= bzw. von 0 bis \infin
+- keine Angabe :: dann
+  - bei Attributen ... 1
+  - bei Assoziationsenden abhängig von Tätigkeit
+    - Analyse: wird meist als unbestimmt betrachtet
+    - Design: 1
+
+* Interface
+\vspace{1.5em}
+#+Attr_LaTeX: :height 6cm
+[[./interface.png]]
+
+* Vererbung
+\vspace{1.5em}
+- =complete= vs. =incomplete=
+  - =complete=: alle Unterklassen sind schon definiert
+-  =disjoint= vs. =overlapping=
+  - =disjoint=: Klassen haben keine gemeinsame Instanzen
+- default: ={incomplete,overlapping}=
+#+Attr_LaTeX: :height 4cm
+[[./inheritance.pdf]]
+
+* Assoziationen und Rollen
+\vspace{1em}
+#+Attr_LaTeX: :height 7cm
+[[./association.png]]
+
+* Einschränkungen bei Assoziationen
+- Benutzerdefinierte Einschränkungen
+  - z.B.\hspace{1em} =User::course.includes(primary)=
+    - aber auch:\hspace{1em} \forall u \in User : primary \in u.course
+- XOR-Einschränkung
+  #+attr_latex: :height 4cm
+  [[./xor.png]]
+
+* Qualifizierte Assoziationen
+\vspace{2em}
+- =user= verwaltet eigene Gruppen
+  - =groupname= in Assoziation =manages= eindeutig
+    - aber nicht über alle Gruppen
+    - kann so nicht ausgedrückt werden
+  \vspace{-0.5em}
+  #+attr_latex: :height 2.5cm
+  [[./qualified_associations.png]]
+\pause\vspace{-2em}
+- \to qualifizierte Assoziation
+  \vspace{-0.5em}
+  #+attr_latex: :height 2.5cm
+  [[./qualified_associations2.png]]
+
+* Vererbung und Assoziationen
+\vspace{1em}
+#+Attr_LaTeX: :height 4cm
+[[./association_inheritance.png]]
+
+* Assoziationsklasse
+\vspace{1.5em}
+#+Attr_LaTeX: :height 6cm
+[[./assoc_class1.png]]
+
+* Assoziationsklasse -- 2
+\vspace{1.5em}
+Alternative Modellierung mittels "normaler" Klassen?
+#+Attr_LaTeX: :height 1.5cm
+[[./assoc_class21.pdf]]
+\pause
+#+Attr_LaTeX: :height 3cm
+[[./assoc_class22.png]]
+
+* Aggregation
+\vspace{1em}
+- Spezialfall der Assoziation
+  - \to "part-of" Beziehung
+  - Definition: /Komponentenobjekt/ part-of /komplexes Objekt/
+- keine Zyklen auf Instanzebene!
+- Semantik der Aggregation bzw. Komposition
+  - abhängig :: abhängiges Komponentenbjekt ist existenzabhängig
+                von komplexen Objekt
+  - unabhängig :: unabhängige Objekte können losgelöst
+                  existieren
+  - exklusiv :: Komponentenobjekt hat genau part-of-Beziehung
+                komplexen Objekt
+  - nicht exklusiv :: Komponentobjekt kann mehrere part-of-Beziehungen
+                      zu unterschiedlichen komplexen Objekten haben
+
+* Aggregation -- 2
+\vspace{1em}
+#+Attr_LaTeX: :height 4.5cm
+[[./aggregation.png]]
+
+* Komposition
+\vspace{2em}
+- Spezialfall der Assoziation
+- zusätzliche Semantik:
+  - Kardinalität: max. 1 auf Seite der Komposition
+  - kaskadierende Operationen: Löschen,...
+#+Attr_LaTeX: :height 2.3cm
+[[./komposition1.png]]
+\pause
+#+Attr_LaTeX: :height 2.5cm
+[[./komposition2.png]]
+
+* Aggregation, Komposition
+\vspace{1.5em}
+#+Attr_LaTeX: :height 6cm
+[[./aggregation_komposition.pdf]]
+
+* N-wertige Assoziationen
+\vspace{1.5em}
+#+Attr_LaTeX: :height 6cm
+[[./n_ary.pdf]]
+* Objektdiagramm
+- Zeigt
+  - Objekte (d.h. Instanzen von Klassen)
+  - Links (d.h. Instanzen von Assoziationen)
+#+attr_latex: :height 4cm
+[[./object.png]]
+
+* Paketdiagramm
+- Zeigt Pakete mit Klassen,...
+#+attr_latex: :height 6cm
+[[./package.png]]
+
+* Verteilungsdiagramm
+\vspace{1em}
+- Zeigt eingesetzte Hard- und Softwaretopologie und das eingesetzte
+  Laufzeitsystem
+#+attr_latex: :height 6cm
+[[./deployment.png]]

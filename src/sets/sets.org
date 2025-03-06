@@ -1,0 +1,325 @@
+#+TITLE: Mengen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+#+LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+
+* Begriff
+- Georg Cantor (1845 - 1918, dt. Mathematiker)
+- Definition von Cantor (1895)
+
+  "Eine Menge ist eine Zusammenfassung von bestimmten
+  wohlunterschiedenen Objekten unserer Anschauung oder unseres
+  Denkens (welche die Elemente der Menge genannt werden) zu
+  einem Ganzen."
+- Es kann also "alles" in einer Menge enthalten sein: Bücher,
+  Autos, Zahlen, Funktionen,...
+- Eigenschaften: keine doppelten Elemente, keine Reihenfolge!!!
+- $M = \{1, 2, 3\}, 1 \in M, 4 \notin M$
+- Anzahl der Elemente von M heißt Mächtigkeit von M: $|M|$
+
+* Problem 1
+- D.h. auch Mengen von Mengen sind nach dieser Definition
+  erlaubt.
+- Menge M *aller* Mengen!
+  - Wenn M eine Menge ist, dann muss M auch sich selbst enthalten!
+  - M ist also als Element in M enthalten.
+  - Und in diesem M ist wiederum ein M enthalten, usw.
+
+* Problem 2
+\vspace{1.5em}
+- Menge M aller Mengen, die sich *nicht* selbst als Element enthalten:
+  $M = \{x| x \notin x\}$
+- Nehmen wir an:
+  - Fall 1: M enthält sich nicht selbst.
+    Dann ist M eine Menge, die sich nicht selbst enthält und als
+    solche ein Element von M!!! \to Widerspruch!
+  - Fall 2: M enthält sich als Element.
+    Dann ist M eine Menge, die sich selbst enthält und als solche
+    kein Element von M!!! \to Widerspruch!
+- Paradoxon von Bertrand Russell (1872 - 1970)
+- Auch unter dem Namen Barbier-Paradoxon bekannt
+  - Im Schaufenster eines Barbierladens steht ein Schild: Ich rasiere
+    alle Männer des Dorfes, die sich nicht selbst rasieren. Rasiert sich
+    der Barbier selbst?
+- Lösung: Zermelo-Fraenkel-Mengelehre (10 Axiome)
+
+* Mengenschreibweisen
+- Aufzählend
+  - $N_g = \{0, 2, 4, 6, 8, 10\}$
+  - $N_g = \{0, 2, 4, ... ,10\}$
+- Beschreibend
+  - $N_g = \{x | x \in \N \mbox{ und x ist kleiner als 11 und gerade}\}$
+  - $N_g = \{x | x \in \N \land x \le 10 \land 2|x\}$
+  - $N_g = \{x | x \le 10 \land 2|x\}$ ... Grundmenge ist gegeben: $\N$
+  - $N_g = \{x | x \le 10 \land x \mod 2 = 0\}$
+  - $N_g = \{x | x \le 10 \land \exists m \in \N: 2 m = x\}$
+  - $N_g = \{2x | x \le 5\}$
+
+* Gebräuchliche Mengen
+- $\N = \{0, 1, 2,...\}$
+- $\Z = \{..., -2, -1, 0, 1, 2,...\}$
+- $\Q = \{x | x = p / q, p,q \in \Z, q \neq 0 \}$
+- $L = \{x | x^2 = 2\}, L \not \subseteq \Q, L \subset \R$
+- $L = \{x | x^2 = -1\}, L \not \subseteq \R, L \subset \C$
+  - $a + bi \in \C$
+  - in Python:
+    #+begin_src python
+    >>> import cmath
+    >>> cmath.sqrt(-1)
+    1j
+    >>> 1j**2
+    (-1+0j)
+    #+end_src
+
+* Teilmenge
+- $A \subseteq B \lequiv \forall x \in A \imp x \in B$
+  - Für jede Menge M gilt: $\{\} \subseteq M$ und $M \subseteq M$
+- $A \subset B \lequiv A \subseteq B \land A \neq B$
+- $A = B \lequiv \forall x \in A \imp x \in B \land \forall y \in B \imp y \in A$
+  - $A = B \lequiv A \subseteq B \land B \subseteq A$
+- $A \supseteq B \lequiv \forall x \in B \imp x \in A$
+- $A \supset B \lequiv A \supseteq B \land A \neq B$
+
+* Rechenregeln
+Für Teilmengen:
+| Reflexivität    | $A \subseteq A$                                     |
+| Antisymmetrie   | $A \subseteq B \land B \subseteq A \lequiv A = B$       |
+| Transitivität   | $A \subseteq B \land B \subseteq C \limp A \subseteq C$ |
+| ​                |                                                     |
+| Kleinstes und   | $\eset \subseteq A \subseteq G$                     |
+| größtes Element |                                                     |
+
+* Potenzmenge
+- Potenzmenge $\P(M)$ ist die Menge aller Teilmengen von M
+  - $\P(M) = \{N | N \subseteq M\}$
+  - $M = \{a, b, c\}$
+          $\P(M) = \{\{\},\{a\},\{b\},\{c\},\{a,b\},\{a,c\},\{b,c\},\{a,b,c\}\}$
+  - Ist M endlich, dann ist $|\P(M)| = 2^{|M|}$
+  - Anstatt $\{\}$ schreiben wir auch \eset
+
+* Binäre Mengenoperationen
+- Durchschnitt: $A \cap B = \{x|x\in A \land x\in B\}$
+  - A und B heißen /disjunkt/, wenn ihre Schnittmenge leer ist.
+- Vereinigung: $A \cup B = \{x|x\in A \lor x\in B\}$
+- Differenz: $A \setminus B = \{x|x\in A \land x\notin B\}$
+- Symmetrische Differenz: $A \vartriangle B = \{(x \in A \lor x \in B) \land x \notin (A \cap B)\}$
+  - $A \vartriangle B = (A \setminus B) \cup (B \setminus A)$
+  - $A \vartriangle B = (A \cup B) \setminus (A \cap B)$
+
+* Rechenregeln -- 2
+| Idempotenz   | $A \cap A = A$            |
+|              | $A \cup A = A$            |
+| ​             |                        |
+| Beherrschung | $A \cup G = G$            |
+|              | $A \cap \eset = \eset$    |
+| ​             |                        |
+| Identität    | $A \cap G = A$            |
+|              | $A \cup \eset = A$        |
+| ​             |                        |
+| Komplement   | $A \cap \sneg{A} = \eset$ |
+|              | $A \cup \sneg{A} = G$     |
+(Idem...dasselbe, Potenz...Leistungskraft)
+
+* Rechenregeln -- 3
+| Kommutativ-  | $A \cap B = B \cap A$                   |
+| gesetz       | $A \cup B = B \cup A$                   |
+| ​             |                                   |
+| Assoziativ-  | $A \cap (B \cap C) = (A \cap B) \cap C$       |
+| gesetz       | $A \cup (B \cup C) = (A \cup B) \cup C$       |
+| ​             |                                   |
+| Distributiv- | $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$ |
+| gesetz       | $A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$ |
+| ​             |                                   |
+| Absorptions- | $A \cap (A \cup B) = A$                 |
+| gesetz       | $A \cup (A \cap B) = A$                 |
+
+* Rechenregeln -- 4
+| Komplemente       | $\sneg{\eset} = G$                   |
+|                   | $\sneg{G} = \eset$                   |
+| ​                  |                                      |
+| Doppelte Negation | $\sneg{\sneg{A}} = A$                |
+| ​                  |                                      |
+| De Morgan         | $\sneg{A \cap B} = \sneg{A} \cup \sneg{B}$ |
+|                   | $\sneg{A \cup B} = \sneg{A} \cap \sneg{B}$ |
+
+* Komplementärmenge & Partition
+- Komplementärmenge $\sneg{A}$ (auch $A^C$) ist definiert durch
+  $\sneg{A} = \{x|x \notin A\}$ (Grundmenge G muss definiert sein)
+- Partition: Menge von Teilmengen $A_1,A_2,...,A_n$ von M:
+  - $A_1 \cup A_2 \cup ... \cup A_n = M$
+  - $\forall A_i, A_j, i \neq j: A_i \cap A_j = \eset$
+
+* Kartesische Produkt
+- Tupel
+  - geordnete Anordnung von Werten (Objekten)
+    - $(5, 3) \neq (3, 5)$
+    - Reihe 5, Sitz 3 vs. Reihe 3, Sitz 5!
+  - Paar, Tripel, Quadrupel, n-Tupel
+- Kartesisches Produkt zweier Mengen
+  - $A \times B = \{(a, b)| a \in A \land b \in B\}$
+  - z.B. zweidimensionales Koordinatensystem
+- n-faches Kartesisches Produkt
+  - $A_1 \times A_2 \times...\times A_n = \{(a_1, a_2,...,a_n)| a_1 \in A_1 \land a_2 \in A_2 \land...\land a_n \in A_n\}$
+  - z.B. $n=3$: dreidimensionales Koordinatensystem
+
+* Relation
+\vspace{1em}
+- Beziehung zwischen 2 oder mehreren Elementen (Objekten)
+  - z.B. Vater-Mutter, Mutter-Sohn, Sohn-Tochter1-Tochter2
+  - z.B. lexiographische Ordnungsrelation: "Meier" steht vor "Meyer"
+    und auch vor "Schmidt"
+- Eine Relation R zwischen A und B ist eine Teilmenge von $A \times B$
+  - $R \subseteq A \times B$
+  - statt: $(a, b) \in R$ schreibt man auch $a\ R\ b$
+  - z.B. $\le\ = \{(a, b)|a \in A, b \in B, a \mbox{ kleiner oder gleich } b\}$,
+    d.h. $a \le b$
+- Allgemein: $R \subseteq A_1 \times A_2 \times...\times A_n$
+- \lto Prädikatenlogik, Relationale Algebra (Relationale Datenbanken)
+
+* Verkettung von Relationen
+- $R \subseteq A \times B, S \subseteq B \times C$
+- Komposition (Verkettung)
+  $R \circ S \subseteq A \times C: a(R \circ S)c \lequiv \exists b\in B: a\ R\ b \land b\ S\ c$
+- Umkehrrelation (inverse Relation)
+  $R^{-1} \subseteq B \times A: b\ R^{-1}\ a \lequiv a\ R\ b$
+
+* Eigenschaften von Relationen
+\vspace{1.5em}
+- R heißt transitiv, wenn $\forall a,b,c \in A: a\ R\ b \land b\ R\ c \limp a\ R\ c$
+- R heißt reflexiv, wenn $\forall a \in A: a\ R\ a$
+- R heißt irreflexiv, wenn $\forall a \in A: \neg (a\ R\ a$)
+- R heißt symmetrisch, wenn $\forall a, b \in A: a\ R\ b \limp b\ R\ a$
+- R heißt antisymmetrisch, wenn nicht gleichzeitig $a\ R\ b$ und $b\ R\ a$ (für $a \neq b$) gelten kann
+  - also: $\forall a, b \in A: a\ R\ b \land b\ R\ a \limp a=b$
+- R heißt asymmetrisch, wenn $\forall a, b \in A: a\ R\ b \limp \lnot(b\ R\ a)$
+  - jede asymmetrische Relation ist auch antisymmetrisch
+    - d.h. ist ein Spezialfall der antisymmetrischen Relation
+    - d.h. ist eine verschärfte Antisymmetrie
+  - jede asymmetrische Relation ist auch irreflexiv
+- R heißt total, wenn $\forall a, b \in A: a\ R\ b \vee b\ R\ a$
+- R heißt trichotom, wenn $\forall a, b \in A: \text{entweder } a\ R\ b \text{ oder }
+  a=b \text{ oder } b\ R\ a$
+  - damit automatisch: irreflexiv und asymmetrisch!
+
+* Ordnungsrelationen
+\vspace{3ex}
+Achtung auf verschieden verwendete Begriffe!
+
+\vspace{1em}
+- Halbordung
+  - auch: partielle Ordnung oder Partialordnung
+  - Eigenschaften: reflexiv, antisymmetrisch, transitiv
+  - Beispiel: $\subseteq$
+- Totalordnung
+  - auch: (schwache) Ordnung
+  - Halbordnung, die total ist
+  - Beispiel: $\leq$ auf \R
+- Starke Totalordnung
+  - auch: starke Ordnung
+  - Eigenschaften: transitiv, trichotom
+  - eine starke Totalordnung ist /keine/ Totalordnung!
+  - Beispiel: $<$ auf \R
+
+* Äquivalenzrelation
+- Eigenschaften
+  - reflexiv
+  - symmetrisch
+  - transitiv
+- Es wird häufig das Symbol \equiv verwendet.
+- Beispiel: $=$ oder "ist gleich alt wie"
+
+* Äquivalenzklasse
+\vspace{1em}
+- Ist $\equiv$ eine Äquivalenzrelation auf einer Menge $M$, dann wird die Menge
+  $[a]_\equiv$ als Äquivalenzklasse über M bezeichnet und ist definiert durch:
+  $[a]_\equiv = \{b|b \in M \land a \equiv b\}$
+- Die Äquivalenzklasse von x ist die Menge der Elemente, die
+  äquivalent zu x sind.
+- Die Äquivalenzklassen von von $\equiv$ bilden eine Partition von $M$
+- Beispiel: Mengen aller Zahlen, die durch 2 dividiert den
+  gleichen Rest ergeben.
+  - $mod2 = \{(a, b) \in \N \times \N|a \mod 2 = b \mod 2\}$
+  - $[a]_{mod2} = \{b|b \in \N \land a \mbox{ mod2 } b\}$
+  - $[1]_{mod2} = \{1, 3, 5,...\}$
+  - $[2]_{mod2} = \{0, 2, 4,...\}$
+
+* Prioritäten
+1. $\sneg{A}$
+2. $\times$
+3. $\setminus, \vartriangle$
+4. $\cap$
+5. $\cup$
+6. $\subset, \subseteq, =, \neq, \supseteq, \supseteq$
+
+Nicht vergessen:
+
++ In the face of ambiguity, refuse the temptation to guess.
++ Explicit is better than implicit.
+
+* Multimenge
+\vspace{1em}
+- mehrfaches Vorkommen
+  - normale Menge "ist eine" Multimenge
+- Beispiel: Noten eines Schülers
+  - $G = \{1, 2, 3, 4, 5\}$, $M = \{2, 3, 3, 4, 4, 5\}$
+- Darstellung durch Zugehörigkeitsfunktion
+  - $M : G \to \N$
+  - $M(1) = 0, M(2) = 1, M(3) = 2, M(4) = 2, M(5) = 1$
+- Operationen
+  - $\forall e :$
+    - $(M \cap N)(e) = \min(M(e), N(e))$
+    - $(M \cup N)(e) = \max(M(e), N(e))$
+    - $(M \setminus N)(e) = \max(0, M(e) - N(e))$
+    - $M \sseq N \lequiv \forall e: M(e) \le N(e)$
+  - $|M| = \sum_e M(e)$

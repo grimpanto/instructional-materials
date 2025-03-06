@@ -1,0 +1,173 @@
+#+TITLE: Framework
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Framework
+\vspace{1.5em}
+- Framework vs. Library?
+  - Library bietet Klassen, Funktion,... an, die von Applikationscode aufgerufen werden\pause
+  - Ein Framework ruft Applikationscode auf!
+- Ein Framework
+  - ist wie ein Text mit Leerstellen, die vom Programmierer befüllt werden
+  - ist wie eine Grammatik, die mit eigenen Worten befüllt wird
+  - hat auch gewisse Überschneidung mit Bibliotheken
+
+* Library
+#+begin_src python
+import sys
+from framework import PersonForm
+from form_utils import transform
+
+form = PersonForm()
+form.load()
+form.fill()
+form.validate()
+form.data = transform(form.data)
+form.save(sys.stdout)
+#+end_src
+
+* Framework -- 2
+- Es gibt verschiedene Möglichkeiten ein Framework zu strukturieren
+  - Callback Funktion
+  - Vererbung mittels Subclassing
+  - Interfaces
+  - imperatives API zur Registrierung
+  - /Convention over configuration/
+  - ...
+
+* Callback Funktion
+#+begin_src python
+from framework import Form
+
+def person_save(data):
+    # ...
+    pass
+
+form = Form(save=person_save)
+Form.add_control(NameControl())
+# ...
+form.do()
+#+end_src
+- Funktionen müssen first-class Objekte sein
+- Closure wären wünschenswert, um Konfiguration
+  der Funktionen zu ermöglichen
+
+* Subclassing
+\vspace{1.5em}
+#+begin_src python
+from framework import Form
+
+class MyPersonForm(Form):
+    def __init__(self):
+        add_control(NameControl())
+        # ...
+    def save(self, data):
+        # ...
+        pass
+
+form = MyPersonForm()
+form.do()
+#+end_src
+- einfach, aber Methoden müssen idR überschrieben werden
+  - Komplexität wächst mit Anzahl der zu überschreibenden Methoden
+- immer eigene Klasse nötig...
+
+* Interfaces
+#+begin_src python
+from framework import Form, IFormBackend
+
+class PersonFormBackend(IFormBackend):
+    def load(self):
+        pass
+
+    def save(self, data):
+        pass
+
+form = Form(PersonFormBackend())
+#+end_src
+- Ähnlich wie Funktionen, aber sinnvoll wenn /umfangreicherer/ Vertrag notwendig
+
+* imperatives API zur Registrierung
+\vspace{1.5em}
+#+begin_src python
+from framework import form_save_registry
+
+def save(data):
+     # ...
+     pass
+
+# configure to use 'save' for the form named 'person_form'
+form_save_registry.register('person_form', save)
+# ...
+person_form = Form()
+#+end_src
+- einfach, aber es nicht offensichtlich wie konfiguriert wurde
+- Reihenfolge der Aufrufe kann von Relevanz sein
+- Effekt von mehrfachen Registrieren des Gleichen
+
+* /Convention over configuration/
+#+begin_src python
+# prefix ist form_save_...
+def form_save_person_form(data):
+    # ...
+    pass
+#+end_src
+- einfach zu verwenden
+  - aber kompliziert, wenn viele verschiedene Regeln zu merken sind
+- Implementierung schwierig, nur in dynamischen Programmiersprachen

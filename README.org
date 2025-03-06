@@ -1,0 +1,41 @@
+* Instructional Materials
+
+These are various teaching materials that I used to teach computer science
+students in an Austrian technical secondary school (aka HTL) for informatics
+mainly in the subjects “Networks and Distributed Systems” and “Software
+Development”.
+
+You will find the following "courses":
+
+** [[file:build/cpp_intro/][An introduction to C++]]
+
+This slide deck is intended for teaching beginners in C++ who already have
+programming skills.
+
+** [[file:build/distsys][Networks and distributed systems]]
+
+A fairly complete teaching aid that covers the curriculum of the
+subject "Networks and Distributed Systems".
+
+** [[file:build/dotnet_intro/][A really short introduction to .NET Core]]
+
+Just a short overview to .NET Core and the basics of C#.
+
+** [[file:build/python_intro/][A gentle introduction to Python]]
+
+This is a gentle introduction to Python for beginners of this particular
+programming language.
+
+** [[file:build/securecomm_intro/][A quick primer to secure communication]]
+
+A short presentation to secure communication for the end user.
+
+** [[file:build/swdev/][Software Development]]
+
+This covers the curriculum almost completely in a form that is as independent as
+possible of specific programming languages and frameworks.
+
+** [[file:build/web_intro/][Webdevelopment for Beginners]]
+
+Nothing fancy, just an old slide deck that covers the basics of
+HTML, CSS, JavaScript, and the foundations of HTTP.

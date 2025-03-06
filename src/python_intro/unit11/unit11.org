@@ -1,0 +1,170 @@
+
+
+#+TITLE: Python \hfill Unit 11\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Listen - 1
+#+BEGIN_SRC python
+>>> buying_list = ["two oranges", "2l milk"]
+>>> len(buying_list)
+2
+>>> buying_list[0]  # same as with tuples...
+'two oranges'
+>>> buying_list[0] = "2 oranges"
+>>> buying_list
+['2 oranges', '2l milk']
+>>> "2 oranges" in buying_list
+True
+>>> buying_list.append("1kg bread")
+>>> buying_list.insert(0, "5 apples")
+>>> buying_list
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+#+END_SRC
+
+* Listen - 2
+#+BEGIN_SRC python
+>>> buying_list2 = buying_list
+>>> buying_list2
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+>>> buying_list2.clear()
+>>> buying_list2
+[]
+>>> buying_list
+[]
+>>> buying_list2.extend(("5 apples", "2 oranges", "2l milk", "1kg bread"))
+>>> buying_list2
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+>>> buying_list
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+#+END_SRC
+
+* Listen - 3
+#+BEGIN_SRC python
+>>> buying_list = buying_list2.copy()
+>>> buying_list
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+>>> del buying_list[2]
+>>> buying_list
+['5 apples', '2 oranges', '1kg bread']
+>>> buying_list2
+['5 apples', '2 oranges', '2l milk', '1kg bread']
+>>> >>> buying_list2.sort()
+>>> buying_list2
+['1kg bread', '2 oranges', '2l milk', '5 apples']
+>>> buying_list2.remove("2l milk")
+>>> buying_list2
+['1kg bread', '2 oranges', '5 apples']
+#+END_SRC
+
+* Listen - 4
+#+BEGIN_SRC python
+>>> buying_list.sort()
+>>> buying_list == buying_list2
+True
+>>> buying_list.index("2 oranges")
+1
+>>> buying_list.reverse()
+['5 apples', '2 oranges', '1kg bread']
+>>> buying_list.extend(["5 apples"])
+>>> buying_list.count("5 apples")
+2
+>>> buying_list.pop()
+'5 apples'
+>>> buying_list
+['5 apples', '2 oranges', '1kg bread']
+#+END_SRC
+
+* Listen - 5
+#+BEGIN_SRC python
+>>> buying_list = [(5, "apples"), (2, "oranges"),\
+... (2, "apples"), (1, "bread")]
+>>> first = buying_list[0]
+>>> del first[0]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: 'tuple' object doesn't support item deletion
+>>> apples = 0
+>>> for item in buying_list:
+...     if item[1] == "apples":
+...         apples += item[0]
+... 
+>>> apples
+7
+#+END_SRC
+
+* Strings
+#+BEGIN_SRC python
+>>> name = "maxi Mustermann"
+>>> name.lower()
+'maxi mustermann'
+>>> name
+'maxi Mustermann'
+>>> name.upper()
+'MAXI MUSTERMANN'
+>>> name.capitalize()
+'Maxi mustermann'
+>>> name.rjust(20)
+'     maxi Mustermann'
+>>> name.center(20)
+'  maxi Mustermann   '
+#+END_SRC
+
+* Strings - 2
+#+BEGIN_SRC python
+>>> number = "  123   "                                                                                                             
+>>> number.isdigit()                                                                                                                
+False
+>>> number = "  123   "
+>>> number.isdigit()                                                                                                                
+False
+>>> number = number.strip()
+>>> number
+'123'
+>>> number.isdigit()
+True
+#+END_SRC
+
+* Strings - 3
+#+BEGIN_SRC python
+>>> address = "1010 Wien"
+>>> address.split()
+['1010', 'Wien']
+>>> address = "2700 Wiener Neustadt, Dr. Eckener Gasse 2"
+>>> city, street = address.split(",")
+>>> city
+'2700 Wiener Neustadt'
+>>> street
+' Dr. Eckener Gasse 2'
+>>> int(city.split()[0])
+2700
+>>> street.lstrip()  # also: rstrip
+'Dr. Eckener Gasse 2'
+#+END_SRC
+
+* Sequenzen
+#+BEGIN_SRC python
+>>> "Wiener" in city
+True
+>>> 3 * "Wiener"
+'WienerWienerWiener'
+>>> (1, 2) + (4,)
+(1, 2, 3)
+>>> (1, 2) * 2
+(1, 2, 1, 2)
+>>> (1, 2) + "abc"
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: can only concatenate tuple (not "str") to tuple
+>>> 
+#+END_SRC

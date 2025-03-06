@@ -1,0 +1,200 @@
+
+#+TITLE: OpenSSL Mini-Tutorial
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+STARTUP: align
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [DIV=17,no-math]
+#+LATEX_HEADER: \usepackage{typearea}
+
+#+LATEX_HEADER: \usepackage{unicode-math}% lädt fontspec
+#+LATEX_HEADER: \setmainfont{TeX Gyre Pagella}
+#+LATEX_HEADER: \setmathfont{TeX Gyre Pagella Math}
+
+# +LATEX: \setmainfont{TeX Gyre Bonum}
+# +LATEX: \setmainfont{TeX Gyre Schola}
+# +LATEX: \setmainfont{TeX Gyre Pagella}
+
+# +LATEX_HEADER: \usepackage{fontspec}
+# +LATEX_HEADER: \usepackage{xunicode}
+# +LATEX_HEADER: \usepackage{xltxtra}
+# +LATEX_HEADER: \usepackage[libertine]{newtxmath}
+# +LATEX_HEADER: \setmainfont[Mapping=tex-text]{Linux Libertine}
+# +LATEX_HEADER: \setsansfont[Mapping=tex-text]{Linux Biolinum}
+
+#+LATEX_HEADER: \setkomafont{title}{\sffamily\bfseries}
+#+LATEX_HEADER: \setkomafont{author}{\sffamily}
+#+LATEX_HEADER: \setkomafont{date}{\sffamily}
+
+#+LATEX_HEADER: \usepackage{pifont}  % necessary for "ding"
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{✔}{{\ding{52}}}
+
+# +LATEX_HEADER: \frenchspacing
+
+#+OPTIONS: toc:nil
+
+# +LATEX: \addtokomafont{disposition}{\normalfont\rmfamily\bfseries\color{blue}}
+
+# latexmk -pvc -pdf -xelatex -view=none --latexoption=-shell-escape themenbereiche.tex
+
+1. Installation unter Linux
+   - Ubuntu, Debian
+     #+BEGIN_SRC sh
+     aptitude install openssl
+     #+END_SRC
+   - archlinux, Manjaro
+     #+BEGIN_SRC sh
+     pacman -S openssl
+     #+END_SRC
+     
+2. Version feststellen
+   #+BEGIN_SRC sh
+   openssl version
+   openssl version -a   
+   #+END_SRC
+
+3. Dokumentation, Links
+   - [[http://openssl.org]]
+   - [[https://www.feistyduck.com/library/openssl-cookbook/]]
+   - [[https://wiki.archlinux.org/index.php/OpenSSL]]
+   - [[https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs]]
+   - [[https://pki-tutorial.readthedocs.org/en/latest/]]
+   - [[http://users.dcc.uchile.cl/~pcamacho/tutorial/crypto/openssl/openssl_intro.html]]
+   
+4. Welche Kommandos gibt es? -> Ungültiges eingeben...
+   #+BEGIN_SRC sh
+   openssl -h   
+   #+END_SRC
+   oder
+   #+BEGIN_SRC sh
+   man openssl
+   #+END_SRC
+     
+5. Welche Subkommandos gibt es? -> Ungültiges...
+   #+BEGIN_SRC sh
+   openssl dgst -h
+   #+END_SRC
+
+6. Einen digest berechnen lassen
+   #+BEGIN_SRC sh
+   openssl dgst -sha256 mozilla.pdf
+   #+END_SRC
+     
+   - sha = sha-0 -> kurz danach ersetzt durch sha-1 (160Bit)
+     - sha-0 ... erfolgreiche Angriffe bekannt
+     - sha-1 ... theoretische Angriff möglich
+   - sha-2 ... Familie: sha-224, sha-256, sha-384, sha-512
+     - keine Angriffe bekannt
+   - sha-3 ... Ausschreibung von NIST
+     - soll sha-2 nicht ersetzen, sondern ergänzen
+       
+7. Wie ein selbst-signiertes Zertifikat in einem Schritt generieren?
+   #+BEGIN_SRC sh
+   openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout key.pem -out cert.pem
+   #+END_SRC
+   
+   - =req= ... certificate signing request
+   - =-x509= ... erzeuge x509 anstatt Zertifikatsrequest 
+     - ITU-T (internat telecommunication union) Standard für PK-Kryptographie
+     - x500: nie implementierter Standard für Verzeichnisdienste (s.LDAP)
+   - =-nodes= ... Key nicht verschlüsseln
+   - =-days 365= ... 365 Tage gültig
+   - =-newkey rsa:1024= ... neuer Key mittels RSA mit Länge 1024 Bits
+   - Was ist Unterschied zwischen .csr, .crt, .pem?
+     \to kein Unterschied im Format: alle PEM (ASCII, base64 kodiert)
+     - =.csr=: Zertifizierungsanfrage
+     - =.crt=: Zertifikat
+     - =.pem=: kann Zertifikat und/oder privaten Key enthalten
+
+8. (optional) nur wenn von Verisign... zu signieren
+   #+BEGIN_SRC sh
+   openssl req -new -newkey rsa:1024 -nodes -keyout key.pem -out req.pem
+   #+END_SRC
+   Wenn Key schon vorhanden, dann:
+   #+BEGIN_SRC sh
+   openssl req -new -key key.pem -out req.csr
+   #+END_SRC
+   Kann folgendermaßen überprüft werden:
+   #+BEGIN_SRC sh
+   openssl req -in req.pem -noout -verify -key key.pem
+   #+END_SRC
+   Info ansehen:
+   #+BEGIN_SRC sh
+   openssl req -in req.csr -noout -text
+   #+END_SRC
+     
+9. Wie ein Zertifikat verifizieren?
+   #+BEGIN_SRC sh
+   openssl verify cert.pem
+   #+END_SRC
+   Error 18 ist ok...
+   
+10. Wie testen?
+    #+BEGIN_SRC sh
+    openssl s_server -cert cert.pem -key key.pem -www
+    #+END_SRC
+    dann Browser starten und zu dieser URL: https://testing:4433
+    
+11. Wie ein entferntes Zertifikat mit der Kommandozeile abrufen?
+    #+BEGIN_SRC sh
+    openssl s_client -connect google.at:443 > google.pem
+    #+END_SRC
+	Dann alles außer BEGIN CERTIFICATE...END CERTIFICATE
+    
+12. Wie Informationen aus Zertifikat extrahieren?
+    #+BEGIN_SRC sh
+    openssl x509 -text -in google.pem
+    #+END_SRC
+	- Wie auf Einzelteile zugreifen?
+      #+BEGIN_SRC sh
+      openssl x509 -noout -in google.pem -issuer      
+      #+END_SRC
+	  oder hinten: =-subject=, =-dates=, =-hash=, =-fingerprint=
+
+13. Wie einen private RSA Schlüssel generieren?
+    #+BEGIN_SRC sh
+    openssl genrsa -out key.pem 1024    
+    #+END_SRC
+
+14. Wie einen public RSA Schlüssel generieren?
+    #+BEGIN_SRC sh
+    openssl rsa -in key.pem -pubout > pubkey.pem
+    #+END_SRC
+    
+15. Wie ein Zertifikat erstellen?
+    #+BEGIN_SRC sh
+	openssl req -x509 -new -nodes -days 365 -key key.pem -out cert.pem    
+    #+END_SRC
+
+16. Wie digest signieren/verifizieren?
+	- generieren ohne signieren:
+      #+BEGIN_SRC sh
+      openssl dgst -sha256 -out nginx.sha256 ../nginx-1.4.1.tar.gz      
+      #+END_SRC
+
+    - generieren mit signieren:
+      #+BEGIN_SRC sh
+      openssl dgst -sha256 -sign key.pem -out nginx.sha256 ../nginx-1.4.1.tar.gz
+      #+END_SRC
+	  
+    - verifizieren eines signierten digest:
+      #+BEGIN_SRC sh
+      openssl dgst -sha256 -verify pubkey.pem -signature nginx.sha256 ../nginx-1.4.1.tar.gz
+      #+END_SRC
+
+17. Wie eine Datei base64 kodieren/dekodieren?
+    #+BEGIN_SRC sh
+	openssl enc -base64 -in ../nginx-1.4.1.tar.gz > nginx-1.4.1.tar.gz.enc
+	less *.enc
+	openssl enc -d -base64 -in nginx-1.4.1.tar.gz.enc -out nginx-1.4.1.tar.gz
+	diff ../nginx-1.4.1.tar.gz nginx-1.4.1.tar.gz    
+    #+END_SRC
+    
+18. Verschlüsseln/Entschlüsseln
+    #+BEGIN_SRC sh
+	openssl enc -aes-256-cbc -salt -in nginx.sha256 -out nginx.sha256.crypt
+	openssl enc -d -aes-256-cbc -salt -in nginx.sha256.crypt -out nginx.sha256.2
+	diff nginx.sha256.crypt nginx.sha256.2    
+    #+END_SRC

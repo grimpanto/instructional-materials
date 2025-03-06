@@ -1,0 +1,121 @@
+#+TITLE: Spieltheorie
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+#+latex_header: \newcommand{\Astar}{\raisebox{5pt}{A\textsuperscript{*}}}
+
+* Spieltheorie
+- mathematische Theorie
+- Modellierung von Entscheidungssituationen
+- Anwendungen
+  - Wirtschaftswissenschaften
+  - Soziologie
+  - Biologie
+  - Psychologie
+  - ...
+
+* Gefangenendilemma
+- 2 Gefangene
+- gemeinsam ein Verbrechen
+- es liegen aber nur Indizien vor
+- werden einzeln verhört
+  - d.h. können nicht miteinander kommunizieren
+
+* Prinzip
+- beide leugnen: beide niedrige Strafe
+  - da z.B. nur Waffenbesitz kann nachgewiesen werden
+- beide gestehen: beide hohe Strafe
+  - aber nicht Höchststrafe
+- einer gesteht, einer leugnet
+  - Geständnis \to Kronzeugenregelung \to frei
+  - kein Geständnis \to Höchststrafe!
+
+* Dilemma
+- Wie soll ein Gefangener am besten entscheiden?
+- Strafmaß hängt nicht nur von eigener Aussage ab!
+- dadurch entsteht das Dilemma (Zwickmühle)!
+
+* Strafausmaß
+#+attr_latex: :align |p{3cm}|p{3cm}|p{3cm}|
+|------------+-------------------------------+-------------------------------|
+|            | B schweigt                    | B gesteht                     |
+|------------+-------------------------------+-------------------------------|
+| A schweigt | A: 2 Jahre\newline B: 2 Jahre | A: 5 Jahre\newline B: 0 Jahre |
+|------------+-------------------------------+-------------------------------|
+| A gesteht  | A: 0 Jahre\newline B: 5 Jahre | A: 4 Jahre\newline B: 4 Jahre |
+|------------+-------------------------------+-------------------------------|
+
+* Beste Antwort?
+Die beste Antwort ist...\pause
+- Annahme A schweigt \to B gesteht
+- Annahme A gesteht \to B gesteht
+d.h. gestehen!\pause
+- Aber: Was ist /beste/ Antwort?\pause
+- Beste Antwort ist größter Gewinn auf jeweilige Strategie des Gegners.\pause
+- Allerdings: Für beide besser, wenn beide schweigen\pause
+- Allerdings: wenn A gesteht und B schweigt, dann für A am besten!
+  - analog für B\pause
+d.h. individuelle Rationalität führt zum Dilemma!
+
+* Mehrmalige Ausführung
+- Wie sieht die Situation aus, wenn die Situation beliebig
+  oft durchgespielt wird?
+  - Anzahl der Runden unbekannt
+- Jeder Spieler weiß wie "Gegner" in Vorrunde agiert hat
+  
+* Mögliche Strategien
+- immer gestehen (d.h. kooperieren)
+- immer schweigen (d.h. nicht übereinstimmen)
+- tit for tat (zuerst gestehen, dann immer "Gegner" in Vorrunde)
+- ...

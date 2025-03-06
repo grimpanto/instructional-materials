@@ -1,0 +1,569 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Systemarchitektur
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX_HEADER:\usepackage{hyperref}
+#+LATEX_HEADER:\hypersetup{colorlinks,linkcolor=,urlcolor=ExecusharesRed,pdfborderstyle={/S/U/W 1}}
+
+* Systemarchitektur -- Definition
+#+begin_quote
+Die Architektur regelt den konzeptionellen Zusammenhang zwischen den
+verschiedenen *eigenständigen Komponenten* eines Systems. Sie formt die *logische*
+und *physikalische* Struktur eines Systems mit allen strategischen und taktischen
+*Entwurfsentscheidungen*, welche während dem Entwicklungsprozess angewendet
+werden müssen. \hfill \textup{Grady Booch}
+#+end_quote
+
+Pragmatische Variante: Man versteht darunter die Konzipierung des Aufbaus von IT-Systemen aus
+Hardware, System-, Middleware- und Anwendungssoftware, Netzwerkstrukturen,
+Betriebspersonal und Nutzern.
+
+* Systemarchitektur -- Kriterien
+Allgemeine Kriterien für eine gute Architektur
+- Einfachheit
+  - komplex vs. kompliziert, \to KISS
+- Erweiterbarkeit: Änderung des Problemraumes
+- Skalierbarkeit: Änderungen des Problemumfangs
+- Kapselung: \to Austauschbarkeit
+- Sicherheit
+
+* Überblick über Architekturmuster
+- Einteilung nach der Struktur
+- Einteilung nach dem Informationsfluss
+- Weitere Patterns
+  
+* Einteilung nach der Struktur
+grundlegende Architekturpatterns
+- Schichtenarchitektur
+- Peer-to-peer
+- Pipe and Filter
+- Broker
+- Blackboard
+  
+* Schichtenarchitektur
+- engl. layered architecture
+- Abstraktion: abhängig von Sicht (engl. view) werden wesentliche Merkmale
+  (engl. feature) extrahiert \to Schicht (engl. layer)
+- Hierarchie von Abstraktionen: geordnete Reihenfolge
+  - Zerlegung (engl. decomposition) eines Problems in Teilprobleme
+  - Schnittstelle zwischen Schichten (engl. tiers)
+  - Kapselung (engl. encapsulation): innere Struktur einer Schicht
+    nicht einsehbar
+- strikt vs. nicht strikt
+- HW vs. SW
+
+* Schichtenarchitektur -- 2
+- Client/Server
+- Proxy
+- Load Balancer
+- Result Cache
+- Scatter und Gather
+
+* Client/Server
+- Teile: Client, Server, Service
+- Schichtenaufbau
+  - Präsentationsebene (presentation layer, PL)
+    - Darstellung der Daten, Verarbeitung von Benutzereingaben
+  - Verarbeitungsebene (application layer, AL)
+    - Business-Logic: Verarbeitung und Auswertung der Daten
+  - Datenebene (data layer, DL)
+    - Daten: persistent, unabhängig von AL, konsistent
+
+* Client/Server -- Architekturen
+\vspace{1em}
+- 2-Tier
+  - Client: PL --- Server: PL, AL, DL
+  - Client: PL --- Server: AL, DL
+  - Client: PL, AL --- Server: AL, DL
+  - Client: PL, AL --- Server: DL
+  - Client: PL, AL, DL --- Server: DL
+- 3-Tier
+  - Client: PL
+  - Anwendungsserver: AL
+  - Datenserver: DL
+- n-Tier
+  - Web
+  - Steuerungsschicht zum Ablauf mehrerer fachlich abgegrenzter
+    Teile des AL
+
+* Client/Server -- Kriterien
+\vspace{1em}
+- Antwortzeitverhalten, Netzwerkbelastung (Durchsatz)
+  - abhängig von Netzwerk, Server, Client, SW,...
+- Zuverlässigkeit und Verfügbarkeit
+  - Redundanz der Daten durch Replikation
+  - Redundanz der HW (Server, Netzwerk)
+  - Redundanz der SW
+  - HW-Tausch,...
+- Skalierbarkeit
+  - vertikal: weitere Ressourcen wie Speicher, schnellerer Prozessor,...
+  - horizontal: weitere Ressourcen wie zusätzliche Hosts \to Anpassung der SW
+- Sicherheit
+  
+* Client/Server -- Kriterien -- 2
+\vspace{1em}
+- Integration in Legacy-Systeme
+  - Import & Austausch von Daten, Authentifizierung, Zugriffskontrolle,...
+- Flexibilität
+  - Austausch der Benutzerschnittstelle,...
+- Installation und Wartbarkeit
+  - Installation? Warten? Deployment?
+- Administration
+  - z.B. Benutzerverwaltung
+- Programmierproduktivität
+  - abhängig von Anforderungen, gewählter Systemarchitektur und Tools
+- Kosten: Lizenzen, Eigentumsverhältnisse,...
+  
+* Proxy -- Zweck und Struktur
+\vspace{1em}
+** Zweck
+- Stellvertreter für Server
+  - gleiches Interface
+- fügt Funktionalität zum angeforderten Dienst
+  - Performance: Caching, Lastverteilung
+  - Filtern der Daten (auch Anonymisierung)
+  - Zugriffskontrolle (auch Bandbreitenkontrolle)
+  - Loggen der Zugriffe
+** Struktur
+\vspace{0.25em}
+# +name: hello
+# +header: :results raw :exports results
+# +begin_src latex
+#+begin_center
+\begin{tikzpicture}[node distance = 2cm, auto]
+    \tikzstyle{block} = [text height=1.5ex,text depth=.25ex,rectangle,draw,fill=blue!20,rounded corners,align=center,minimum height=2em,minimum width=3em,node distance=6em]
+    \tikzstyle{line} = [draw, -latex']
+    \tikzstyle{cloud} = [text height=1.5ex,text depth=.25ex,draw,ellipse,fill=red!20,minimum height=2em]
+
+    % Place nodes
+    \node [cloud] (client) {client};
+    \node [block,right of=client,xshift=-3mm] (proxy) {proxy};
+    \node [cloud,right of=proxy] (server) {server};
+
+    % Draw edges
+    \path [line] (client) -- (proxy);
+    \path [line] (proxy) -- (server);
+\end{tikzpicture}
+# +end_src
+#+end_center
+* Proxy -- Varianten, Vor- und Nachteile
+** Varianten
+- transparenter Proxy
+- Reverse Proxy
+** Vorteile
+- Schutz der Clients und Server
+** Nachteile
+- Gefahr durch Falschkonfiguration
+- weitere Indirektion \to Performance
+* Load Balancer
+- ein Reverse-Proxy
+- Dispatcher (reverse-proxy) entscheidet auf Basis von
+  - Zufall
+  - Round robin
+  - geringste Auslastung
+  - Session (z.B. Cookie)
+  - Parameter in Request
+
+* Result Cache
+- ein Reverse-Proxy
+- Ablauf
+  a. im Cache nachschlagen
+  b. wenn gefunden, dann zurückliefern
+  c. andererseits zum Worker weiterleiten und Ergebnis in Cache
+
+* Scatter and Gather
+\vspace{1.5em}
+"zerstreuen und einsammeln"
+** Zweck
+\vspace{-0.5em}
+- Aufteilung einer Anforderung auf viele Worker
+  - bestes Ergebnis
+  - Lastaufteilung
+  - Redundanz
+\vspace{-1em}
+** Aufbau
+\vspace{-0.5em}
+- Client
+- Dispatcher
+- mehrere Worker
+\vspace{-1em}
+** Ablauf
+\vspace{-0.5em}
+a. Broadcast der Anforderung an alle Worker
+b. auf alle Antworten warten
+c. Einzelantworten zu Gesamtantwort zusammenfassen
+
+* Peer-to-Peer
+- Client/Server: Server Flaschenhals?!
+- keine Server mehr!
+- d.h. Client und Server-Rollen wechseln nach Bedarf
+- Nachteile
+  - einheitlichen Status der Applikation bestimmen/gewährleisten
+  - effizientes Routing muss sichergestellt werden können
+  - Finden eines Kommunikationspartners
+  - Netzwerkausfälle maskieren
+- Beispiele: file sharing (z.B. BitTorrent), Blockchain (z.B. Bitcoin),
+  anonyme Internetbenützung (z.B. I2P)
+
+* Pipe and Filter -- Zweck und Struktur
+\vspace{1.5em}
+** Zweck
+\vspace{-0.75em}
+- Data-Flowarchitektur
+- inkrementelle Transformation der Daten in jedem Verarbeitungsschritt
+\vspace{-1.25em}
+** Struktur
+\vspace{-0.75em}
+# +name: hello
+# +header: :results raw :exports results
+# +begin_src latex
+#+begin_center
+\begin{tikzpicture}[node distance = 2cm, auto]
+    \tikzstyle{block} = [rectangle,draw,fill=blue!20,text width=3em,text centered,rounded corners,minimum height=2em,node distance=6em]
+    \tikzstyle{line} = [draw, -latex']
+    \tikzstyle{cloud} = [draw,ellipse,fill=red!20,minimum height=2em]
+
+    % Place nodes
+    \node [cloud] (source) {source};
+    \node [block, right of=source] (filterA) {filter A};
+    \node [block, right of=filterA] (filterB) {filter B};
+    \node [block, right of=filterB] (filterC) {filter C};
+    \node [cloud, right of=filterC] (sink) {sink};
+    % Draw edges
+    \path [line] (source) -- (filterA);
+    \path [line] (filterA) edge node[below] {pipe} (filterB);
+    \path [line] (filterB) edge node[below] {pipe}  (filterC);
+    \path [line] (filterC) -- (sink);
+\end{tikzpicture}
+\vspace{-1em}
+#+end_center
+\vspace{-1em}
+- Pipe \to FIFO
+- Filter: teilen sich keinen Zustand, haben kein Wissen über andere Filter
+\vspace{-1.25em}
+** Subtypen
+\vspace{-0.75em}
+- Pipelines: lineare Topologie
+- Bounded Pipes: Menge der Daten ist begrenzt
+- Getypte Pipes: Daten haben Typ
+* Pipe and Filter -- Vorteile
+- keine komplexen Interaktionen, Filter (Worker) sind Black Boxes
+- leichte Zusammensetzbarkeit, hierarchische Strukturierung möglich
+- leichte Wiederverwendbarkeit
+- parallelle Verarbeitung möglich
+  - d.h. mehrere parallele Filter (Worker) je Stufe
+- keine Zwischenspeicher (wie Dateien,...) notwendig
+  - Implemenetierung als Queue
+- schnelles Prototyping
+
+* Pipe and Filter -- Nachteile
+- Fehlertoleranz (was ist wenn Filter ausfällt?)
+- Performance (jeder Filter muss Daten parsen, keine globalen Daten)
+- nicht direkt für interaktive Anwendungen
+- Filter können nicht gemeinsam an einem Problem arbeiten
+- Pufferkapazität der Filter muss prinzipiell unbegrenzt sein
+
+* Broker
+\vspace{1em}
+** Zweck
+- Entkoppeln von Sender und Empfänger, sodass Kommunikation
+  möglich ist: Broker empfängt, bestimmt Ziel, leitet Nachricht weiter!
+** Struktur
+\vspace{-3.5em}
+#+begin_center
+\begin{tikzpicture}[node distance = 2cm, auto]
+    \tikzstyle{block} = [rectangle,draw,fill=blue!20,text width=3em,text centered,rounded corners,minimum height=2em,node distance=6em]
+    \tikzstyle{line} = [draw]
+    \tikzstyle{cloud} = [draw,ellipse,fill=red!20,minimum height=2em]
+
+    % Place nodes
+    \node [cloud] (broker) {broker};
+    \node [block, left of=broker] (w) {Host};
+    \node [block, above left of=broker] (nw) {Host};
+    \node [block, above of=broker] (n) {Host};
+    \node [block, above right of=broker] (ne) {Host};
+    \node [block, right of=broker] (e) {Host};
+    \node [block, below right of=broker] (se) {Host};
+    \node [block, below of=broker] (s) {Host};
+    \node [block, below left of=broker] (sw) {Host};
+    % Draw edges
+    \path [line] (w) -- (broker);
+    \path [line] (nw) -- (broker);
+    \path [line] (n) -- (broker);
+    \path [line] (ne) -- (broker);
+    \path [line] (e) -- (broker);
+    \path [line] (se) -- (broker);
+    \path [line] (s) -- (broker);
+    \path [line] (sw) -- (broker);
+\end{tikzpicture}
+\vspace{-1em}
+#+end_center
+
+* Blackboard
+aka Shared Space, auch Tuple Space
+- siehe Foliensatz "Serverprogrammierung"
+- Struktur
+  - Client: stellt Request in Space
+  - Blackboard
+  - Worker: arbeiten Requests ab
+- Ablauf eines Workers
+  a. aktuelles Zwischenergebnis vom Blackboard holen
+  b. neuen Wert zum Zwischenergebnis hinzufügen
+  c. neues Zwischenergebnis im Blackboard ablegen
+     
+* Einteilung nach Informationsfluss
+\vspace{1em}
+- Pull-Architektur: Client 'pulled' vom Server
+  - Client muss wissen *wo* und *wann* Informationen verfügbar sind \to regelmäßig
+    abfragen \to Request/reply Messaging Pattern
+- Push-Architektur: Server 'pushed' zum Client
+  - große Mengen von Information an viele Clients
+  - Anbieter klassifiziert Information \to Kanal, Interessenten abonnieren Kanal
+  - Beispiele: E-Mail, Usenet News
+- Event-Architektur:
+  - ähnlich Push, aber kleinere Informationseinheiten, Subskription basierend
+    auf Event-Klassen, Event-Mustern, bestimmten Events
+  - problematisches Event-Routing, Ressourcenverbrauch
+
+* Weitere Patterns
+- weitere Architekturpatterns
+  - MapReduce
+  - SOA
+  - ESB
+  - MOM
+- SW und Architekturpattern
+  - Ports and Adapters
+- SW
+  - Middleware
+
+* MapReduce
+\vspace{1.5em}
+- Hauptkomponenten (bei Google, [[https://www.cnet.com/news/google-spotlights-data-center-inner-workings/][2008]]!)
+  - GFS (Google File System): verteiltes Dateisystem
+    - mehr als 200 Cluster, die auf GFS basieren!
+    - einige Installationen bei Google: "many petabytes in size"
+  - Bigtable: "NoSQL Big Data database service"
+  - /MapReduce/: Programmiermodell und Implementierung zum verteilten Berechnen
+    - 100000 MapReduce Jobs jeden Tag: jeder benötigt 400 Server und ca. 5-10
+      Minuten!
+  - fehlertolerante SW
+    - fällt ein Server bei GFS, Bigtable oder MapReduce aus...      
+
+* MapReduce -- 2      
+- MapReduce bei Google
+  - \scriptsize https://research.google.com/archive/mapreduce.html
+  - Map/Reduce: Anleihen bei funktionaler Programmierung
+    - \to Open Source: Apache Hadoop
+  - 2014: Cloud Dataflow: zusätzlich (zu batch mode) "streaming data
+    processing"
+    - \to Open Source: Apache Beam
+- Anwendungen
+  - invertierte Indizes, Graphstrukturen von Webdokumenten, machine learning,
+    sortieren, einfache statistische Berechnungen
+    - inverted index: Abbildung von Inhalt zu Ort, z.B. Wort \to Dokumente (u.U.
+      mit Position)
+  # http://horicky.blogspot.co.at/2010/08/designing-algorithmis-for-map-reduce.html
+
+* MapReduce -- 3
+- Phasen
+  a. Map: Daten aus GFS
+     - Funktion Map wird vom Benutzer vorgegeben
+  b. Combine (optional)
+     - arbeitet wie Reduce, aber am Knoten von Map \to reduziert die Datenmenge und somit die
+       Netzwerkbelastung!
+  c. Shuffle: Zuordnung der Ausgangsdaten der Map-Prozesse auf Eingangsdaten
+     der Reduce-Prozesse
+     - Teil des Frameworks
+  d. Reduce: Daten in GFS
+     - Funktion Reduce wird vom Benutzer vorgegeben
+     
+* MapReduce -- 4
+[[./mapreduce.png]]
+\scriptsize
+Quelle: https://research.google.com/archive/mapreduce.html (2004)
+
+* MapReduce -- 5
+[[./mapreduce2.png]]
+\scriptsize
+Quelle: https://de.wikipedia.org/wiki/MapReduce
+
+* MapReduce -- 6
+\vspace{1.5em}
+[[./mapreduce3.png]]
+\scriptsize
+Quelle: http://horicky.blogspot.co.at/2010/10/scalable-system-design-patterns.html
+
+* MapReduce -- 7
+\vspace{1.5em}
+\small
+Zählen der Vorkommen der Wörter in einer größen Ansammlung
+von Wörtern:
+#+begin_example
+map(String key, String value):
+    // key: document name
+    // value: document contents
+    for each word w in value:
+         EmitIntermediate(w, "1");
+         // ko: or whatever the count will be
+
+reduce(String key, Iterator values):
+    // key: word
+    // values: a list of counts
+    int result = 0;
+    for each v in values:
+         result += ParseInt(v);
+    Emit(AsString(result))
+#+end_example
+\scriptsize
+Quelle: https://research.google.com/archive/mapreduce.html (2004)
+
+* Service-oriented Architecture (SOA)
+\vspace{1em}
+#+begin_quote
+Service Oriented Architecture (SOA) is a paradigm for organizing and utilizing distributed
+capabilities that may be under the control of different ownership domains.
+
+\hfill [[https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=soa-rm][Reference Model for Service Oriented Architecture 1.0]]
+#+end_quote
+
+\vspace{2em}
+
+#+begin_quote
+A service is a mechanism to enable access to one or more capabilities, where the access is
+provided using a prescribed interface and is exercised consistent with constraints and policies as
+specified by the service description.
+
+\hfill [[https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=soa-rm][Reference Model for Service Oriented Architecture 1.0]]
+#+end_quote
+
+* Service-oriented Architecture -- 2
+- Ein Dienst...
+  - repräsentiert eine fachliche Funktionalität
+  - ist in sich abgeschlossen und kann eigenständig benutzt werden
+  - ist über das Netzwerk verfügbar
+  - hat eine wohldefinierte Schnittstelle
+    - Black-Box: Implementierung in beliebiger Programmiersprache
+- Eine "Anwendung" \to Koordination der Dienste (Orchestrierung)
+
+* Service-oriented Architecture -- 3
+- Autovermietung
+  1. Benutzer registrieren
+  2. Reservierung vornehmen
+  3. Mietvertrag erstellen
+  4. Auto aushändigen
+  5. Auto zurückgeben
+  6. Abrechnung erstellen
+- \to jeweils ein Dienst
+  - Nutzung jeweils auch für andere Geschäftsfälle
+    - z.B. /Benutzer registrieren/ für Autoversicherung
+
+* Service-oriented Architecture -- 4
+\vspace{1.5em}
+- Verbindung der Dienste mittels:
+  - nachrichtenbasierter Kommunikation
+    - meist: Punkt-zu-Punkt -- Verbindungen
+    - Serialisierung: ASN.1, YAML, JSON, BSON, MessagePack, Google Protobuf,
+      Thrift,...
+  - \to Message Oriented Middleware
+  - CORBA, ICE, Java RMI, WCF, grpc,...
+  - Web Services basierend auf WS-* Spezifikationen (SOAP, WSDL, UDDI,
+    WS-Security,..., XML-RPC) bzw. auf \to REST
+  - Enterprise Service Bus (ESB)
+    - *Datenbus*, um Dienste in einem Unternehmensnetzwerk zur Verfügung zu stellen
+    - Dienste sind über Endpunkte mit Bus verbunden
+    - Austausch von Nachrichten um Dienste in Anspruch zu nehmen
+    - z.B. IBM WebSphere ESB, MS BizTalk Server, Mule ESB, Apache ServiceMix
+- Spezialfall: Microservices
+
+* ESB
+\vspace{2em}
+#+ATTR_LATEX: :width 9cm
+[[file:esb.png]]
+#+begin_center
+\footnotesize Quelle: Wikipedia
+#+end_center
+
+* Message Oriented Middleware
+** Zweck
+- Abstraktion einer persistenten nachrichtenorientierten Kommunikation
+- Nachrichten auf höheren Abstraktionsebene (nicht auf Bit/Byteebene)
+- validieren, transformieren, weiterleiten
+** Definition: MOM ist
+- eine Softwareinfrastruktur, die
+- durch asynchrone Verbindungen charakterisiert ist und
+- mehrere Systeme durch
+- Nachrichten miteinander verbindet
+* Message Oriented Middleware -- 2
+** Aufbau
+- Broker: einer oder mehrere
+- Server: registrieren sich bei Broker
+- Clients: sendet Nachricht über Broker
+** Kommunikationsmodelle
+- Message Queueing
+- Publish/subscribe
+** Dienste
+- Transaktionen, Prioritäten, Filterung, Transformation
+* Message Oriented Middleware -- 3
+** QoS
+- Zuverlässigkeit, Priorität, Time-to-Live
+** Sicherheit
+- Authentifizierung, Geheimhaltung, Integrität, Zugriffskontrolle
+* Message Oriented Middleware -- 4
+** Vorteile
+- Lose Kopplung
+- asynchrone (und synchrone) Kommunikation
+  - Server muss nicht online sein!
+- Lastverteilung und parallele Verarbeitung möglich
+- Verfügbarkeit einzelner Teilsysteme
+** Nachteile
+- MOM ist SPOF (single point of failure)
+- Routing der Nachrichten
+* Ports and Adapters
+\vspace{1em}
+- alternativer Name: Hexagonal Architecture
+- Verwendung einer Anwendung (eines System)
+  - gleicherweise durch Benutzer und
+  - anderen Programmen (u.a. auch automatisierten Tests)
+- \to Entwicklung: unabhängig von eingesetzter Umgebung
+  - d.h. anderen Programmen, Datenbanken,...
+\vspace{-1em}
+#+begin_center
+#+attr_latex: :width 0.5\textwidth
+[[./hexagonal_architecture.png]]
+\scriptsize http://alistair.cockburn.us/Hexagonal+architecture
+#+end_center
+
+* Ports and Adapters -- 2
+- andere Ansicht
+  #+begin_center
+  #+attr_latex: :width 0.3\textwidth
+  [[./ports_and_adapters.png]]
+  \scriptsize http://www.dossier-andreas.net/software_architecture/ports_and_adapters.html
+  #+end_center
+- Warum?
+  - oft wandert Business Logic in die PL \to Probleme (Änderungen der UI, Testen,
+    Ablauf im Batchbetrieb bzw. mit Daten eines anderen Prozesses)
+    
+
+* Middleware
+- Schicht zwischen Schicht 7 und Anwendung
+  - erstreckt sich über mehrere Maschinen
+    - Begriff auch allgemeiner in SW
+- stellt zusätzliche Dienste zur Verfügung
+  - Kommunikation: RPC, RMI, Webservice
+  - Namensgebung
+  - Persistenz und verteilte Transaktionen
+- Beispiele: CORBA, ICE, JEE, .NET

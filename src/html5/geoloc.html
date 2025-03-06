@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style type="text/css">
+       p:first-letter { font-size:2em; }
+       p:first-line { color:blue;}
+       /* h1:before {content: counter(chapno, upper-roman) ". "} */
+       p.special:before {content: "Special! "}
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+
+        var options = {
+            enableHighAccuracy: true,
+            timeout: 1000, // legt max. Wartezeit fest
+            maximumAge: 0 // max. akzeptiertes Cache-Alter
+        }
+
+        function successCallback(pos) {
+            alert("Position: " + pos.latitude + " " + pos.longitude + "\n" +
+                  "Höhe: " + pos.altitude + "\n" +
+                  "95% Genauigkeit von Länge&Breite (m): " + pos.accuracy + "\n" +
+                  "95% Genauigkeit von Höhe (m): " + pos.altitudeAccuracy + "\n" +
+                  "Richtung (°): " + pos.heading + "\n" +
+                  "Geschwindigkeit (m/s): " + pos.speed);
+        }
+
+        function errorCallback(err) {
+            alert(err.message + " " + err.code);
+        }
+
+        //    alert(err.message + err.code);
+
+
+        //navigator.geolocation.getCurrentPosition(
+        //    successCallback, errorCallback, options);
+
+        // alert("test");
+
+        //succ = function(x) { return x+1; }
+        //alert(succ(2))
+
+    </script>
+    <h1>erste</h1>
+    <h1>zweite</h1>
+    <h1>dritte</h1>
+    <h1>vierte</h1>
+    <form action="/register" method="post">
+        <fieldset>
+            <legend>Name</legend>
+            <p><label>Vorname: <input type="text" name="firstname" autocomplete autofocus id="firstname"></label></p>
+            <p><label>Nachname: <input type="text" name="lastname" value=""><label></p>
+        </fieldset>
+        <fieldset>
+            <legend>Geschlecht</legend>
+            <p><label>M<input type="radio" name="sex"></label></p>
+            <p><label>W<input type="radio" name="sex"></label></p>
+        </fieldset>
+        <p><label style="color:hsl(0,100%,50%)">News: <input type="checkbox" name="news" checked></label></p>
+        <p><label>E-Mail<input type="text" name="email" value="maxi@example.com"></label></p>
+        <label style="opacity:1">Suche: <input type="search" name="search"></label><p>
+        <label>Nummer: <input type="number" name="number" value="1" min="0" max="10" id="number"></label><p>
+        <label><input type="range" name="range" value="1"></label><p>
+        <label>E-Mail: <input type="email" name="email" multiple></label><p>
+        <label>URL: <input disabled value="FFF" type="url" name="url"></label><p>
+        <label>Lieblingsfarbe: <input type="color" name="xxx" id="color"></label><p>
+        <label>Geburtsdatum: <input type="date" name="yyy" id="date"></label><p>
+        <meter value="0.5">Wert 5</meter>
+        <input type="submit" name="submit" id="submit">
+    </form>
+            <button onclick="alert(document.getElementById('date').valueAsDate);">click mich</button>
+
+    <script type="text/javascript">
+
+// Create new WebSocket
+var mySocket = new WebSocket("ws://echo.websockets.org");
+// Attach listeners
+mySocket.onmessage = function(event) { alert("Der Server sagt: " + event.data); };
+mySocket.onopen = function(event) { alert("open");};
+mySocket.onclose = function(event) { alert("close");};
+mySocket.onerror = function(event) { alert("error");};
+
+mySocket.send("Hallo Server!");
+
+    </script>
+
+</body>
+</html>

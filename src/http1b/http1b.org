@@ -1,0 +1,147 @@
+#+TITLE: Verteilte Systeme \linebreak \small \mbox{ } \hfill HTTP 1.1 -- Teil B
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Chunked Transfer-Encoding
+- Wenn Server die Länge (noch) nicht kennt!
+- Antwort wird in Teilen (chunks) gesendet
+- =Transfer-Encoding: chunked=
+- beliebige binäre Daten
+
+* Chunked Transfer-Encoding -- 2
+- Aufbau eines Chunk-Stroms
+  1. =chunk*=
+  2. =last-chunk= (Endemarkierung)
+  3. =trailer-part= (zusätzliche Header)
+  4. =\r\n=
+- Aufbau eines =chunk=
+  1. Größe (Hexadezimal) =\r\n=
+  2. Daten =\r\n=
+- Aufbau des =last-chunk=: =0\r\n=
+- Aufbau von =trailer-part=: =(Key: Value\r\n)*=
+  - explizit verboten: =Transfer-Encoding=, =Content-Length=, =Trailer=
+
+
+* Chunked Transfer-Encoding -- 3
+#+begin_example
+HTTP/1.1 200 OK
+Date: Sun, 21 Aug 2016 23:59:59 GMT
+Content-Type: text/plain
+Transfer-Encoding: chunked
+Trailer: some-footer, another-footer
+
+1a
+abcdefghijklmnopqrstuvwxyz
+10
+1234567890abcdef
+0
+some-footer: some-value
+another-footer: another-value
+#+end_example
+
+* Chunked Transfer-Encoding -- 4
+#+begin_example
+HTTP/1.1 200 OK
+Date: Sun, 21 Aug 2016 23:59:59 GMT
+Content-Type: text/plain
+Content-Length: 42
+some-footer: some-value
+another-footer: another-value
+
+abcdefghijklmnopqrstuvwxyz1234567890abcdef
+#+end_example
+
+* Persistent Connections
+\vspace{1em}
+- bis HTTP/1.0 (TCP-)Verbindung \to geschlossen
+  - HTTP/1.0 Client und persistente Verbindung gewünscht \to =Connection: keep-alive=
+- HTTP/1.1 persistente Verbindung \to default
+  - Keine persistente Verbindung gewünscht \to =Connection: close=
+- kann ein Client/Server keine persistente Verbindungen \to =Connection: close=!
+- meist mehrere parallele Verbindungen!
+- Länge des Body muss bekannt sein
+- wird für Pipelining verwendet
+
+* Länge des Body
+- hier geht es nur um /echte/ Daten
+  - kein =HEAD=, kein 1xx,...
+- =Transfer-Encoding= vorhanden
+  - =chunked= am Ende \to Länge durch =chunked=
+  - =chunked= nicht am Ende
+    - Response \to bis zum Schließen der Verbindung
+    - Request \to 400 (Bad Request)
+- =Content-Length= vorhanden \to ✓
+- weder =Transfer-Encoding= = ~chunked~ noch =Content-Length=
+  - Request \to keine Daten, d.h. Länge = 0 (z.B. =GET=)
+  - Response \to bis zum Schließen der Verbindung
+
+* Pipelining
+\vspace{2em}
+- Senden mehrerer Requests /ohne/ auf Response zu warten
+  - \to Images, CSS, JavaScript!
+#+attr_latex: :width 0.68\textwidth
+#+caption: Quelle Wikipedia
+[[./http_pipelining.png]]
+
+* Pipelining -- 2
+\vspace{1.5em}
+- /möglich/ wenn persistente Verbindungen
+  - Weitere Verbesserung nach "persistenter Verbindung"
+- Server /kann/ parallel verarbeiten, wenn Methoden "safe" sind
+- Antworten immer in Reihenfolge der Anfragen!!
+- kein Pipelining nicht-idempotenter Requests (SOLL)!
+  - Wenn nicht-idempotenter Request, dann warten mit Pipelining bis Antwort
+    /dieses/ Requests eingetroffen
+- Client soll unbeantwortete Requests wieder stellen, wenn
+  Verbindung abgebrochen
+- Problem des HOL Blocking (Head-Of-Line Blocking) besteht
+  trotzdem noch
+  - HOL: nachfolgende Pakete sind blockiert wegen erstem Paket
+  - \to mehrere parallele Verbindungen
+  - \to HTTP/2
+- seit 2018: pipelining nicht mehr default-mäßig aktiviert in
+  modernen Browsern (wg. HOL und buggy Browser)!
+
+* Verbindungsabbau
+- Verbindungen können immer geschlossen werden
+  - beabsichtigt
+  - unbeabsichtigt (aka Abbruch)
+- Verbindungsabbau ausgehend vom
+  - Client
+  - Server
+- Wiederholung nach Wiederaufbau der Verbindung
+  - bei idempotenten Methoden: ok
+  - /nicht/ bei nicht-idempotenten Methoden
+    - außer Client ist sicher, dass ok
+
+* Verbindungsabbau -- Client
+a. Client sendet =Connection: close=
+   - darf danach nicht mehr senden!
+b. Server sendet Response (soll =Connection: close= enthalten)
+   - darf keine weiteren Requests verarbeiten
+c. Server schließt ausgehenden Stream
+d. Client empfängt Response von Server und schließt Verbindung
+e. Server schließt auf jeden Fall wenn ACK vom Response
+
+* Verbindungsabbau -- Server
+a. Server sendet =Connection: close=
+   - darf danach nicht mehr senden!
+b. Server schließt ausgehenden Stream
+c. Client empfängt =close=
+   - darf danach nicht mehr senden!
+d. Client schließt Verbindung
+   - soll nicht annehmen, dass Requests in der Pipeline
+     vom Server verarbeitet werden
+e. Server schließt auf jeden Fall wenn ACK vom Response

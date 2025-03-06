@@ -1,0 +1,480 @@
+#+TITLE: Formale Sprachen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{tikz}
+# +Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+Latex_header:\definecolor{links}{HTML}{2A1B81}
+#+Latex_header:\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+
+* Sprachen
+- zur Übertragung und Weitergabe von Information
+- Unterteilung
+  - Natürliche Sprachen
+    - historisch gewachsen (langer Entwicklungsprozess!).
+    - dienen der Verständigung zwischen Menschen.
+    - werden gesprochen oder schriftlich verwendet.
+    - meist redundant (Redundanz): Buchstaben oder ganze Worte
+      können in einem Satz fehlen und die Bedeutung (Information!)
+      bleibt u.U. trotzdem erhalten.
+    - Deutsch, Chinesisch,...,Körpersprache
+  - Künstliche Sprachen
+
+* Natürliche Sprachen
+\vspace{1.5em}
+- nicht exakt
+  - `Er ist ein großer Schwindler' (wie groß?)
+  - `Wir haben nur noch wenig Zeit' (wie viel?)
+- mehrdeutig
+  - `Er sah den Mann auf dem Hügel mit dem Fernrohr' (wer hat das Fernrohr?)
+  - `Ich gehe zur Bank' (um mich zu setzen oder Geld abzuheben?)
+- verändern sich laufend.
+  - Neue Begriffe entstehen
+    - "fingerfood"
+  - Bedeutungen ändern sich
+    - "nerd": Sonderling vs. Computerfreak
+  - Begriffe fallen weg
+    - "Kanapee"
+
+* Natürliche Sprachen -- 2
+#+begin_verse
+The programmer's wife sent him to the grocery store.
+Her instructions were: "buy butter. See if they have eggs. If they do, buy 10."
+He came back with 10 packs of butter. Because they had eggs.
+#+end_verse
+      
+* Künstliche (formale) Sprachen
+\vspace{1em}
+- für bestimmte Zwecke Information in kompakter Form und
+  unmissverständlich vermitteln.
+  - werden meist für ein Spezialgebiet `erfunden'.
+  - werden meist in geschriebener Form verwendet.
+  - sind exakt.
+  - sind eindeutig.
+  - sind unveränderlich.
+- Aufbau: streng vorgegebene, tw. formalisierte Regeln
+- Beispiele
+  - Notenschrift
+  - Mathematik
+  - Chemie
+  - Informatik, Programmiersprachen
+
+* Sprachen in der Informatik
+\vspace{1em}
+- Prinzipiell 2 Arten von Daten
+  - Binärformate: nur maschinenlesbar
+  - Klartextformat: Inhalte werden rein textuell verfasst.
+    \to Texteditor! \to Kodierung!
+- Sprachen im Klartextformat
+  - Programmiersprachen
+  - Auszeichnungssprachen: XML, HTML, CSS, RTF, Postscript, \LaTeX, Markdown,
+    Org Mode,...
+    - grundsätzlich plattformneutral
+    - lesbar durch Mensch und Computer
+    - veränderbar durch variable Länge
+    - Speicherbedarf und Zeit zum Verarbeiten in der Regel höher
+      als bei Binärformaten
+  - Formale Sprachen
+
+* Aufbau einer Sprache
+- \small Alphabet: Menge aller Zeichen der Worte.
+- Grammatik: Regeln wie Zeichen bzw. Worte
+  zu kombinieren sind, um ein gültiges Wort zu erhalten.
+- Syntax = Grammatik und Alphabet. Legt Form (d.h.
+  richtigen Aufbau) der Zeichenketten fest.
+- Semantik: Die Bedeutung syntaktisch richtiger Zeichenketten.
+  #+begin_example
+  a := b; (Pascal, Modula)
+  a = b; (Java, C, C++, C#, JavaScript,...)
+  MOVE B TO A (Cobol)
+  #+end_example
+- Pragmatik: Teil der Bedeutung, der vom Informationsempfänger
+  gewisse Vorkenntnisse einbezieht. Bewirkt persönliche
+  Interpretation (Anspielungen, Wortspiele,
+  Stimmungen,... Informatik: eleganter Algorithmus).
+
+* Alphabet -- Syntax -- Semantik
+- Wort über dem Alphabet: Aneinanderreihung von Zeichen
+- Syntax legt Worte der Sprache fest
+- Semantik scheidet bedeutungslose Worte aus
+- Deutsche Sprache
+  - Alphabet: Groß- und Kleinbuchstaben, Ziffern,...
+  - Worte über dem Alphabet: asdf*123
+  - Teilworte der Sprache: sind im Duden zu finden
+  - syntaktisch falsch: "Der wenn seine morgen Auto."
+  - syntaktisch richtig, semantisch falsch: "Der Tisch spricht gelb
+    über Informatik."
+  - syntaktisch richtig, semantisch richtig: "Die Ferien sind leider
+    vorbei!"
+
+* Einteilung der Sprachen
+- auf Grund ihrer Mächtigkeit in verschiedene Sprachklassen
+- Chomsky-Hierarchie:
+  - Typ-0 Sprachen: unbeschränkte Sprachen, d.h. alle Sprachen,
+    die durch eine beliebige Grammatik erzeugt werden können.
+  - Typ-1 Sprachen: kontextsensitive Sprachen
+  - Typ-2 Sprachen: kontextfreie Sprachen
+  - Typ-3 Sprachen: reguläre Sprachen
+- Typ-3 $\subseteq$ Typ-2 $\subseteq$ Typ-1 $\subseteq$ Typ-0
+
+* Grammatik -- Definition
+- Objektsprache: Sprache, deren Syntax beschrieben werden soll
+- Metasprache: Sprache zur Darstellung einer Grammatik
+  - mit Metasprache wird Objektsprache beschrieben
+- Grammatik G = (\Phi, \Sigma, P, S)
+  - \Phi ... Menge der Hilfssymbole (Non-Terminalsymbole)
+  - \Sigma ... Menge der Terminalsymbole \to Alphabet
+  - P ... Menge der Produktions- oder Ersetzungsregeln
+  - S ... Startsymbol (aus der Menge der Hilfssymbole)
+- Es muss gelten: $\Phi \cap \Sigma = \{\}$
+- $\Sigma^+$: Menge aller Worte über $\Sigma$
+- $\Sigma^* = \Sigma^+ \cup \{\epsilon\}$
+
+* Grammatik -- Beispiele
+- Grammatik
+  \begin{align*}
+  G & = (\Phi, \Sigma, P, S)\\
+  \Phi & = \{S,L,E\}\\
+  \Sigma & = \{a,b,c,;,(,)\}\\
+  P & = \{ S \to L, E \to a, E \to b, L \to L, L \to (L;E), L \to cc\}\\
+  S & = S
+  \end{align*}
+- Menge konstruierbarer Worte
+  \begin{align*}
+  \Sigma & = \{ a,b \}\\
+  \Sigma^+ & = \{a, b, aa, ab, ba, bb, aaa, aab,{\ldots} \}\\
+  \Sigma^* & = \{\epsilon, a, b, aa, ab, ba, bb, aaa, aab,{\ldots} \}
+  \end{align*}
+
+* Wortlänge und Verkettung
+\vspace{2em}
+- Wort der Länge $n$ über $\Sigma$ ist eine Folge von $n$ Terminalsymbole
+  - $x = x_1 x_2 x_3{\ldots}x_n$ mit $x_i \in
+    \Sigma$ und $1\le i \le n$: $|x| = n$.
+  - $|\epsilon| = 0$.
+  - Beispiel:
+    $\Sigma = \{a,b,c\}$
+    \begin{xalignat*}{3}
+    x & = aabcab & y & = ccc & xy & = aabcabccc\\
+    |x| & = 6 & |y| & = 3 & |xy| & = 9
+    \end{xalignat*}
+
+- Verkettung: $x, y \in \Sigma^+, x = x_1 x_2 x_3{\ldots}x_m, y =
+  y_1 y_2 y_3{\ldots}y_n$ dann ist die *Verkettung* $xy = x_1 x_2
+  x_3{\ldots}x_m y_1 y_2 y_3{\ldots}y_n$
+
+  - Kurzschreibweise:
+    \begin{align*}
+    aa & \quad {\ldots} \quad a^2\\
+    abbbaab & \quad {\ldots} \quad ab^3a^2b
+    \end{align*}
+
+* Ersetzungen und Ableitungen
+- Zeichen \to: mögliche Ersetzung
+  - Abkürzung für $E \to a, E \to b$: $E \to a | b$
+- Zeichen \limp: tatsächliche Ersetzung oder Ableitung
+- Es gilt: $u x w \limp u y w$ genau dann, wenn $x \to y \in P$
+- $\limp^*$: Ableitung in beliebig vielen Schritten
+- Beispiel: Grammatik G wie vorher!
+  \begin{align*}
+  P & = \{ S \to L, E \to a, E \to b, L \to L, L \to (L;E), L \to cc\}\\
+  S & \limp L \limp (L;E) \limp (cc;E) \limp (cc;a)\\
+  S & \limp^* (cc;a)
+  \end{align*}
+- $(cc;a)$ ist ein Terminalwort
+
+* Sprache
+- L(G) ... die durch die Grammatik G erzeugte Sprache.
+- L(G) besteht aus genau allen Terminalworten, die sich aus der
+  Startvariable ableiten lassen:
+  \[L(G) = \{w | w \in \Sigma^*, S \limp^* w \}\]
+
+  w ... Terminalworte: bestehen nur aus Terminalsymbolen\\
+  S ... Startsymbol
+- L(G) $\subseteq \Sigma^*$
+
+* Sprachen und Grammatiken
+\begin{center}
+\begin{tabular}[h]{|l|l|l|}
+\hline
+Typ & Sprache & erzeugt durch\\ \hline
+Typ-0 & unbeschränkte Sprachen & beliebige Grammatik\\ \hline
+Typ-1 & kontextsensitive Sprachen & kontextsensitive Grammatik\\
+\hline
+Typ-2 & kontextfreie Sprachen & kontextfreie Grammatik\\ \hline
+Typ-3  & reguläre Sprachen & reguläre Grammatik\\ \hline
+\end{tabular}
+\end{center}
+
+* Kontextsensitive Grammatik
+\vspace{1em}
+- Kontext (Umgebung): Zeichen li und re eines NT-Symboles
+- Definition:
+  - li und re Seite einer Regel: Terminal- wie NT Symbole
+  - Regeln
+    - Die li Regelseite darf nicht länger als die re Regelseite
+      sein.
+    - Die Regel $S \to \epsilon$ ist zugelassen, aber wenn sie vorkommt,
+      darf $S$ auf keiner rechten Seite stehen.
+    - Links muss mind. ein Non-Terminalsymbol stehen.
+- Andere Definition:
+  - Die Regeln haben folgende Gestalt: $\alpha N \beta \to \alpha \gamma \beta$, wobei
+    $\alpha, \beta \in (\Phi \cup \Sigma)^*$ und $\gamma \in (\Phi \cup
+    \Sigma)^+$ sein muss.  \item Die Regel $S \to \epsilon$ ist zugelassen,
+    aber wenn sie vorkommt, darf $S$ auf keiner rechten Seite stehen.
+- Beide Definitionen führen zur selben Sprachklasse!
+
+* KS Grammatik -- Beispiel
+\vspace{1em}
+- Ges.: Ableitung für $a^4bd^2c^4$
+  \begin{align*}
+  G & = (\Phi, \Sigma, P, S)\\
+  \Phi & = \{ S, B, X \}\\
+  \Sigma & = \{a,b,c,d\}\\
+  P & = \{S \to aBc, aB \to aaBc, Bc \to dXdc, dX \to Xd, aX \to ab\}
+  \end{align*}
+- Ges.: Ableitung für $a^3b^3c^3$
+  \begin{align*}
+  L(G) & = \{ a^nb^nc^n | n \ge 1 \}\\
+  G & = (\Phi, \Sigma, P, S)\\
+  \Phi & = \{ S, B, X \}\\
+  \Sigma & = \{a,b,c\}\\
+  P & = \{S \to aBc, aB \to aaXBB, XB \to BX, Xc \to cc, B \to b\}
+  \end{align*}
+
+* Kontextfreie Grammatik
+\vspace{1em}
+- Definition
+  - Li Seite: genau ein NT-Symbol
+  - Re Seite: beliebige Symbolfolge.
+  - D.h. Hilfssymbol wird unabhängig vom Kontext ersetzt
+- Beispiele für KF Produktionsregeln
+  \vspace{-.5em}
+  \begin{align*}
+  A & \to aAb\\
+  S & \to XYZ\\
+  B & \to abcd\\
+  A & \to \epsilon
+  \end{align*}
+- KF ... wichtige Klasse \to Syntax von Programmiersprachen!
+  - Backus-Naur Form
+  - Syntaxdiagramme
+
+* KF Grammatik -- Beispiel
+Die Menge aller arithmetischen Ausdrücke über den Variablen
+$x_1,x_2,{\ldots}x_n$ und den Operationssymbolen $+,*,-,/$ mit korrekter
+Klammerung ist eine kontextfreie Sprache. Die dazugehörige Grammatik
+sieht folgendermaßen aus:
+\begin{align*}
+G & = (\Phi,\Sigma,P,S)\\
+\Phi & = \{S,E\}\\
+\Sigma & = \{+,*,-,/,(,),x_1,x_2,{\ldots},x_n\}\\
+P & = \{
+\end{align*}
+
+* Backus-Naur Form
+\vspace{1.5em}
+- 1959: John Backus & Peter Naur \to Algol 60
+- Metazeichen
+  \vspace{-.7em}
+  | =<>=    | NT-Symbole, z.B. =<letter>=  |
+  | ~::=~   | Definitionszeichen; trennt li von re Regelteil |
+  | $\vert$ | trennt verschiedene Regelalternativen          |
+  | Leerzeichen | Trennzeichen bei Sequenz |
+\vspace{-0.5em}
+- Vorrangregel: Sequenz vor Alternative
+- Vorteile
+  - übersichtliche Darstellung
+  - bequem zu schreiben
+  - große Freiheit in der Bezeichnung der Objekte
+
+* Backus-Naur Form -- 2
+- Beispiel: Identifier
+  \vspace{-.7em}
+  \begin{align}
+  \Sigma & = \{0,{\ldots},9,a,{\ldots},z,A,{\ldots},Z\}\\
+  \Phi & =\{\langle letter\rangle, \langle identifier\rangle, \langle digit\rangle\}\\
+  P & = \{\\
+  S & =
+  \end{align}
+- Erweiterungen: EBNF, ABNF
+  - jeweils /unterschiedliche/ Definitionen!
+
+* Erweiterte BNF (EBNF)
+- \to Pascal: Metazeichen { und }
+- Metazeichen
+  | { X }   | X kann beliebig oft, d.h. 0,1, oder n-Mal.  |
+- Beispiel:  Identifier
+  \begin{align*}
+  \Sigma & = \{0,{\ldots},9,a,{\ldots},z,A,{\ldots},Z\}\\
+  \Phi & =\{\langle letter\rangle, \langle identifier\rangle, \langle
+  digit\rangle, \langle letter or digit\rangle \}\\
+  P & = \{\\
+  \\
+  S & =
+  \end{align*}
+  Ges.: außerdem Ableitung für =Ab3c=.
+
+* EBNF -- ISO Variante
+\vspace{1em}
+- Terminalsymbolen in =" "​= oder in =' '=
+  - z.B.:\hspace{1em} ="1"= oder ='1'=
+- Non-Terminalsymbole ohne Maskierung
+  - z.B.:\hspace{1em} =digit=
+- ~=~ anstatt ~::=~
+  - z.B.:\hspace{1em} ~digit = "1" | "2"~...
+- Sequenz von Symbolen durch =,= getrennt
+  - z.B.:\hspace{1em} ~digit, digit, digit, digit~
+- Bestimmte Anzahl der Wiederholung durch =*=
+  - z.B.:\hspace{1em} =4 * digit=
+- Endezeichen einer Produktionsregel =;=
+  - z.B.:\hspace{1em} =year = 4 * digit;=
+
+* EBNF -- ISO Variante -- 2
+\vspace{1em}
+- Beliebige Wiederholung durch ={= und =}=
+  - z.B.:\hspace{1em} ={ digit }=
+- Mindestens einmalige Wiederholung mittels ={ }-=
+  - z.B.:\hspace{1em} ={ digit }-=
+- Optional durch =[= und =]=
+  - z.B.:\hspace{1em} =[ sign ] { digit }-=
+- Gruppierung mittels =()=
+  - z.B.:\hspace{1em} =char (digit | char)=
+- Ausnahme mittels =-= (infix)
+  - z.B.: \hspace{1em} =comment_character = character - ";";=
+- Kommentar mittels ~(* *)~
+  - z.B.: \hspace{1em} =(* Kommentar *)=
+
+* EBNF -- ISO Variante -- 3  
+- Vorrangregeln
+  1. Wiederholung, d.h. =*=
+  2. Ausnahme, d.h. =-=
+  3. Sequenz, d.h. =,=
+  4. Alternative, d.h. =|=
+- Vorrangregeln bzgl. Klammern
+  1. ='= \to Terminalzeichen
+  2. ="= \to Terminalzeichen
+  3. Kommentare, d.h. \texttt{(*} und \texttt{*)}
+  4. Gruppierung, d.h. =(= und =)=
+  5. optionaler Term, d.h. =[= und =]=
+  6. Wiederholung, d.h. ={= und =}=
+  
+* ABNF
+\vspace{1.5em}
+- Angereicherte BNF (engl. augmented backus-naur form)
+- Verwendung: Spezifikation in RFCs der IETF
+- Ähnlich EBNF
+- Terminalsymbole (nur) in ="=
+  - aber case insensitive, außer, wenn =%s"pRoGramm"=
+- Alternative: =/=, z.B.:\hspace{1em} =bit = "0" / "1"=
+  - inkrementell: ~/=~, z.B.:\hspace{1em} ~fruit /= apple~
+- Zeichencodes
+  - wie z.B. CR:\hspace{1em} =%d13= oder =%x0d= oder =%b00001101=
+  - Bereiche: =%x30-39= \equiv ="0" / "1" /=...
+- Non-Terminalsymbole, nur A-Z,a-z,0-9 sowie =-=, aber /muss/ mit mit Buchstaben
+  beginnen; case-insensitive!
+- Sequenz: durch Leerzeichen getrennt
+- Produktionsregel: li durch re Seite getrennt mittels ~=~
+
+* ABNF -- 2
+\vspace{1.5em}
+- Gruppierung mittels =()=, z.B.: =char (digit | char)=
+- Wiederholung mittels =*=, z.B.: =*digit= (beliebig), =4digit= (genau), =2*digit=
+  (min), =*8digit= (max), =2*8digit= (Bereich)  
+- Zeilenkommentar mittels =;= (wie in Python/Shell/PHP =#=)
+- Vorrangregeln
+  1. Kommentare
+  2. Zeichenketten (\to Terminalsymbole) und Non-Terminalsymbole
+  3. Bereiche
+  4. Wiederholung
+  5. Gruppierung
+  6. Sequenz
+  7. Alternative
+- Beispiel: ~number = *1'-' digit-without-zero *digit  / "0" ;~
+  
+* Syntaxdiagramm
+- graphische Beschreibungsmethode für KF Grammatiken
+- durch Pfeile verbundene Menge abgerundeter und rechteckiger Felder
+- genau ein Eingang und genau ein Ausgang
+- Diagramm /muss/ einen Namen haben
+- Beispiel: Menge von Wörtern, die mit einer Ziffer beginnen
+  und enden.
+
+* Syntaxdiagramm -- 2
+- Terminalsymbol: =a=
+
+  #+Attr_LaTeX: :height 1cm
+  [[./syndiag1.png]]
+- NT-Symbol: =<x>=
+
+  #+Attr_LaTeX: :height 1cm
+  [[./syndiag2.png]]
+- Sequenz: ~<z> ::= b <Y>~
+
+  #+Attr_LaTeX: :height 1.3cm
+  [[./syndiag3.png]]
+
+* Syntaxdiagramm -- 3
+- Alternative: ~<x> ::= <A>|<B>|a~
+
+  #+Attr_LaTeX: :height 4cm
+  [[./syndiag4.png]]
+
+* Syntaxdiagramm -- 4
+- Wiederholung (mind. 1 Mal): ~<x> ::= <w><x>|<w>~
+
+  #+Attr_LaTeX: :height 2cm :placement [H]
+  [[./syndiag5.png]]
+- Wiederholung (auch kein Mal): ~<x> ::= [<w><x>]~
+
+  #+Attr_LaTeX: :height 2.5cm :placement [H]
+  [[./syndiag6.png]]
+
+* Reguläre Grammatik
+- Definition
+  - Li Seite: genau ein Non-Terminalsymbol
+  - Re Seite
+    - ein oder mehrere Terminalsymbole
+    - ein Terminalsymbol gefolgt von genau einem NT-Symbol
+      (rechtslinear)
+    - ein NT-Symbol gefolgt von genau einem
+      Terminalsymbol (linkslinear).
+    \begin{xalignat*}{2}
+    \text{rechtslinear:}\quad X & \to a & \text{linkslinear:}\quad X & \to a\\
+    X & \to aY & X & \to Ya
+    \end{xalignat*}
+  - *entweder* rechtslinear *oder* linkslinear!
+  - von S darf \epsilon abgeleitet werden, wenn S nicht auf der
+    re Seite einer Regel vorkommt.
+
+* Reguläre Grammatik -- Beispiele
+- Ges.: vollständige Grammatik und eine Ableitung für ${(abc)}^2$
+  \begin{align*}
+  G & = (\Phi, \Sigma, P, S)\\
+  L(G) & = \{{(abc)}^n | n\ge0\}\\
+  \Phi & = \{\\
+  \Sigma & = \{\\
+  P & = \{
+  \end{align*}
+
+* Reguläre Grammatik -- Beispiele 2
+- $L(G) = \{a^nb^n|n\ge1\}$
+  \pause
+  - nicht mittels regulärer Grammatik!
+  - nur möglich Worte von li nach re (rechtlinear) oder 
+    von re nach li (linkslinear) zeichenweise aufzubauen.
+  - Beim Wechsel von der a-Gruppe auf die b-Gruppe besitzt man
+    keine Information mehr über die Länge der bisher erzeugten Zeichen.
+

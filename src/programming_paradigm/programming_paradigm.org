@@ -1,0 +1,405 @@
+#+TITLE: Programmierparadigmen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+# +LATEX_HEADER:\usepackage{enumitem}
+# +LATEX: \setlistdepth{4}
+# +LATEX: \renewlist{itemize}{itemize}{4}
+# +LATEX: \setitemize{label=\usebeamerfont*{itemize item}\usebeamercolor[fg]{itemize item}\usebeamertemplate{itemize item}}
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Programmierparadigmen
+- Art der Programmierung
+- grobe Einteilung
+  - imperative Programmierung: Programm legt die Abarbeitung von Operationen fest
+    - prozedurale Programmierung
+    - modulare Programmierung
+    - objektorientierte Programmierung
+    - generische Programmierung
+  - deklarative Programmierung: Programm legt /nicht/ die Abarbeitung von Operationen fest
+    - funktionale Programmierung
+    - logische Programmierung
+
+* Imperative Programmierung
+- Programm besteht aus einer Folge von Befehlen
+  - z.B. Addieren, I/O-Befehle, Sprungbefehle
+- Befehle werden nacheinander abgearbeitet
+  - und verändern dabei Daten (Speicherzellen)
+- Programmiersprachen
+  - frühe Assemblersprachen
+
+* Prozedurale Programmierung
+- Prozeduren (auch: Unterprogramm, Routine, Subroutine): Zusammenfassung von Befehlen
+  - auch Funktionen (nicht im mathematischen Sinne!), d.h. mit Rückgabewert
+- Record (auch Struktur): Zusammenfassung von Daten
+  - werden an Prozeduren weitergegeben
+- Sinn
+  - logische Gliederung
+  - Wiederverwendung von Code
+- Programmiersprachen
+  - C, Pascal, Fortran, COBOL, Basic,...
+
+* Modulare Programmierung
+- Aufteilung der Gesamtfunktionalität (an Prozeduren und Datenstrukturen)
+  in Module
+- Ein Modul
+  - fasst Prozeduren und Daten zu einer logischen Einheit zusammen
+  - bietet eine Schnittstelle an
+- Sinn
+  - weitergehende Strukturierung des Systems
+- Programmiersprachen
+  - Oberon (und Oberon-2, Oberon-07), Modula-2 (und Modula-3), Ada
+
+* Objektorientierte Programmierung
+- Zusammenfassung von Befehlen und Daten zu Klasse
+  - Vererbung und Polymorphie
+  - objektbasierte Programmierung: keine Vererbung
+    - z.B. Javascript
+- Sinn
+  - Zusammenbringen was zusammen gehört
+- Programmiersprachen
+  - Python, Java, C#, C++, Ruby,...
+- siehe Foliensatz /Objektorientierung/
+
+* Generische Programmierung
+\vspace{1em}
+- Definition einer Funktion (oder auch Klasse samt Methoden) enthält
+  Typvariablen
+  - aber: unabhängig von Klassen oder Vererbung!
+- Ziel: Verwendung einer Funktion mit verschiedenen Typen
+- Beispiel: Entwicklen einer Funktion =add(x, y)=
+  - Lösung in \cpp mit mehreren überladenen Funktionen:
+    #+begin_src C++
+    int add(int x, int y) {
+        return x + y;
+    }
+    double add(double x, double y) {
+        return x + y;
+    }
+    // ...
+    #+end_src
+  - \to immer der "gleiche" Code!
+
+* Generische Programmierung -- 2
+- Beispiel:
+  - Lösung mit einem (Funktions)Template:
+    
+    #+latex: { \scriptsize
+    #+begin_src C++
+    // Voraussetzung: Operator + ist überladen
+    // anderenfalls Compilerfehler!
+    template <typename T>
+    T add(T x, T y) { return x + y; }
+    
+    int main() {
+        cout << add(1, 2) << endl;
+        cout << add(1.0, 2.0) << endl;
+        // cout << add("abc", "def") << endl;  // -> error
+        cout << add(string{"abc"}, string{"def"}) << endl;
+    }
+    #+end_src
+    #+latex: }
+- \to Reduzierung der Implementierung
+
+* (Template) Meta-Programming
+\vspace{1em}
+\scriptsize
+#+begin_src C++
+#include <iostream>
+
+using namespace std;
+using ull = unsigned long long;
+
+template <ull n>
+struct Factorial {
+    static constexpr ull value{n * Factorial<n - 1>::value};
+};
+
+template <>
+struct Factorial<0> {
+    static constexpr ull value{1};
+};
+
+int main() {
+    Factorial<0> f0;
+    cout << f0.value << endl;  // -> 1
+    cout << Factorial<1>::value << endl;  // -> 1
+    cout << Factorial<2>::value << endl;  // -> 2
+    cout << Factorial<64>::value << endl;  // -> 9223372036854775808
+}
+#+end_src
+
+* Funktionale Programmierung
+\vspace{1.5em}
+- basiert nicht Berechnung eines inneren Zustandes eines Berechnungsprozesses
+  - keine Nebeneffekte (side effects) möglich
+- Funktionen im mathematischen Sinn
+  - gleiche Eingabe \to gleiche Rückgabe
+  - keine Nebeneffekte
+- Funktionale Programme
+  - keine Folge von Anweisungen sondern ineinander verschachtelte Funktionsaufrufe
+  - Higher-order functions
+  - partial application
+  - Closures
+- Programmiersprachen
+  - Haskell, Lisp, Erlang,...
+  - aber auch Erweiterungen in "normalen" Programmiersprachen:
+    Python, Java, C#, \cpp,...
+
+* Funktionale Programmierung -- 2
+\vspace{1em}
+- Higher-order functions
+  - Mathematik, Informatik
+  - zumindest eines der beiden Kriterien
+    - hat eine oder mehrere Funktionen als Parameter
+    - liefert eine Funktion als Ergebnis zurück
+  - Beispiel
+    \small
+    #+begin_src python
+    def f(x):
+        return 2 * x + 1
+    def g(x):
+        return -2 * x - 1
+    def add_functions(u, v, x):
+        return u(x) + v(x)
+    print(add_functions(f, g, 1))
+    #+end_src
+    \normalsize
+    \vspace{0.5em}
+  - Implementierung entweder als 
+    - first-class object
+    - Adresse der Funktion
+
+* Funktionale Programmierung -- 3
+\vspace{1em}
+- Partial application
+  - auch /currying/ genannt (nach Haskell Curry)
+    - Teilweise Anwendung einer Funktion bzgl. der Parameter
+    - ergibt Funktion mit einer geringeren Anzahl an Parameter
+  - Beispiel 1
+    \vspace{0.5em}
+    \small
+    #+begin_src python
+    print(int('1111', 2))  # -> 15
+    from functools import partial
+    base2 = partial(int, base=2)
+    print(base2('1111'))  # -> 15
+    #+end_src
+    \normalsize
+    \vspace{0.5em}
+  - Beispiel 2
+    \small
+    #+begin_src python
+    def make_adder(n):
+        return lambda k: n + k
+
+    add = make_adder(2)
+    add(3)  # -> 5
+    #+end_src
+
+* Funktionale Programmierung -- 4
+- Closures (Funktionsabschluss)
+  - Funktion, die Kontext beim Aufruf speichert
+    - Kontext sind die nicht lokalen Variablen
+    - auch wenn der Kontext nicht mehr exisitiert
+    - Closures "konservieren" also ihren Kontext
+  \footnotesize
+  #+begin_src python
+  def create_incrementer(start, inc):
+      cnt = start
+      def increment(inc=inc):  # closure!
+          nonlocal cnt
+          cnt += inc
+          return cnt
+      return increment
+   
+  inc12 = create_incrementer(1, 2)
+  print(inc12(), inc12(), inc12(1)) # -> 3 5 6
+  #+end_src
+
+* Funktionale Programmierung -- 5
+\vspace{1em}
+- Berechnung der Faktoriellen
+  - nicht funktional
+    #+begin_src python
+    def factorial(n):
+        res = 1
+        while n >= 1:
+            res *= n
+            n -= 1
+        return res
+    #+end_src
+  - funktional
+    #+begin_src python
+    def factorial(n):
+        return 1 if n <= 1 else n * factorial(n - 1)
+    #+end_src
+  - funktional -- 2 (in Python am schnellsten!)
+    #+begin_src python
+    from functools import reduce
+    from operator import mul
+    def factorial(n):
+        return reduce(mul, range(1, n + 1), 1)
+    #+end_src
+
+* Logische Programmierung
+- Fakten und Regeln vorgegeben
+  - Regelinterpreter leitet für eine Fragestellung (query) eine Antwort ab
+- basiert auf mathematischer Logik
+- Programmiersprachen
+  - Prolog
+    - Teilmenge der Prädikatenlogik erster Ordnung
+  - SQL
+
+* Logische Programmierung -- 2
+\footnotesize
+Prolog:
+#+begin_src prolog
+mann(adam).
+mann(tobias).
+mann(frank).
+frau(eva).
+frau(daniela).
+frau(ulrike).
+vater(adam,tobias).
+vater(tobias,frank).
+vater(tobias,ulrike).
+mutter(eva,tobias).
+mutter(daniela,frank).
+mutter(daniela,ulrike).
+#+end_src
+
+Quelle: Wikipedia
+
+* Logische Programmierung -- 3
+\footnotesize
+Abfragen:
+#+begin_src prolog
+?- mann(tobias).
+yes.
+?- mann(heinrich).
+no.
+?- frau(X).  % Variable -> beginnen groß!
+X=eva
+X=daniela
+X=ulrike
+?- mann(heinrich).  % negativ -> keine Ableitung gefunden!
+no
+?- frau(heinrich).
+no.
+#+end_src
+
+* Logische Programmierung -- 4
+\footnotesize
+Regeln:
+#+begin_src prolog
+grossvater(X,Y) :-  % X Großvater von Y väterlicherseits
+    vater(X,Z),     % , -> AND
+    vater(Z,Y).     % ; -> OR
+grossvater(X,Y) :-  % mütterlicherseits
+    vater(X,Z),
+    mutter(Z,Y).
+#+end_src
+
+Abfragen:
+#+begin_src prolog
+?- grossvater(adam,ulrike).
+yes.
+?- grossvater(X,frank).
+X=adam
+#+end_src
+
+* Programmiersprachen
+\vspace{1em}
+- C: prozedural
+  - Nachfolger von B (B von BCPL)
+  - Systemprogrammierung, embedded systems
+- Java: objektorientiert mit funktionalen Elementen
+  - beeinflusst von: \cpp, Smalltalk, C#
+  - Netzwerk- und Serverprogrammierung
+- C#: objektorientiert mit funktionalen und deklarativen Elementen
+  - beeinflusst von: Java, \cpp, Delphi (Object-Pascal)
+  - Anwendungsentwicklung, Webentwicklung
+- \cpp: generische Programmierung, objektorientiert mit funktionalen Elementen
+  - beeinflusst von: C, Simula, Ada
+  - Anwendungsentwicklung, Systemprogrammierung, embedded systems, HPC
+
+* Programmiersprachen -- 2    
+- [[https://www.erlang.org][Erlang]]: funktional
+  - beeinflusst von: Smalltalk, Prolog, Lisp
+  - nebenläufige Anwendungen (ursprünglich für Telekommunikation), Serverprogrammierung
+- [[https://golang.org][Go]]: objektorientiert
+  - beeinflusst von: Pascal, C, Smalltalk
+  - nebenläufige Programmierung
+- [[https://www.haskell.org][Haskel]]: rein funktional
+  - beeinflusst viele Programmiersprachen...
+- Lisp: funktional und prozedural
+  - beeinflusst von Smalltalk
+  - für KI, Emacs =;-)=
+
+* Programmiersprachen -- 3
+\vspace{0.5em}
+- [[https://www.python.org][Python]]: objektorientiert, prozedural, funktionale Elemente
+  - beeinflusst von: ABC, C und \cpp, Lisp, Haskell
+  - Anwendungsprogrammierung, Webprogrammierung, wissenschaftliche Anwendungen
+- [[https://www.ruby-lang.org][Ruby]]: objektorientiert
+  - beeinflusst von: Perl, Smalltalk, Eiffel
+  - Webprogrammierung
+- [[https://www.rust-lang.org][Rust]]: generische Programmierung
+  - beeinflusst von: \cpp, Erlang, Haskell
+  - Systemprogrammierung
+- Smalltalk: rein objektorientiert
+  - beeinflusst von: Simula, Lisp
+  - Anwendungsprogrammierung
+- weitere: [[https://nim-lang.org][Nim]], [[https://www.lua.org][Lua]], [[https://dlang.org][D]], [[https://www.eiffel.org][Eiffel]], Forth, Fortran,...

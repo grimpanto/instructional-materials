@@ -1,0 +1,155 @@
+
+
+#+TITLE: Python \hfill Unit 2\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Konvertierung
+#+BEGIN_SRC python
+>>> float(2)
+2.0
+>>> int(1.0)
+1
+>>> int(1.5)
+1
+>>> int("2")
+2
+>>> float("-2.5")
+-2.5
+#+END_SRC
+
+* Konvertierung - 2
+#+BEGIN_SRC python
+>>> print(1.5); print("Orangen und");\
+... print(2); print("Bananen")
+1.5
+Orangen und
+2
+Bananen
+>>> print(str(1.5) + " Orangen und " + str(2) +\
+... " Bananen")
+1.5 Orangen und 2 Bananen
+#+END_SRC
+
+* =print= - 3
+#+BEGIN_SRC python
+>>> print(1.5, end=" ");\
+... print("Orangen und ", end="");\
+... print(2, end=" "); print("Bananen")
+1.5 Orangen und 2 Bananen
+>>> print("1.5 Orangen und\n2 Bananen")
+1.5 Orangen und
+2 Bananen
+#+END_SRC
+
+* Modul - 2
+- abgeschlossene Einheit einer Software,
+- bestehend aus Code und Daten.
+- In Python ist jede Datei mit der Endung =.py= ein Modul.
+- =math= ist vordefiniertes Modul
+
+#+BEGIN_SRC python
+>>> import math
+>>> type(math)
+<class 'module'>
+#+END_SRC
+
+* Importieren
+#+BEGIN_SRC python
+>>> import math
+>>> math.pi
+3.141592653589793
+>>> pi
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'pi' is not defined
+#+END_SRC
+
+* Importieren - 2
+#+BEGIN_SRC python
+>>> from math import pi
+>>> pi
+3.141592653589793
+>>> from math import *
+>>> sqrt(4)
+2.0
+#+END_SRC
+
+* Strings
+- Folge von Zeichen
+- doppelte Anführungszeichen (engl. single quotes): =​"Heute ist's kalt!"​=
+- einfache Anführungszeichen (engl. double quotes): =​'Er sagt: "Heute ist es kalt!"'​=
+- Escape character (dt. Fluchtzeichen): =​'Er sagt: "Heute ist\'s kalt!"'​=
+  - =\\= ... ein backslash
+  - =\n= ... newline
+  - =\'​= ... ein einfaches Hochkomma
+  - =\"​= ... ein doppeltes Hochkomma
+
+* Strings - 2
+- jeweils 3 einfache oder doppelte Anführungszeichen (engl. triple-quote strings)
+  #+BEGIN_EXAMPLE
+  >>> print("""Maxi: "Heute ist's kalt!" """)
+  Maxi: "Heute ist's kalt"
+  >>> """Maxi: "Heute ist's kalt!" """
+  'Maxi: "Heute ist\'s kalt!" '
+  >>> '''Maxi: "Heute ist's kalt!"'''
+  'Maxi: "Heute ist\'s kalt!"'
+  #+END_EXAMPLE
+
+* Kommentare und Doc-Strings
+- Kommentar: alle Zeichen einer Zeile nach =#= werden ignoriert
+  #+BEGIN_SRC python
+  1 + 1  # ergibt 2
+  #+END_SRC
+- Docstrings
+  - triple-quotes
+  - außerhalb jeder Anweisung
+  - in einem Programm
+  - \to wird ignoriert (wie Kommentar)
+  #+BEGIN_SRC python
+  """
+  das ist ein Doc-String
+  und wird ignoriert
+  """
+  #+END_SRC
+
+* Funktion =help=
+- =help= bekommt normalerweise ein Argument
+- gibt Hilfetext zurück
+
+#+BEGIN_SRC python
+>>> from turtle import *
+>>> help(forward)
+Help on function forward in module turtle:
+      
+forward(distance)
+    Bewegt die Turtle um distance nach vorne.
+
+    Aliases: forward | fd
+
+    Argument:
+    distance -- a number (integer or float)
+#+END_SRC
+
+* Sequenz von Anweisungen
+- Je Zeile eine (einfache) Anweisung!
+- Mehrere einfache Anweisung je Zeile möglich (\to Programmierrichtlinien)
+
+  #+BEGIN_SRC python
+  >>> print("a"); print("b"); print("c")
+  a
+  b
+  c
+  #+END_SRC
+
+  

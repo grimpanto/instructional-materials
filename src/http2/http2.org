@@ -1,0 +1,263 @@
+#+TITLE: Verteilte Systeme \linebreak \small \mbox{ } \hfill HTTP 2 (Quelle: hauptsächlich =https://daniel.haxx.se/http2=)
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+Latex_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+# https://www.heise.de/developer/artikel/Mit-Java-auf-dem-HTTP-2-Zug-3918097.html?view=print
+
+* Überblick
+\vspace{1.5em}
+- Nachfolger von HTTP/1.1
+  - HTTP/1.1 ist mittlerweile ein umfangreicher Standard
+    - keine Implementierung implementiert alles!
+    - viele Optionen und Erweiterungsmöglichkeiten \to Interoperabilitätsprobleme!
+  - baut auf SPDY (von Google) auf
+- [[https://tools.ietf.org/html/rfc7540][RFC 7540]]
+    
+* HTTP/1.x und Performance
+\vspace{1.3em}
+- HTTP/1.0 ... 1 Request ausständig zu einer Zeit je TCP Verbindung
+  \pause
+- HTTP/1.1 ... Pipelining
+  - aber kein verschränktes Senden und Empfangen
+    - außer mehrere TCP Verbindungen (diese sind beschränkt: dzt. nicht mehr
+      als 6-8 je Site durch Browser)
+  - \to HOL Blocking
+  \pause
+- Allgemein
+  - HTTP Header wiederholend und langatmig
+    - \to Netzwerkbelastung
+
+* HTTP/2 -- Ziele
+- kompatibel zu HTTP/1.1 sein
+  - auf gewisser (hohen) Abstraktionsebene
+- "Performance" verbessern
+  - d.h. Latenz reduzieren
+- d.h. Anzahl der TCP Verbindungen reduzieren
+  - nur eine Verbindung je Domain
+- Sicherheit verbessern
+
+* HTTP/2 -- Features
+\vspace{1em}
+- Multiplexen mehrerer Requests über eine TCP Verbindung
+  - verschränktes Senden und Empfangen
+- binäres Nachrichtenformat (!) & Komprimierung der Header
+- Server Push
+  - mehrere Antworten für einen Request
+- Priorisierung der Requests
+- Definition eines Profils für TLS
+  - wenn HTTP/2 über TLS
+
+* HTTP/2 -- Multiplexen
+- mehrere Streams über /eine/ TCP Verbindung
+- Jeder Stream
+  - besteht aus einer Folge von Frames
+  - hat eine Stream-ID
+  - hat eine Priorität (Änderung zur Laufzeit möglich)
+  - kann vorzeitig beendet werden
+  - hat eine Flusskontrolle (engl. flow control)
+    - Schutz des Empfängers vor Überlastung
+- Wirkungen
+  - \to Beheben des HOL
+  - \to eine Verbindung je Domain \to "Performance"
+
+* HTTP/2 -- Multiplexen -- 2
+[[./http2_multiplexing.png]]
+
+\small
+Quelle: https://www.nginx.com/blog/http2-module-nginx/
+
+* Binär & Komprimierung der Header
+- Binäres Format
+  - \to binäre Daten vs. Textdaten
+  - weiters: Komprimierung der Header
+- Wirkungen
+  - effizienter zu parsen
+  - geringere Datenmenge auf der Leitung
+  - weniger Fehlerquellen
+    - z.B. Behandlung von Whitespace, Groß/Kleinschreibung, Zeilenende,
+      Leerzeilen,...
+  - \to allg. Verbesserung der "Performance"
+
+* HTTP/2 -- Server Push
+- UA sendet Request für Ressource
+- Server antwortet mit HTML /und/ CSS, JS,...
+- Wirkungen
+  - \to Reduzierung der Latenz
+
+* HTTP/2 -- Priorisierung der Requests
+- müssen Client und Server beherrschen
+  - Client teilt Server Priorisierung mit
+  - dzt. keine Möglichkeit für Frontend-Entwickler diese zu bestimmen
+- z.B. HTML \to CSS \to JS \to Bilder
+- Wirkungen
+  - \to Darstellung einer Seite schneller
+
+* COMMENT Definition eines Profils für TLS
+- mind. TLS 1.2
+- müssen zusätzlich SNI unterstützen
+  - (Server Name Indication)
+
+* COMMENT HTTP/2 -- Charakterisierung
+\vspace{1.5em}
+- "schlankes", klar definiertes Protokoll
+  - keine optionalen Teile
+    - d.h. später keine Interoperabilitätsprobleme
+    - außer ein Erweiterungskonzept
+  - keine Minor-Version Nummer
+    - wenn Weiterentwicklung, dann: HTTP/3
+- Komprimierung der Header
+
+* COMMENT HTTP/2 -- Charakterisierung -- 2
+- Integration in bestehende Infrastruktur
+  - durch Abbildung von HTTP/2 auf HTTP/1.1
+  - UA, Proxies, Server
+  - Verwendung von ALPN
+    - Application-Layer Protocol Negotiation (Erweiterung von TLS)
+    - \to aushandeln vom Protokoll, das über TL𝕊 genutzt wird
+    - Weiterentwicklung von NPN (Teil von SPDY)
+    - Sinn: unnötige RTT (Round-Trip-Time) vermeiden durch Reduzierung von
+      /Round Trips/ (\to Header =Upgrade=)
+      
+* Funktionsweise
+- (vorzugsweise) nur eine TCP Verbindung je Server
+  - Empfehlung in RFC 7540: max. #Streams nicht unter 100 konfigurieren!
+- Stream: Multiplexing einer TCP Verbindung
+  - bidirektional
+- Message: ein Stream überträgt Messages
+  - Request (=GET=, =POST=,...), Response
+- Frame: jede Message besteht aus einem oder mehreren Frames
+  - \to kleinste Kommunikationseinheit für binärkodierte Headerdaten und
+    Nutzdaten
+    
+* Funktionsweise -- 2
+- Frame
+  - =Length=: 24 Bits
+  - =Type=: 8 Bits
+  - =Flags=: 8 Bits
+  - =R=: reserviert, 1 Bit
+  - =Stream Identifier=: 31 Bits (\to Multiplexing)
+  - =Frame Payload=
+
+* Funktionsweise -- 3
+\vspace{1.5em}
+- =Type=
+  - =DATA=, =HEADERS=
+    - Komprimierung der Header mittels neuem Algo /HPACK/
+  - =CONTINUATION= ... zum Senden von weiteren Headerblockfragmenten
+  - =SETTINGS= ... einer Verbindung
+  - =PRIORITY= ... Ändern der Priorität und Abhängigkeit zu anderen Stream
+    (Elternstream) herstellen (\to Baum)
+    - Ressourcen nur an Kindstream, wenn Elternstream beendet oder kein
+      Fortschritt beim Elternstream möglich
+  - =GOAWAY= ... beenden eines Streams
+  - =RST_STREAM= ... sofortiges Abbrechen eines Streams
+    - so etwas geht in HTTP/1.x nicht!
+  - =PUSH_PROMISE= ... im Vorhinein mitteilen, dass Stream später angelegt wird
+  - =PING= ... messen der RTT
+  - =WINDOW_UPDATE= ... für Flusskontrolle
+
+* Webseiten optimieren
+\vspace{1em}
+- kein Domain Sharding mehr!
+  - Ursprüngliche Idee: Anzahl der gleichzeitigen Verbindungen durch Verwendung
+    von Subdomainen ↑
+  - z.B. Aufteilen der Bilder auf =img1.example.com= und =img2.example.com=
+  - aber
+    - jetzt werden je Subdomain eine neue TLS Verbindung aufgebaut!
+    - TCP Slow Start \to anfänglich geringere Bandbreite!
+- kein Zusammenpacken von CSS und JS mehr!
+  - Ursprüngliche Idee: Anzahl der zu ladenden Ressourcen reduzieren
+  - aber
+    - mehrere Dateien \to Priorisierung möglich
+    - kein einzelnes Caching möglich\\
+      \to Änderungen oder Zuteilung zu einzelnen Seiten
+
+* Webseiten optimieren -- 2
+\vspace{1em}
+- kein Inlining von CSS und JS in HTML mehr!
+  - Ursprüngliche Idee: Seite schneller anzeigen können
+  - aber
+    - HTML Ressourcen deutlich größer
+    - kein einzelnes Caching möglich
+    - \to HTTP/2 Server Push um Ressourcen vorweg zum Client zu schicken
+- HTTP/2 Server Push
+  - eigener Push Cache im Browser
+  - Daten, die im Browser-Cache liegen bräuchten nicht gesendet
+    werden
+    - Browser hat Möglichkeit begonnen Push abzubrechen, aber...
+    - Internet-Draft vorliegend (Cache Digests): Browser teilt Server mittels
+      "Cache Digests" mit, welche Ressourcen schon im Browser Cache
+
+* Kritik
+\vspace{1em}
+- inkonsistent, unnötige Komplexität, verletzt das Schichten-Prinzip
+- de facto Zwang zur Verschlüsselung (ursprünglich zwingend!) \to Firefox, Chrome
+  - oft nicht benötigt
+  - Ressourcenbedarf \to TLS (Handshake, Verschlüsselung)
+  - Performance könnte sinken \to kein Caching!
+- verbessert nicht die Privatsphäre
+  - z.B. Cookies bleiben bestehen
+    - anstatt z.B. einer vom Client erzeugter Session-ID
+  - Vermutung: Großfirmen (wie Google) \to Geschäftsmodell
+- verbessert Performance nur wenn CDN verfügbar
+  - nicht bei einzelnem Server \to erhöhter Aufwand!
+\footnotesize hauptsächlich: http://queue.acm.org/detail.cfm?id=2716278
+
+* Zukunft
+\vspace{1.5em}
+- Grundlegende Probleme mit HTTP/2
+  - basiert auf TCP
+  - ähnliches Problem wie HOL bleibt bestehen
+    - Wenn TCP Segmente verloren gehen, dann werden die weiteren
+      schon eingetroffenen Segmente erst bestätigt, wenn das verlorenen
+      gegangene Segment nochmals gesendet und eingetroffen ist!
+    - speziell bei unzuverlässigen Kommunikationskanälen ein Problem,
+      wie z.B. bei mobilen Geräten
+- deshalb: HTTP/3
+  - HTTP über QUIC
+  - wird von IETF standardisiert
+  - wird schon verwendet von
+    - Chrome (70% Marktanteil!)
+    - der Facebook App
+
+* QUIC
+- \underline{Q}uick \underline{U}DP \underline{I}nternet
+  \underline{C}onnections
+- Transportprotokoll UDP!
+- wird von IETF standardisiert (voraussichtlich 2021)
+  - ursprünglich von Google entwickelt
+- Vorteile
+  - reduzierte Latenz bei Verbindungsaufbau
+  - bessere Performance (auch bei Verlust von Datenpaketen)
+  - Von Anfang an verschlüsselt
+- Nachteile
+  - Reifegrad nicht so hoch wie bei TCP
+  - "schwerer" für Router
+    - sehen derzeit nur eine Folge von UDP Datagrams!
+    - TCP hat im Gegensatz unverschlüsselte Header!
+
+* QUIC -- Charakteristiken
+- kein 3 Way Handshake beim Verbindungsaufbau
+  - nur einfacher Handshake wie bei TLS, d.h.
+    a. \to =ClientHello=
+    b. \leftarrow =ServerHello=
+    c. \to =Finished=
+- mehrere Streams über UDP (multiplexing)
+  - Jeder Stream hat eigene Fehlerbehandlung
+    - daher nicht das Problem wie bei TCP!
+- IP Adressen können sich während Betrieb ändern
+  - da UDP
+  - z.B. Smartphone wechselt von mobilen Netzwerk ins WLAN
+- TLS 1.3 integriert

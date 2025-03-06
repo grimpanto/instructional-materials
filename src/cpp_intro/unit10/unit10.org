@@ -1,0 +1,288 @@
+#+TITLE: Modernes C++\linebreak \small...für Programmierer \hfill Unit 10: Idioms und Patterns
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \newcommand{\cppXI}{C++11\xspace}
+#+LATEX: \newcommand{\cppXIV}{C++14\xspace}
+#+LATEX: \newcommand{\cppXVII}{C++17\xspace}
+
+* Überblick
+- RAII
+- PIMPL
+- Virtual Constructor
+- CRTP
+
+* RAII
+- Ressource Acquisition Is Initialization
+- Zweck
+  - Garantie, dass Ressource am Ende des Scope freigegeben wird
+  - Basic Exception Garantie (\to /error_handling.pdf/) sicherstellen
+- Umsetzung
+  - im Konstruktor intialisieren...
+  - im Destruktor freigeben
+- siehe =std::string=, =std::lock_guard=, =unique_ptr=,...
+
+* PIMPL
+- pointer to implementation
+- Zweck
+  - Verringerung der Abhängigkeiten zwischen Modulen
+- Umsetzung
+  - Verschieben der privaten Implementierung einer Klasse in eine separate
+    Struktur
+
+* PIMPL -- 2
+\vspace{1.5em}
+\footnotesize
+#+header: :exports both :results none :tangle src/pimpl1.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>  // pimpl1.cpp
+using namespace std;
+class Accumulator {
+  public:
+    Accumulator(double init=0) : val{init} {}
+    double value() { return val; }
+    Accumulator& operator+=(double v) {
+        val += v;
+        return *this;
+    }
+    void reset() { val = 0; }
+  private:
+    double val;
+};
+int main() {
+    Accumulator acc;
+    acc += 2;
+    acc += 40;
+    cout << acc.value() << endl;
+}
+#+end_src
+
+* PIMPL -- 3
+- Nachteile?\pause
+  - Implementierung ist in Headerdatei\pause
+    - selbst wenn Methoden in =.cpp= ausgelagert: Instanzvariablen!
+    - verletzt das Prinzip /information hiding/!
+  - starke Kopplung \to Compileabhängigkeiten
+- Lösung: PIMPL \equiv Pointer to IMPLementation
+  - ...ist ein: /idiom/
+  
+* PIMPL -- 4
+es fehlen die special member functions!
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/pimpl2.cpp :flags -std=c++17 :main no
+#+begin_src C++
+#include <iostream>  // pimpl2.cpp
+#include <memory>
+using namespace std;
+class Accumulator {
+  public:
+    Accumulator(double init=0) : p{make_unique<Impl>(init)} {}
+    double value();
+    Accumulator& operator+=(double v);
+    void reset();
+  private:
+    struct Impl;  // forward declaration
+    const unique_ptr<Impl> p;
+};
+#+end_src
+
+* PIMPL -- 5
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/pimpl2.cpp :flags -std=c++17 :main no
+#+begin_src C++
+struct Accumulator::Impl {  // in separate .cpp file!!!
+    Impl(double v) : val{v} {}
+    double val{};
+    double value() { return val; }
+    void incr(double v) { val += v; }
+    void reset() { val = 0; }
+};
+double Accumulator::value() { return p->value(); }
+Accumulator& Accumulator::operator+=(double v) {
+        p->incr(v);
+        return *this;
+}
+void Accumulator::reset() { p->reset(); }
+int main() {
+    Accumulator acc;
+    acc += 2;
+    acc += 40;
+    cout << acc.value() << endl;
+}
+#+end_src
+
+* PIMPL -- 6
+\vspace{2em}
+... die special member functions:
+\footnotesize
+#+header: :exports code :results none :tangle src/pimpl3.cpp :flags -std=c++17 :main no
+#+begin_src C++
+#include <iostream>  // pimpl3.cpp
+#include <memory>
+using namespace std;
+class Accumulator {
+  public:
+    Accumulator(double init=0) : p{make_unique<Impl>(init)} {}
+    double value();
+    Accumulator& operator+=(double v);
+    void reset();
+    Accumulator(const Accumulator& o)
+      : p{make_unique<Impl>(*o.p)} {}
+    Accumulator(Accumulator&& o)=default;
+    Accumulator& operator=(const Accumulator& o);
+    Accumulator& operator=(Accumulator&& o)=default;
+    ~Accumulator()=default;
+  private:
+    struct Impl;  // forward declaration
+    const unique_ptr<Impl> p;
+};
+#+end_src
+
+* PIMPL -- 7
+\vspace{1.5em}
+\footnotesize
+#+header: :exports code :results none :tangle src/pimpl3.cpp :flags -std=c++17 :main no
+#+begin_src C++
+struct Accumulator::Impl {  // in separate .cpp file!!!
+    Impl(double v) : val{v} {}
+    double val{};
+    double value() { return val; }
+    void incr(double v) { val += v; }
+    void reset() { val = 0; }
+};
+
+double Accumulator::value() { return p->value(); }
+Accumulator& Accumulator::operator+=(double v) {
+    p->incr(v);  return *this; }
+void Accumulator::reset() { p->reset(); }
+Accumulator& Accumulator::operator=(const Accumulator& o) {
+    *p = *(o.p);  return *this; }
+
+int main() {
+    Accumulator acc;
+    acc += 2;  acc += 40;
+    cout << acc.value() << endl;  // -> 42
+}
+#+end_src
+
+* PIMPL -- 8
+- Vorteile
+  - Information hiding!
+  - Kopplung reduziert
+    - würde =Accumulator::Impl= spezielle Headerdateien benötigen, sind diese
+      jetzt nicht mehr im Interface von =Accumulator=!
+  - Schnelleres Übersetzen durch Reduzierung der Übersetzungsabhängigkeiten:
+    /compile time firewall/
+    - \to nur Linken mit =Accumulator::Impl=
+    - \to keine Headerdateien der Implementierung (nur =<memory>= bei Smart-Pointer)
+  - größere Binärkompatibilität \to Größe von =Accumulator= ändert
+    sich nicht, selbst wenn Änderungen an =Impl=
+    - d.h. ABI (Application Binary Interface) stabil
+  - /Lazy allocation/: Instanz von =Impl= könnte auch /on demand/
+    angelegt werden
+
+* PIMPL -- 9
+- Nachteile
+  - Größe eines Objektes um Größe eines Pointers größer
+  - weitere Allokation bzw. Freigabe von Speicher
+  - Teil des Objektes immer am Heap
+    - nicht aneinandergereiht mit Objekt
+  - Performance leidet auf Grund der Indirektion
+  - komplizierter zu programmieren
+  - Copy-Konstruktor implementieren oder löschen
+  - Compiler kann =const= bei Methoden nicht mehr überprüfen
+
+
+* Virtual Constructor
+- Zweck
+  - Anlegen eines Objektes oder einer Kopie ohne den konkreten Typ
+    zu kennen
+- Umsetzung \to =unit09=
+
+* CRTP
+- Curiously Recurring Template Pattern
+- Zweck
+  - Basisklasse spezialisieren mit einer Subklasse als Templateargument
+    - \to /static polymorphism/ \newline
+      um Nachteile des /dynamic polymorphism/ zu vermeiden\newline
+      nur wenn Typen der Objekt von Compiler bestimmbar
+      
+- Umsetzung: nächste Folie
+  
+* CRTP -- 2
+\vspace{1.7em}
+\footnotesize
+#+header: :exports both :results output :tangle src/crtp.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>
+using namespace std;  // crpt.cpp
+
+template<typename Child>
+struct Base {
+    void interface() {
+        static_cast<Child*>(this)->implementation();
+    }
+};
+struct Derived : Base<Derived> {
+    void implementation() {
+        cout << "derived implementation" << endl;
+    }
+};
+
+int main() {
+    Derived d;
+    d.interface();
+}
+#+end_src
+
+#+RESULTS:
+: derived implementation
+
+* CRTP -- 3
+- Konkretes Beispiel:
+  - =clone= von /virtual constructor/ muss in jeder
+    Subklasse entsprechend implementiert werden
+  - \to DRY!
+    
+\footnotesize
+#+header: :exports code :results none :tangle src/crtp2.cpp :flags -std=c++17
+#+begin_src C++
+#include <iostream>
+#include <memory>
+using namespace std;  // crpt2.cpp
+
+class AbstractShape {
+  public:
+    virtual ~AbstractShape()=default;
+    virtual std::unique_ptr<AbstractShape> clone() const=0;
+};
+
+template<typename Derived>
+class Shape : public AbstractShape {
+  public:
+    std::unique_ptr<AbstractShape> clone() const override {
+        return make_unique<Derived>(static_cast<Derived const&>(*this));
+    }
+  protected:
+    Shape()=default;
+    Shape(const Shape&)=default;
+};
+
+class Square : public Shape<Square>{};
+
+int main() {
+    Square sq;
+    unique_ptr<AbstractShape> sq2{sq.clone()};
+};
+#+end_src

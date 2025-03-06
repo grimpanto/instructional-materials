@@ -1,0 +1,156 @@
+
+
+#+TITLE: Python \hfill Unit 5\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Funktion definieren - 1
+#+BEGIN_SRC python
+name = "Maxi"
+>>> def print_name():
+...     print(name)
+...
+>>> print_name()
+Maxi
+#+END_SRC
+
+* Funktion definieren - 2
+#+BEGIN_SRC python
+name = "Maxi"
+>>> def print_name(name):
+...     print(name)
+...
+>>> print_name("Mini")
+Mini
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+>>> print_name()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: print_name() missing 1 required positional argument: 'name'
+#+END_EXAMPLE
+
+* Funktion definieren - 3
+#+BEGIN_SRC python
+>>> def print_name(firstname, lastname):
+...     print(firstname, lastname)
+...
+>>> res = print_name("Maxi", "Mustermann")
+Maxi Mustermann
+>>> res
+>>> print(res)
+None
+#+END_SRC
+
+* Funktion definieren - 4
+#+BEGIN_SRC python
+>>> def say_hello(name):
+...     return "Hello, " + name
+...
+>>> say_hello("Maxi")
+'Hello, Maxi'
+>>> print(say_hello("Mini"))
+Hello, Mini
+>>> message = say_hello("Otto")
+>>> message
+Hello, Otto
+#+END_SRC
+
+* Funktion definieren - 5
+#+BEGIN_SRC python
+>>> def sum(a, b):
+...     return a + b
+...
+>>> sum(1, 2)
+3
+>>> sum("abc", "def")
+'abcdef'
+#+END_SRC
+
+* Funktion definieren - 6
+#+BEGIN_SRC python
+>>> def sum(a, b):
+...     res = a + b
+...     return res
+...
+>>> sum(3, 4)
+7
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+>>> res
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'res' is not defined
+#+END_EXAMPLE
+
+* Funktion definieren - 7
+#+BEGIN_SRC python
+>>> res = 0
+>>> def acc(x):
+...     return res + x
+...
+>>> res = acc(3)
+>>> res
+3
+>>> res = acc(4)
+>>> res
+7
+#+END_SRC
+
+* Funktion definieren - 8
+#+BEGIN_SRC python
+>>> def acc(x):
+...     res = res + x
+...     return res
+...
+>>> acc(3)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 2, in acc
+UnboundLocalError: local variable 'res' referenced before assignment
+#+END_SRC
+
+* Funktion definieren - 9
+#+BEGIN_SRC python
+>>> res = 0
+>>> def acc(x):
+...     global res  # pfui!
+...     res = res + x
+...
+>>> acc(3)
+>>> res
+3
+>>> acc(4)
+>>> res
+7
+#+END_SRC
+
+* Strings
+#+BEGIN_SRC python
+>>> apples = 3
+>>> oranges = 4
+>>> msg = str(apples) + " apples and " + \
+str(oranges) + " oranges..."
+>>> msg
+'3 apples and 4 oranges...'
+>>> msg = "{} apples and {} oranges...".format(\
+apples, oranges)
+>>> msg
+'3 apples and 4 oranges...'
+>>> msg = "{:<4} apples and {:>4} oranges...".\
+format(apples, oranges)
+>>> msg
+'3    apples and    4 oranges...'
+#+END_SRC

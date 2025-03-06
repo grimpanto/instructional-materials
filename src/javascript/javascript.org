@@ -1,0 +1,1028 @@
+#+TITLE: JavaScript
+#+AUTHOR: Dr. Günter Kolousek
+#+EMAIL:  ko@htlwrn.ac.at
+#+DATE:   2012-08-30
+
+#+SETUPFILE: "../beamer_latex.org"
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [presentation]
+#+BEAMER_FRAME_LEVEL: 2
+#+BEAMER_HEADER_EXTRA: \usetheme{boxes}\addheadbox{structure}{\tiny\quad\insertsection\qquad\insertsubsection\hfill\insertpagenumber\quad}\useinnertheme{rectangles}\usecolortheme[RGB={0,118,190}]{structure}\usefonttheme{structurebold}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* Charakterisierung
+
+*** Merkmale
+    - Objekt-basierte, prototypen-basierte Programmiersprache
+    - von C, Java, Python, Perl, Scheme, Self beeinflusst
+	  - kein block-level scoping (außer mit =let=), sondern function-level
+    - plattformunabhängig (OS, Rechnerarchitektur)
+    - Fokus auf Browser (Server: \lto node.js, rhino)
+    - dynamisch und schwach getypt
+	  - (großzügige) Typumwandlungen!!!
+	- reguläre Ausdrücke in Sprache eingebaut
+    - Garbage collector (GC)
+    - Security \lto sandbox
+
+
+*** Geschichte
+	Versionsnummern gemäß Mozilla Browser:
+    - 1996: JS 1.0, Netscape, jetzt geschützte Marke von Oracle
+	- 1998: JS 1.3
+
+	  JS von Netscape bei ECMA (European Computer Manufacturer's Asscoiation)
+	  \lto ECMAScript 1 und ECMAScript 2
+	- 2000: JS 1.5 (ECMAScript 3)
+	- 2005: JS 1.6 (= JS 1.5 + Array Extras...)
+	- 2006: JS 1.7 (+Pythonic Generators, +Iterators, +Array Comprehensions)
+	- 2008: JS 1.8 (+Generator Expressions, +Expression Closures)
+	- 2010: JS 1.8.5 (+ECMAScript 5.1 Kompatibiltät)
+	Alle außer FF: ECMAScript 3!
+
+
+* Grundlagen
+
+*** Allgemeines
+	- Unicode-Zeichen: UTF-16
+	- Identifier
+	  - aus Buchstaben, Ziffern, =$=, =_=
+	  - keine Ziffer an erster Stelle
+	- kein Typ bei Deklaration von Variablen
+	  - \lto dynamisch getypt
+
+
+*** Variable
+	- Zugriff: zuerst lokal, dann umschließender Scope,...
+	  - \lto ReferenceError
+	- Zuweisung: zuerst lokal, dann umschließender Scope,...
+	  - global ... Eigenschaft des globalen Objektes
+	- ~var~
+	  - kann /nicht/ mit ~delete~ gelöscht werden
+	  - ohne ~var~ \lto global
+	- function-level scope (siehe myscope2)
+	#+begin_src javascript
+	var scope = "global";  // globale Variable
+	myscope2 = "global";  // globale Var, ohne var
+	function test() {
+	  console.log(myscope2);  // -> undefined
+	  scope = "lokal";  // globale Var!
+	  myscope = "global";  // neue globale Var (kein var!)
+	  var myscope2 = "lokal";  // lokale Var
+	  console.log(myscope2);   // -> lokal
+	}
+	#+end_src
+	\lto *immer* deklarieren!
+
+
+*** Semikolon optional
+	- wenn separate Zeilen und
+	- folgende Zeile nicht als Fortsetzung interpretiert werden kann
+	  - außer
+		- =break=, =return=, =continue=
+		- ~++~ und ~--~
+	  - Beispiel
+		#+begin_src javascript
+		x = 1
+		y = 2
+
+		// Aber:
+		var y = x + f
+		(a + b).toString()
+
+        // wird interpretiert wie
+        var y = x + f(a+b).toString();
+		#+end_src
+	  - besser: Semikolon verwenden!!!
+
+
+*** Reservierte Wörter:
+	- Schlüsselwörter
+      - ~if~, ~else~, ~switch~, ~case~, ~default~
+      - ~while~, ~for~, ~do~, ~break~, ~continue~
+      - ~try~, ~catch~, ~finally~, ~throw~, ~default~
+      - ~this~, ~instanceof~, ~typeof~, ~delete~
+      - ~function~, ~return~, ~var~, ~null~
+	  - ~void~, ~debugger~, ~with~
+    - reserviert, aber derzeitig nicht genutzt
+      - ~class~, ~extends~, ~super~, ~const~, ~enum~, ~export~, ~import~
+	- im 'strict mode':
+	  - reserviert: ~implements~, ~let~, ~private~, ~public~, ~yield~,
+        ~interface~, ~package~, ~protected~, ~static~
+	  - nicht als Var, Fkt, Par: ~arguments~, ~eval~
+	- ECMAScript 3 reserviert alle Schlüsselwörter von Java
+
+
+
+*** Vordefiniert...
+	- =Array=, =Date=, =Error=, =RegExp=
+	- =Math=, =Number=, =Boolean=, =String=, =Object=, =Function=, =JSON=
+	- =Infinity=, =isFinite=, =NaN=, =isNaN=, =parseInt=, =parseFloat=
+	- =eval=, =encodeURI=, =encodeURIComponent=, =decodeURI=,
+	  =decodeURIComponent=
+	- =arguments=, =undefined=
+	- =EvalError=, =RangeError=, =ReferenceError=, =SyntaxError=,
+	  =TypeError=, =URIError=
+
+
+* Datentypen, Ausdrücke, Anweisungen
+
+
+*** Einteilung
+	- elementare Typen (immutable!)
+	  - Zahlen
+	  - Strings
+	  - boolesche Wahrheitswerte
+		- Typumwandlung in =false=: =undefined=, =null=, 0, =NaN=, ~​""​~
+	  - Werte: =null= und =undefined=
+		- =null=: ~typeof null~ \lto ~​"object"​~
+		- =undefined=: Variable nicht initialisiert oder Objekteigenschaft
+		  nicht definiert.
+		- ~null == undefined~, aber ~null !== undefined~
+	- Objekttypen
+	  - Sammlung von Eigenschaften
+	  - \lto globales Objekt
+		- Eigenschaften sind global definierte Symbole! (\lto =window=)
+		- z.B. =undefined=, =isNaN()=, =Date()=, =Math()=
+	  - Arrays sind Objekte
+	  - Funktionen sind Objekte (first class objects)
+	  - Funktion mit =new= aufgerufen \lto Konstruktor
+
+
+
+*** Zahlen und Mathematisches
+	- keine Unterscheidung in ganze Zalen und Gleitkommazahlen (64-Bit)
+	- =Math= Funktionen und Konstanten
+	  - z.B.: =Math.pow(2,53)= oder =Math.PI=
+	- =Number=
+	  - =Infinity=, =Number.POSITIVE_INFINITY=, =Number.MAX_VALUE + 1=, =1/0=
+	  - =0/0=, =NaN=, =Number.NaN=
+	  - ~.1+.1+.1+.1+.1+.1+.1+.1+.1+.1 == 1~ \lto =false=
+
+
+
+*** Strings
+	- einfache oder doppelte Anführungszeichen
+	- Escape-Zeichen ganz "normal", z.B. =\n=
+	#+begin_src javascript
+	var s = "abcdef";
+	s.charAt(0);
+	s[0];  // ECMAScript 5
+	s.slice(0, -1);  // -> abcde
+	s.slice(-3);  // -> def
+	// aber nicht: s.charAt(-1)!
+    s.indexOf("d");  // -> 3
+    "abc".charAt(0);  // "abc" ist kein Objekt!!
+	#+end_src
+
+
+
+*** Wrapper-Objekte
+	- ~​"abc".charAt(0)~ wie ~new String("abc").charAt(0)~
+	  - Implementierung *muss kein* richtiges Objekt anlegen
+	- ~15.toString(2) == "1111"​~
+	  - Wrapper-Klasse ~Number~
+	- ~true.toString()~
+	  - Wrapper-Klasse ~Boolean~
+	- keine Wrapper-Klassen für =null= und =undefined=
+
+
+
+*** Typumwandlungen
+	- Implizit
+	  - beliebiger Typ in booleschen Wert (siehe boolesche Werte)
+	  - beliebiger Typ in String
+		- =10 + "​ Objekte"​= \lto =​"10 Objekte"​=
+		- ~NaN + " Objekte"​~ \lto =​"NaN Objekte"​=
+	  - beliebiger Typ in Zahl
+		- oder =NaN=
+		- ~​"7" * "4"​~ \lto =28=
+		- ~​"2" * "3 Orangen"​~ \lto =NaN=
+		- ~1 - "x";~ \lto =NaN=
+		- ~​"0" == 0~ bzw. ~​"0" == false~ \lto =true=
+	- Explizit
+	  - Achtung: ohne =new=
+	  - =Boolean([])= \lto =false=
+	  - =Number("3")= \lto =3=
+		- =Number(" 3 Objekte")= \lto =NaN=
+		- =parseInt(" 3 Objekte")= \lto =3=
+	  - =String(false)= \lto =​"false"​=
+
+
+
+*** Objekt-basierte Sprache
+	- keine Klassenanweisung, keine Vererbung
+	- dafür: Prototypen
+	- Konstruktor "definiert" Klasse
+	- Eingebaute Klassen
+	  - =Array=
+	  - =Date=
+	  - =RegExp=
+		- Literaltyp, z.B. =/[1-9][0-9]*/=
+	  - =Error=
+
+
+
+*** Objekte
+	#+begin_src javascript
+	var p1 = {
+	  "x" : 1,
+	  y : 1,
+    }
+
+    p.x = 0;
+    p["y"] = 0;
+
+	var points = [p1, {x:1, y:1.0}];
+
+	points.dist = function() {
+        var p1 = this[0];
+		var p2 = this[1];
+		var a = p2.x - p1.x;
+		var b = p2.y - p1.y;
+		return Math.sqrt(a * a + b * b);
+    }
+
+	points.dist();  // -> 1.414...
+	#+end_src
+
+*** Objekte und Methoden - 1
+	#+begin_src javascript
+    var person = {
+      firstName : "Max",
+      lastName : "Mustermann",
+      greet : function() {
+          console.log("Hi, " + this.firstName);
+      }
+    };
+     
+    var sayHi = person.greet; // Methode in Variable ablegen
+     
+    sayHi(); // -> Hi, undefined
+    // this referenziert jetzt globales Objekt!!!
+	#+end_src
+
+
+*** Objekte und Methoden - 2
+	#+begin_src javascript
+    var person = {
+      firstName : "Max",
+      lastName : "Mustermann",
+      greet : function(greeting, punctation) {
+          console.log(greeting + " " + this.firstName + punctation);
+      }
+    };
+     
+    var sayHi = person.greet; // Methode in Variable ablegen
+     
+    sayHi.call(person, "Hi", "!")
+    sayHi.apply(person, ["Hallo", "!!"])
+	#+end_src
+
+
+*** Getter und Setter
+	#+begin_src javascript
+	var p = {
+        x: 1,
+        y: 1,
+        get r() { return Math.sqrt(this.x * this.x +
+                                   this.y * this.y)},
+        set r(val) {
+          var oldval = Math.sqrt(this.x * this.x +
+                                 this.y * this.y);
+          var ratio = val / oldval;
+          this.x *= ratio;
+          this.y *= ratio;
+        }
+    };
+
+    alert(p.r);  // -> 1.414...
+    p.r = 2;
+    alert(p.x + " " + p.y);  // -> 1.414... 1.414...
+	#+end_src
+
+
+
+*** Arrays - 1
+	#+begin_src javascript
+	var primes = [2, 3, 5, 7, 11];
+	var a = new Array(10);  // a.length == 10
+    a[0];  // -> undefined
+	var b = new Array(2, 3, 5, 7, 11, "Test", false);
+    
+    var c = ["a"];
+    c[0];  // "a"
+    c[1] = 3.14;
+    c.length;  // -> 2
+    c["a"] = true;
+    c.a;  // -> true
+    c.length;  // -> 2
+    #+end_src
+
+
+
+*** Arrays - 2
+	#+begin_src javascript
+    var d = [1, 2, 3];
+    delete d[1];
+    1 in d;  // -> false: prueft ob Index in Array
+    console.log(d.toString());  // -> 1,,3
+    console.log(d);  // -> [1, 2: 3]    (Chrome)
+    d.length;  // -> 3!
+    for (var i in d) console.log(d[i]);  // -> 1 3 (2 Zeilen)
+    // -> 1 undefined 3
+    for (var i=0; i < d.length; i++) console.log(d[i]);
+    // 1 undefined 3
+    
+    o = {};
+    o[1] = "x";  // 1 wird in einen String konvertiert
+    o[1];  // -> "x"
+    o["1"];  // -> "x"
+    o.length;  // -> undefined
+    #+end_src
+
+
+
+*** Ausdrücke
+	- ziemlich wie Java
+	- Operator =typeof= ... Typ ermitteln
+	- Operator =instanceof= ... Instanz dieser Klasse?
+	  - =[1, 2, 3] instanceof Array= \lto ~true~
+	- Operator =delete= ... Eigenschaft löschen
+	- Operator =in= ... Eigenschaft in Objekt?
+	- ~​"x" in {x:0, y:1}~ \lto =true=
+	- ~​"toString" in {x:0, y:1}~ \lto =true=
+	- ~​"5" in [4,5,6]~ \lto =true=
+	- Operator ~==~ ... Gleichheit
+	- Operator ~===~ ... strenge Gleichheit
+	  - keine Typwandlungen
+
+
+
+*** =typeof= - Operator
+	- =typeof undefined= \lto ~​"undefined"​~
+	- =typeof null= \lto ~​"object"​~
+	- =typeof true= \lto ~​"boolean"​~
+	- =typeof 3.14= \lto ~​"number"​~
+	- ~typeof "abc"​~ \lto ~​"string"​~
+	- =typeof Math.sqrt= \lto ~​"function"​~
+	- =typeof {x:1,y:2}= \lto ~​"object"​~
+	- =typeof [1, 2, 3]= \lto ~​"object"​~
+
+
+
+*** =delete= - Operator
+	#+begin_src javascript
+	var o = {x:1, y:2};
+	delete o.x;  // -> true
+	typeof o.x;  // -> undefined
+	delete o.x;  // -> true
+    delete o["y"]  // -> true
+    // deklarierte Var koennen nicht geloescht werden
+	delete o;  // -> false
+   
+    var a = [1,2,3];
+	delete a[2];
+	a.length;  // -> 3
+	#+end_src
+
+
+
+*** Funktionen - 1
+	#+begin_src javascript
+	function fact(x) {
+        if (x <= 1) return 1;
+        return x * fact(x - 1);
+    }
+
+	var square = function(x) { return x * x; }
+
+	var f = function fact2(x) {
+              if (x <= 1) return 1;
+                return x * fact2(x - 1);
+            };
+    #+end_src;
+
+
+
+*** Funktionen - 2
+	#+begin_src javascript
+	function sum(x, y, /* optional */ z) {
+        if (z === undefined) z = 0;
+		return x + y + z;
+    }
+
+    sum(1, 2);  // -> 3
+    sum(1, 2, 3);  // -> 6
+
+    function max(/* ... */) {
+        var max = Number.NEGATIVE_INFINITY;
+		for (var i=0; i < arguments.length; i++) {
+            if (arguments[i] > max) max = arguments[i];
+        }
+		return max;
+    }
+
+    max(1, -3, 42, 9);  // -> 42
+    #+end_src
+
+
+
+*** Funktionen - 3
+	#+begin_src javascript
+    function sum2(x, y) {
+        if (arguments.length < 2)
+            throw new Error("zu wenig Parameter");
+
+        var res = x + y;
+
+        if (arguments.length > 2)
+            for (var i = 2; i < arguments.length; i++)
+                res += arguments[i];
+     
+        return res;
+    }
+
+	alert(sum2(1));  // -> Error: zu wenig Parameter
+    alert(sum2(1,2));  // -> 3
+    alert(sum2(1,2,3,4,5));  // -> 15
+	#+end_src
+
+
+
+*** "Klassen" - 1
+	#+begin_src javascript
+	function Point(x, y) {
+	    this.x = x;
+		this.y = y;
+	}
+    // damit wird Point zu einem "Konstruktor"
+	var p1 = new Point(1, 1);
+	Point.prototype.dist0 = function() {
+	    return Math.sqrt(this.x * this.x + this.y * this.y);
+	};  // Point.prototype ist Objekt "Point"
+	
+	p1.dist0();  // -> 1.414
+    p1.constructor === Point;  // -> true
+    p1.constructor.prototype === Point.prototype; // -> true
+    Point.prototype.isPrototypeOf(p1); // -> true
+    Object.getPrototypeOf(p1) === Point.prototype;  // -> true
+    p1.__proto__ === Point.prototype; // -> true (nicht Standard!)
+	#+end_src
+	Jede Funktion hat eigenes "Prototypen"-Objekt!
+
+
+
+*** "Klassen" - 2
+	Prinzip der "Vererbung": =o.x=
+	1. Hat =o= eine Eigenschaft =x=? ja,...
+	2. nein: Hat Prototyp eine Eigenschaft =x=? ja,...
+	3. nein: Hat Prototyp des Prototyps eine Eigenschaft =x=?...
+    #+begin_src javascript
+	var o1 = {x: 1, y: 2};
+	var o2 = Object.create(o1);
+ 	var o3 = Object.create(o2);
+	o3.x;  // -> 1
+	o3.hasOwnProperty("x");	 // -> false
+	o2.hasOwnProperty("x");	 // -> false
+	o1.hasOwnProperty("x");	 // -> true
+	#+end_src
+
+
+
+*** "Klassen" - 3
+	- Instanz erbt von Prototyp
+	  - Prototyp nicht "direkt" als Eigenschaft zugreifbar.
+	- Prototyp kennt Konstruktor
+	  - Instanz erbt von Prototyp die Konstruktor-Eigenschaft (=o.constructor=)
+	- Konstruktor kennt Prototyp-Eigenschaft (=o.constructor.prototype=)
+	#+begin_src javascript
+    var o1 = {x:1, y:2};
+	var o2 = Object.create(o1);  // o1 ist Prototyp von o2
+	o1.isPrototypeOf(o2);  // -> true
+    o2.constructor === Object;  // -> true
+    o2.constructor.prototype === o1;  // -> false
+	Object.prototype.isPrototypeOf(o2);  // -> true (transitiv!)
+    // Object.prototype "ist" das Objekt "Object"
+    // nicht die Funktion "Object"
+    o2.constructor.prototype === p;  // -> false!
+    o2.constructor.prototype === Object.prototype;  // -> true
+    #+end_src
+
+
+*** "Klassen" - 4
+	#+begin_src javascript
+    var p1 = new Point(1,1);
+    var p2 = Object.create(p1);
+    p1.isPrototypeOf(p2);  // -> true
+    p2.constructor === Point;  // -> true
+    #+end_src
+
+	Unter Chrome:
+	#+begin_src javascript
+    Object.prototype  // -> Objekt "Object"
+    Object.prototype.__proto__  // -> null
+    Object.prototype.constructor  // -> Funktion "Object"
+    Object.__proto__  // -> Funktion "Empty"
+    Object.__proto__.__proto__  // -> Objekt "Object"
+    Object.__proto__.prototype  // -> undefined
+	#+end_src
+
+
+
+*** Anweisungen
+	- =for=, =while=, =do=, =if=, =switch= wie in Java 7
+    - Alternative Form von =for=
+	  #+begin_src javascript
+	  var o = {x:0, y:1};
+	  for (var key in o)
+	      console.log(o[key]);  // o.key geht natuerlich nicht!
+	  // aber:
+	  for (i in ["a", "b", "c"])
+	      console.log(i);  // 0, 1, 2
+	  #+end_src
+
+
+* Client-seitiges JavaScript
+
+*** JS im Browser
+    - JS im Browser: single-threaded
+	  - \lto HTML5: WebWorker
+	- Einbettung
+	  - externe Datei mittels ~<script src="...">...</script>~ (präferiert)
+	  - innerhalb von =script=
+		- XHTML \lto CDATA! (=<![CDATA[ ... ]]>=)
+	  - Event-Handler in HTML
+		~<input type="checkbox" name="opt"\~
+	    ~​  value="pepper" onchange="...">~
+	  - JavaScript-URLs:
+		~<a href="javascript:alert(\~
+        ~​  new Date().toLocaleTimeString();">~
+
+
+*** JS im Browser - Ausführung
+	1. Request los und =document= Objekt
+	 beim Response anlegen (~document.readyState == "loading"​~).
+	2. Parsen \lto HTML Elemente erzeugen und hinzufügen
+	   (siehe DOM).
+	3. =<script>= Element (kein =async= oder =defer=) \lto Skript
+	 laden und synchron ausführen.
+	 - =async= ... parallel laden, asynchron ausführen.
+	 - =defer= ... laden, warten bis Dokument geparst.
+	4. Dokument vollständig geparst, dann
+	   ~document.readyState == "interactive"​~
+	5. =defer= Skripte starten (Reihenfolge wird beachtet).
+	6. Dananach (alle =defer= fertig): Verarbeitung der
+	 Events (=async= Skripte müssen noch nicht fertig sein).
+	7. Alle Ressourcen (z.B. Bilder) geladen, 
+	 dann ~document.readyState == "complete"​~ \lto load-Event!
+
+
+*** =defer= und =async= im Vergleich
+	- nicht in Opera!
+    - weder =defer= noch =async=
+	  - werden sofort geladen und gestartet
+	- =defer=
+	  - werden gestartet, wenn DOM fertig
+      - Reihenfolge der Ausführung wird eingehalten.
+	- =async=
+      - Start prinzipiell sofort
+	  - Reihenfolge der Ausführung wird eingehalten.
+	- beide, dann wie =async=
+
+
+*** Window-Objekt
+	- Window-Objekt ist im Browser *globales* JavaScript-Objekt!
+    - jedes Fenster hat eigenes =window= Objekt
+	- auch =iframe= hat eigenes =window= Objekt
+	- jeder Tab hat eigenes =window= Objekt
+	- Ein Window kann
+	  - ein anderes Window öffnen und schließen
+	  - auf Inhalt des anderen im Rahmen der CORS zugreifen
+
+
+*** Window-Objekt - Timeout
+	- =setTimeout(f, t)= ... Funktion =f= nach =t= ms
+	  - Return-Wert kann an =clearTimeout()= übergeben werden
+	- =setInterval(f, t)= ... =f= alle =t= ms aufrufen
+	  - Return-Wert kann an =clearInterval()= übergeben werden
+	- Beispiel
+	  #+begin_src javascript
+	  var cnt = 0;
+	  function incr() {
+	      cnt++;
+	      if (cnt < 10) {
+              console.log(cnt);
+	          setTimeout(incr, 1000);
+          }
+      }
+	  setTimeout(incr, 1000);
+	  #+end_src
+
+
+*** Window - =open=
+	- Öffnen kann prinzipiell vom Browser blockiert werden
+	- Name ist wichtig beim =target= Attribut von =<a>= bzw. =<form>=
+	  - "\_blank" (default) ... neues, unbenanntes Fenster
+	#+begin_src javascript
+    var w = open("http://www.orf.at",
+    		  "news",  // name, optioal
+              // durch , getrennt; nicht standardisiert;
+              // kann ignoriert werden
+			  "width=400,height=350",
+			  false);  // neuer Eintrag in History (T: replace)
+	setTimeout(function() { w.close(); }, 10000);
+    w.opener != null; // enthaelt window-Objekt des Erzeugers
+    w = open("http://derstandard.at",
+             "news");  // kein neues Fenster!
+    // Fenster w wird nach 10s geschlossen
+	#+end_src
+
+
+*** Window-Objekt - =location=
+	- =location= - Objekt
+	  - ~window.location == document.location~
+	- Eigenschaften
+	  - =protocol=, =host=, =port=, =pathname=, =search=, =hash=
+	- Methoden
+	  - =reload()=
+	- Zuweisung
+	  - ~location = "http://www.orf.at";~
+	  - auch relative URL, wie z.B. ~location = "page2.html";~
+	  - auch, z.B. nur Fragment, z.B. ~location = "#top";~
+		- wenn keine id mit "top", dann zum Anfang
+
+
+*** Window - Methoden
+	- =alert()= ... Meldung anzeigen
+	- =confirm()= ... Meldung anzeigen, OK und Cancel,
+	  booleschen Wert zurückliefern
+	- =prompt()= ... Meldung anzeigen, Textfeld, String zurückliefern
+	- =confirm= und =prompt= blockieren!
+	  - =alert= i.d.Regel auch, aber nicht zwingendermaßen
+	- maßvoll einsetzen!
+	- hauptsächlich =alert= zum Debuggen
+
+
+* DOM
+
+*** Document Object Model (DOM)
+	- API zum Zugriff auf alle Elemente
+	- Zugriff über =window.document=
+	- Baumstruktur des HTML Dokumentes mit allen HTML Elementen
+    - root-Element ist das =html= Element
+	- Klassenhierarchie
+	  #+begin_example
+      Node
+	    Document
+          HTMLDocument
+        CharacterData
+          Text
+          Comment
+        Attr
+	    Element
+          HTMLElement
+            HTMLHeadElement
+	        ...
+	  #+end_example
+
+
+*** Eigenschaften von =Node=
+	- =parentNode=
+	- =childNodes= ... Array-ähnliches Objekt
+	- =firstChild=, =lastChild=
+	- =nextSibling=, =previousSibling=
+	- =nodeType= (Element=1, Text=3, Document=9,...)
+	- =nodeValue= ... Inhalt eines Text- oder Comment-Knotens
+	- =nodeName= ... Tagname
+
+
+*** Elemente auswählen
+	- =id=
+	  - ~sect1 = document.getElementById("sect1");~
+	- =name=
+	  - ~rad = document.getElementsByName("color");~
+	  - Liefert eine =NodeList= zurück
+	  - IE auch Elemente mit gleicher =id=!
+	- Tagname
+	  - ~s = document.getElementsByTagName("span");~
+	- CSS Klasse
+	  - ~w = document.getElementsByClassName("wrn");~
+	- CSS Selectors API
+	  - =querySelector= und =querySelectorAll=
+    \lto jQuery!
+
+
+*** HTMLElement-Objekt
+	- Ein HTML (XML) Element besteht aus:
+	  - Start-Tag mit Attributen
+	  - Inhalt
+	  - Ende-Tag
+    - Inhalt
+	  - ~<p>Ein <em>wichtiger</em> Absatz</p>~
+	  - =elem.innerHTML=  \lto ~Ein <em>wichtiger</em> Absatz~
+	  - =elem.textContent= \lto ~Ein wichtiger Absatz~
+	  - iterieren über Kind-Knoten
+
+
+*** HTMLElement-Objekt - Attribute
+	- Attribute können gelesen und geschrieben werden:
+	  - reservierte Wörter, dann "html" davorsetzen
+		- =for= Attribut des =label= \lto =htmlFor=
+	  - z.B. ~var img = document.getElementById("myimage")~
+	         ~img.src = "img2.png";~
+	  - über =attributes=
+		- =img.attributes[0]=
+		- =img.attributes.src=
+		- ~img.attributes["src"]~
+
+
+*** HTMLElement-Objekt - CSS
+	- über Attribut =style=: Objekt vom Typ =CSSStyleDeclaration=
+	  - Alle Werte als Strings!
+		- z.B.: ~e.style.left = "300px";~
+	  - CSS Eigenschaften mit Bindestrichen, dann camelCase!
+		- z.B.: ~e.style.fontSize = "24pt";~
+	  - CSS Eigenschaft als Schlüsselwort in JavaScript, dann =css=!
+		- z.B.: ~e.style.cssFloat = "left";~
+	- Klassen
+	  - über =className= ... setzt =class= Attribut (besser wäre
+        =classNames=...)
+		- z.B.: ~e.className = "warning";~
+	  - über =classList= ... array-ähnlich (dzt. nicht in IE)
+
+
+*** Eigenschaften des Document - Elementes
+	- =cookie=
+	  - setzen mittels Zuweisung
+	  - auslesen mittels Zugriff und splitten an ";"
+	  - löschen mittels Wert auf Leerstring und Zeit abgelaufen
+	- =domain= ... siehe same-origin-policy
+	- =location=
+	- =referrer= ... Achtung "rr" (wie HTTP-Header "Referer") letzte
+	  Seite, die zu diesem Dokument geführt hat
+
+
+*** Cookies
+	#+begin_src javascript
+	function setCookie(name, value, days) {
+      if (days) {  var date = new Date();
+		date.setTime(date.getTime() + (days*24*60*60*1000));
+		var expires = "; expires=" + date.toGMTString();
+      } else var expires = "";
+      document.cookie = name+"="+value+expires+"; path=/";
+    }
+
+    function getCookie(name) {
+      var nameEQ = name + "=";
+	  var ca = document.cookie.split(';');
+	  for(var i=0;i < ca.length;i++) {
+		  var c = ca[i];
+		  while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		  if (c.indexOf(nameEQ) == 0) 
+            return c.substring(nameEQ.length,c.length);
+	  } return null; }
+     
+    function deleteCookie(name) {
+        setCookie(name,"",-1); }
+	#+end_src
+
+
+* Events
+
+*** Event-Typen
+	- "alte" Events: load, click, mouseover,...
+	- "neue" Events:
+	  - DOM Level 3 Events: "alte" + neue, wie focusin, focusout, mousenter,
+		mouseleave, textinput
+	  - HTML5 Events, z.B. für Video und Audio,...
+	  - Touch-Events: touchstart, touchmove, touchend, touchcancel
+	
+
+*** Event-Handler
+	- Definition
+	  - via HTML, z.B. ~window.onload = function() { ... };~
+		- lediglich ein Event-Handler!
+		- Rückgabewert = =false=: keine Standardaktion
+	  - =addEventListener=
+		- =attachEvent= bis IE8!
+		- =e.preventDefault()= oder ~e.returnValue = false~ (bis IE8): 
+	      keine Standardaktion
+        - ~e.stopPropagation()~ oder ~e.cancelBubble = true~ (bis IE8):
+		  Abbruch der Event-Propagation.
+	- Aufruf
+	  - meist mit einem Event-Objekt (außer IE: globales =event=)
+		- außerdem: Unterschiede je Implementierung!
+
+
+*** Überblick Event-Arten - 1
+	- Tastatur - Events
+	  - steigen auf
+	  - keydown, keyup: low-level
+	  - keypress: ausgebbares Zeichen
+		- Firefox: auch nicht ausgebbare Zeichen
+		- Eigenschaft =keyCode= (Firefox: =charCode=)
+	  - input: Eingabe schon passiert, keine Information was geändert wurde
+	- Mouse - Events
+	  - steigen auf (außer mouseenter und mouseleave)
+	  - click, dblclick
+	  - mousedown, mouseup
+	  - mousemove, mouseover, mouseout
+	  - mouseenter, mouseleave
+
+
+*** Überblick Event-Arten - 2
+	- Formular - Events
+	  - steigen auf (außer blur und focus)
+	  - click ... Buttons
+      - change ... Textfelder, Checkbox, Radiobox
+	    - Checkbox, Radiobox, Select ... sofortiges Triggern des Events
+	    - "Text" ... triggert erst beim Fokuswechsel
+	  - focus, blur ... Fokus erhalten bzw. verlieren
+	  - focusin, focusout
+	  - submit, reset
+	- Window
+	  - load, resize, scroll
+
+
+* AJAX
+
+*** Ajax - Einführung
+	- HTTP mittels JavaScript
+	  - =location= eines Window-Objektes setzen
+	  - =submit()= eines Formular-Objektes aufrufen
+	  - \lto Seite wird neu geladen (synchron!)
+	- Asynchronous JavaScript and XML
+	  - lange Zeit ein "Buzzword"
+	  - geskriptete HTTP-Requests
+	- Alternativen
+	  - =src= von =img= auf Skript setzen und Server liefert
+		leeres Bild (1x1 transparent) \lto eine Richtung!
+	  - =src= von =iframe= ... \lto lokales JavaScript kann
+		Inhalt abfragen.
+	  - =src= von =script= ... \lto oft JSON kodiert
+
+
+
+*** JSON
+	- Javascript Object Notation
+	- Datenformat, text-basiert, gültiges JavaScript (per =eval()=)
+	- Datentypen
+	  - =null=, =true=, =false=
+	  - Zahl, String (in doppelten Anführungszeichen)
+	  - Array in eckigen Klammern
+	  - Objekt mit Key (String) und Wert (JSON Wert)
+	- Beispiel
+	  #+begin_src javascript
+	  { "id": 4712,
+        "firstname": "Maxi",
+	    "phone": {
+          "home": "02622/2781",
+          "office": ["02622/27871", "02622/27178"]
+        },
+	    "salary": 1500.42,
+	    "locked": false,
+        "departement": null
+      }
+	  #+end_src
+  
+
+*** AJAX - Charakterisierung
+	- Begriff
+	  - asynchronous
+	  - JavaScript
+	  - XML
+		- prinzipiell beliebiges Datenformat
+		- heute meist (da einfacher): JSON
+	- Implementierung
+	  - Klasse =XMLHttpRequest= (XHR)
+
+
+*** XHR - 1
+	#+begin_src javascript
+	var request = new XMLHttpRequest();
+	
+	request.open("POST", "/send");
+
+	// fuer POST notwendig
+	request.setRequestHeader("Content-type", 
+                             "text/plain;charset=UTF-8");
+
+	// bei GET: null verwenden (kein Datenblock)
+	request.send(msg);
+	// kein warten: asynchron!
+    // synchron, wenn 3. Parameter von open: false, aber...
+	#+end_src
+
+
+*** XHR - 2
+	- die folgenden Header werden selbstständig hinzugefügt:
+	  - Content-Length, Date, Referer, User-Agent
+	- XHR - Objekt hat Eigenschaft =readyState=
+	  - 0 ... UNSET
+	  - 1 ... OPENED
+	  - 2 ... HEADERS\_RECEIVED
+	  - 3 ... LOADING
+	  - 4 ... DONE
+	- =readystatechange= Event
+
+
+*** XHR - 3
+	#+begin_src javascript
+	var request = new XMLHttpRequest();
+	request.open("GET", url);
+	request.onreadystatechange = function() {
+	  if (request.readystatechange === 4 && request.state === 200) {
+        var type = request.getResponseHeader("Content-Type");
+		if (type.match(/^text/))
+          callback(request.responseText);
+        else if (type === "application/json")
+          callback(JSON.parse(request.responseText));
+      }
+    };
+    request.send(null);
+    #+end_src
+
+
+* Sicherheit
+
+
+*** Sicherheit
+	- JavaScript unterstützt nicht, z.B.:
+	  - beliebige Daten schreiben oder löschen bzw. Verzeichnisse zu lesen
+		(aber HTML5: File API)
+	  - beliebige Netzwerkverbindungen aufbauen und beliebige Daten
+		versenden
+	- JavaScript schränkt ein, z.B.:
+	  - kann Browser-Fenster öffnen
+	  - kann Browser-Fenster schließen, wenn selbst geöffnet
+	  - kann kein =value= eines HTML FileUpload - Elementes setzen.
+	  - kann den Inhalt von anderen Dokumenten nicht lesen, wenn von anderem
+		Server \lto Same-Origin-Policy
+
+
+*** Same-Origin-Policy ("Gleiche-Herkunfts-Richtlinie")
+	- z.B. bei Öffnen eines Window oder bei =<iframe>=
+    - gleiche Herkunft des Dokumentes \lto Zugriff auf anderes Dokument
+	  erlaubt
+	- gleiche Herkunft, wenn
+	  - gleiches Protokoll
+	  - gleicher Host
+	  - gleicher Port
+	- Herkunft des Skripts *unerheblich*!
+	- gilt auch für XMLHttpRequests (aka Ajax)
+	  - Requests nur an Website mit gleicher Herkunft!
+
+
+*** Möglichkeiten der Lockerung
+	- Motivation: "developers.example.com" möchte auf "orders.example.com"
+	  zugreifen.
+	- Lösung 1: =domain= Eigenschaft des =document= Objektes auf "example.com"
+	  setzen (auf beiden =document= Objekten!)
+      - default: Host von dem es gelesen wurde
+	  - nur gültiges Domänensuffix
+		- z.B. "example.com"
+		- nicht: "com" (keine TLD, d.h. mind. ein Punkt)
+	    - nicht: "office.example.com"
+	  - Achtung: "evils.example.com" könnte ebenfalls auf "example.com"
+		setzen!
+	- Lösung 2: Cross-Origin Resource Sharing
+	- Lösung 3: Cross-Document Messaging
+	  - mittels =postMessage()= Objekt versenden
+	  - mittels =onmessage= Event empfangen
+	  - sonst kein Zugriff!
+
+
+*** Cross-Origin Resource Sharing (CORS)
+	- Working Draft: http://www.w3.org/TR/cors/
+	- "developers.example.com" an "orders.example.com":
+	  - C\to S: =Origin: http://developers.example.com=
+	  - S\to C: 
+	    =Access-Control-Allow-Origin: http://developers.example.com=
+	  - C: erlaubt daraufhin den Zugriff
+	- beliebiger Zugriff: =Access-Control-Allow-Origin: *=
+	- Aktivieren am Server: http://enable-cors.org/
+	- Weiters möglich (bei Verwendung zusätzlicher Header!)
+	  - beliebige Methoden: POST, PUT, DELETE,...
+	  - Cookies
+	  - Alle Header beginnen mit "Access-Control-" außer "Origin:"
+	  - Weitere Infos:
+		- http://www.html5rocks.com/en/tutorials/cors/
+		- http://dev.opera.com/articles/view/dom-access-control-using-cross-origin-resource-sharing/
+
+
+*** JSONP
+	- "JSON with Padding"
+	- Hilfslösung für Zugriff auf Daten anderer Domänen
+	- Prinzip
+	  - Einbetten der Antwort in =<script>= Element (da von
+        Same-Origin Policy ausgenommen!!)
+	  - Idee: Antwort als JSON Dokument
+		- aber: Block ={ ... }= kein gültiges JavaScript
+	  - JSONP: auffüllen (padding) mit z.B.
+		- Funktionsaufruf: =parseData({ ... })=
+		- Zuweisung: ~data = {...}~ (u.U. =JSON.parse()=  verwenden)
+	- Vorteil: Browser benötigt keine spezielle Implementierung
+	- Nachteil: Security (CSRF möglich), nur GET, keine Cookies

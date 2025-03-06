@@ -1,0 +1,205 @@
+
+
+#+TITLE: Python \hfill Unit 1\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Interpreter
+- Starten
+  #+BEGIN_SRC sh
+  $ python
+  Python 3.4.3 (default, Mar 26 2015, 07:36:01) 
+  [GCC 4.9.2 20150304 (prerelease)] on linux
+  Type "help", "copyright", "credits" or "license" for more information.
+  >>> 
+  #+END_SRC
+- Beenden
+  #+BEGIN_SRC python
+  >>> exit()
+  #+END_SRC
+
+* Datentypen - Zahlen
+- Datentyp (engl. data type)
+  - gibt Wertebereich an
+  - legt Operationen fest
+- Zahlen (engl. number)
+  - ganze Zahlen (engl./lat. integer): =1=, =3=, =42=,...
+  - Gleitkommazahlen (engl. floating point number): =0.5=, =3.1415926=, =2.7182818=,...
+
+* Ausdrücke
+(engl. expression)
+#+BEGIN_EXAMPLE
+>>> 1 + 1
+2
+>>> _ + 1
+3
+>>> _ + 1
+4
+>>> type(4)
+<class 'int'>
+#+END_EXAMPLE
+
+* Ausdrücke - 2
+#+BEGIN_EXAMPLE
+>>> 1.5
+1.5
+>>> type(_)
+<class 'float'>
+>>> 1 + 1.5 * 3
+5.5
+>>> (1 + 1.5) * 3
+7.5
+#+END_EXAMPLE
+
+* Ausdrücke - 3
+- Subtraktion, Division
+  #+BEGIN_SRC python
+  >>> 12 / 3 - 1
+  3.0
+  #+END_SRC
+- Potenz: =**=
+  #+BEGIN_SRC python
+  >>> 2 ** 3
+  8
+  #+END_SRC
+
+* Fehler - Syntaktische Fehler
+(engl. syntax error)
+#+BEGIN_EXAMPLE
+>>> How do you do?
+  File "<stdin>", line 1
+    How do you do?
+         ^
+SyntaxError: invalid syntax
+>>>
+#+END_EXAMPLE
+\to Regeln der Grammatik (Struktur der Sprache) verletzt
+
+* Fehler - Semantische Fehler
+#+BEGIN_EXAMPLE
+>>> pi
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'pi' is not defined
+>>>
+#+END_EXAMPLE
+\to Bedeutung falsch!
+
+* Fehler - Laufzeitfehler
+(engl. runtime error)
+#+BEGIN_EXAMPLE
+>>> 1 / 0
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ZeroDivisionError: division by zero
+>>>
+#+END_EXAMPLE
+\to zur Laufzeit auf Grund "falscher"" Eingabedaten
+
+* Fehler - Übersicht
+(engl. error, failure)
+- Syntaktische Fehler (Syntaxfehler)
+- Semantische Fehler
+- Laufzeitfehler
+- logische Fehler
+  - Fehler in der Logik des Programms (z.B. Endlosschleife)
+\to Fehler sind unvermeidlich!\\
+\to Umgehen lernen!!
+
+* Funktionen und Module
+#+BEGIN_SRC python
+>>> sqrt(4)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'sqrt' is not defined
+>>> from math import *
+>>> sqrt(4)
+2.0
+>>> pi
+3.141592653589793
+#+END_SRC
+
+* Funktion
+- Ähnlich wie in der Mathematik
+- Funktion hat einen Namen \to =sqrt=
+- Funktion kann "aufgerufen" werden
+  - Argumente innerhalb von runden Klammern \to 4
+  - Ergebnis wird als Rückgabewert zurückgeliefert \to 2.0
+  - Der Aufruf einer Funktion ist ein Ausdruck!
+
+* Modul
+- Beinhaltet
+  - Daten \to =pi=
+  - Code \to =sqrt=
+- in einer Datei gespeichert \to =math=
+  - verschiedene Arten von Dateien möglich
+- Inhalt des Moduls kann importiert werden\\
+  \to =from ... import ...=
+
+* Datentypen - Strings
+- String (auch Zeichenkette) ist eine Folge von Zeichen
+#+BEGIN_SRC python
+>>> "Hello, World"
+'Hello, World'
+>>> "Hello, 'Maxi'"
+"Hello, 'Maxi'"
+>>> 'Hello, "Mini"'
+'Hello, "Mini"'
+>>> "Hello, " + '"Mini2"'
+'Hello, "Mini2"'
+#+END_SRC
+
+* =print=
+#+BEGIN_SRC python
+>>> print("1 + 1")
+1 + 1
+>>> print(1 + 1)
+2
+>>> print("1 + 1 =", 1 + 1)
+1 + 1 = 2
+#+END_SRC
+- vordefiniert, muss nicht importiert werden!
+- liefert "nichts" zurück
+
+* =print= - 2
+#+BEGIN_EXAMPLE
+>>> print("Hello, World")
+Hello, World
+>>> print('Hello, "Mini"')
+Hello, "Mini"
+>>> print(1.5, "Orangen und", 2, 'Bananen')
+1.5 Orangen und 2 Bananen
+#+END_EXAMPLE
+
+* Exception
+#+BEGIN_SRC python
+>>> 2 + " Bananen"
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: unsupported operand type(s) for +: 'int' and 'str'
+#+END_SRC
+- Typen werden überprüft!
+- \to Exception (dt. Ausnahme, Ausnahmesituation)
+
+* Minimales Python Programm
+- Datei =hello.py= (mit Endung =.py=)
+- Editor auf UTF-8 einstellen!
+- Datei befüllen mit
+  #+BEGIN_SRC python
+  print("Hello, World")
+  #+END_SRC
+- Ausführen
+  #+BEGIN_SRC sh
+  $ python hello.py
+  Hello, World
+  #+END_SRC

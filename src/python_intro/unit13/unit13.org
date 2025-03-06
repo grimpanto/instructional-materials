@@ -1,0 +1,196 @@
+
+
+#+TITLE: Python \hfill Unit 13\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+#+LATEX: \setminted{escapeinside=´´}
+
+* Bitoperationen - 1
+#+BEGIN_SRC python
+>>> 12 & 6
+4
+>>> bin(12)
+'0b1100'
+>>> bin(6)
+'0b110'
+>>> 0b1100 & 0b0110
+4
+>>> bin(4)
+'0b100'
+>>> 
+#+END_SRC
+
+* Bitoperationen - 2
+#+BEGIN_SRC python
+>>> 12 | 6
+14
+>>> bin(14)
+'0b1110'
+>>> 12 ^ 6
+10
+>>> bin(10)
+'0b1010'
+>>> ~12
+-13  # ? -> unendlich lange Zahlen!
+>>> bin(12 ^ 0xF)
+'0b11'
+#+END_SRC
+
+* Bitoperationen - 3
+#+BEGIN_SRC python
+>>> True & False
+False
+>>> True | False
+True
+>>> True ^ True
+False
+>>> ~True  # Achtung!
+-2
+>>> bool(~True)
+True
+>>> ~False
+-1
+#+END_SRC
+
+* Vertauschung ohne Hilfsvariable - 3
+ohne arithmetische Operationen und ohne Tupel?
+#+beamer: \pause
+#+begin_src python
+>>> a = 1
+>>> b = 2
+>>> a = a ^ b
+>>> b = a ^ b
+>>> a = a ^ b
+>>> a
+2
+>>> b
+1
+#+end_src
+
+* Sequenzielle Suche - 1
+#+BEGIN_SRC python
+>>> lst = [3, 1, 5, 9, 7, 6]
+>>> x = 5
+>>> for e in lst:
+...     if x == e:
+...         print("found")
+... 
+found
+#+END_SRC
+
+* Sequenzielle Suche - 2
+#+BEGIN_SRC python :results output
+>>> lst = [3, 1, 5, 9, 7, 6]
+>>> x = 5
+>>> i = 0
+>>> for e in lst:
+...    if x == e:
+...        print("found at index:", i)
+...    i += 1
+found at index: 2
+#+END_SRC
+
+* Sequenzielle Suche - 3
+#+BEGIN_SRC python :results output
+>>> lst = [3, 1, 5, 9, 7, 6]
+>>> x = 0
+>>> i = 0
+>>> for e in lst:
+...    if x == e:
+...        print("found at index:", i)
+...    i += 1
+...
+>>>
+#+END_SRC
+
+* Sequenzielle Suche - 4
+#+BEGIN_SRC python :results output
+lst = [3, 1, 5, 9, 7, 6]
+def search(x, lst):
+    i = 0
+    for e in lst:
+        if x == e:
+            print("found at index:", i)
+        i += 1
+    if i == len(lst):
+        print("not found")
+search(5, lst)
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+found at index: 2
+not found
+#+END_EXAMPLE
+
+* Sequenzielle Suche - 5
+#+BEGIN_SRC python :results output
+lst = [3, 1, 5, 9, 7, 6]
+def search(x, lst):
+    i = 0
+    for e in lst:
+        if x == e:
+            print("found at index:", i)
+            break
+        i += 1
+    if i == len(lst):
+        print("not found")
+search(5, lst)
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+found at index: 2
+#+END_EXAMPLE
+
+* Sequenzielle Suche - 6
+#+BEGIN_SRC python :results output
+lst = [3, 1, 5, 9, 7, 6]
+def search(x, lst):
+    i = 0
+    for e in lst:
+        if x == e:
+            return i
+        i += 1
+    return
+print(search(5, lst))  # -> 2
+print(search(0, lst))  # -> None
+#+END_SRC
+
+* Sequenzielle Suche - 7
+#+BEGIN_SRC python :results output
+lst = [3, 1, 5, 9, 7, 6]
+
+pos = search(5, lst)
+
+if pos:
+    print("found at:", pos)  # -> found at: 2
+else:
+    print("not found")
+#+END_SRC
+
+* Binäre Suche
+#+BEGIN_SRC python :results output
+def binary_search(x, lst):
+    lb = 0
+    ub = len(lst) - 1
+    while lb <= ub:
+        mid = (lb + ub) // 2
+        if x == lst[mid]:
+            return mid
+        elif x < lst[mid]:
+            ub = mid - 1
+        else:
+            lb = mid + 1
+
+lst = [1, 3, 5, 6, 7, 9]
+print(binary_search(9, lst))
+#+END_SRC

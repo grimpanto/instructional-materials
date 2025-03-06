@@ -1,0 +1,89 @@
+
+
+#+TITLE: Python \linebreak \small ...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Allgemeines
+- Programmiersprache
+- Guido van Rossum
+- benannt nach "Monty Python's Flying Circus"
+- Eine der 5 weit verbreitesten Programmiersprachen
+- Verwendung
+  - WWW
+  - Wissenschaftliches Rechnen
+  - Skriptsprache
+  - Ausbildung!
+
+* Firmen und Produkte
+- Mozilla (\to Firefox)
+- Google (z.B. Youtube), Yahoo
+- CERN (Kernforschung, Beschleuniger LHC)
+- Industrial Light and Magic (Star Wars, Jurassic Park, Titanic, Avatar)
+- NASA
+- Dropbox
+- TTTech (sicherheitskritische Systeme)
+- Frequentis (Flugsicherung SW)
+- Blender, GIMP, Civilization IV, Battlefield 2, Cinema 4D,...
+- ...
+
+* Versionen
+- 1980er :: ABC
+  - interaktiv, high-level, strukturiert
+- 1994 :: Python Version 1.0
+  - Guido van Rossum
+- 2000 :: Version 2.0
+  - aktuell 2.7
+- 2008 :: Version 3.0
+  - aktuell 3.4
+
+* Charakterisierung
+- general-purpose
+- high-level
+- Interpreter
+- streng getypt
+  - Typen werden streng überprüft
+- dynamisch getypt
+  - Typen stehen erst zur Laufzeit fest
+- garbage collector
+
+* Installation
+- Python installieren
+  - Windows
+    - http://python.org \to MSI für Python 3.x \to Doppelklick
+  - Ubuntu
+    - Software Center \to Python 3.x
+- pip installieren
+  - https://bootstrap.pypa.io/get-pip.py
+  - =python get-pip.py=
+- ipython installieren
+  - =pip install ipython=
+- pyreadline installieren (nur Windows)
+  - =pip install pyreadline=
+
+* Konfiguration der "turtle"
+- Ermittle das Verzeichnis des Moduls =turtle= deiner
+  Installation befindet:
+  \small
+  #+BEGIN_EXAMPLE
+  $ python -c "import turtle; print(turtle.__file__)"
+  C:\Python\Lib\turtle.py
+  #+END_EXAMPLE
+  \large
+  \to =C:\Python\Lib=
+- Kopiere die folgenden Dateien in dieses
+  Verzeichnis:
+  - =turtle.cfg=
+  - =turtle_docstringdict_german.py=
+
+

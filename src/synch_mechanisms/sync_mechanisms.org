@@ -1,0 +1,354 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill Synchronisationsmechanismen
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Klassische Probleme
+- Producer/Consumer
+  - siehe Synchronisation
+- Reader/Writer
+  - mehrere dürfen gleichzeitig lesen
+  - wenn einer schreibt, darf keiner lesen oder schreiben
+  - siehe Read/Write Lock
+- Dining philosophers
+  - siehe Übungsbeispiel
+- ...
+
+* Mechanismen -- ein Überblick
+\vspace{1.3em}
+- Mutex, Lock
+  - lock \to owner (Besitzer)
+  - unlock \to nur vom gleichen Thread (Besitzer)!!
+- Bedingungsvariable
+  - Datenstruktur, die Threads repräsentiert auf die gewartet wird
+  - Operationen: =notify_one=, =notify_all=, =wait=, =wait_for=, =wait_until=
+- Monitor
+- Semaphor
+- Read-Write Lock
+- atomare Variable
+- Promise & Future, Task
+
+* Monitor
+- klassischerweise eine Sammlung von Prozeduren und Datenstrukturen,
+  - die als Einheit gruppiert sind.
+- Prozesse können die Prozeduren eines Monitor aufrufen,
+  - aber nicht auf die internen Datenstrukturen zugreifen.
+- Es können nicht zwei Prozesse gleichzeitig in einem Monitor aktiv sein!
+- Bedingungsvariablen (condition variables) zusammen mit zwei
+  Operationen WAIT und NOTIFY (oder auch SIGNAL genannt)
+- \to Java, C#
+
+* Semaphor
+\vspace{1.3em}
+- ...zur Verwaltung begrenzter Ressourcen
+  - verwaltet diese nicht selber, sondern nur Anzahl
+    - z.B. Karten mit freier Platzwahl im Kino
+    - z.B. 10 Lizenzen für ein SW Produkt
+  - hat /keinen/ Besitzer
+- ...ist ein Zähler,
+  - dessen Wert immer \ge 0 ist
+  - Zähler: (atomar) inkrementiert bzw. dekrementiert
+    - inkrementieren: traditionell ... "P", meist =release=
+    - dekrementieren: traditionell ... "V", meist =acquire=
+  - Dekrementieren nur, wenn Zähler \gt 0, ansonsten blockierende Operation
+    \to bis anderer Thread inkrementiert
+- Nicht in \cpp, aber leicht mittels =mutex= und
+  =condition_variable= zu implementieren!
+  - ab =C++20=: =counting_semaphore= und =binary_semaphore=
+    - =binary_semaphore= \equiv =counting_semaphore<1>=
+    - NYI in =g++=
+
+* COMMENT Semaphorimplementierung
+#+header: :exports code :results output :tangle src/semaphore.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // semaphore.cpp
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+using namespace std;
+
+class semaphore {
+    int cnt{};
+    mutex mtx;
+    condition_variable not_null;
+  public:
+    semaphore() {}
+    semaphore(int val) : cnt{val} {}
+
+    void release() {
+        { lock_guard<mutex> lg{mtx};
+          ++cnt;
+        }
+        not_null.notify_one();
+    }
+
+    void acquire() {
+        unique_lock<mutex> lck{mtx};
+        not_null.wait(lck, [this]() { return cnt; });
+        --cnt;
+    }
+};
+
+int main() {
+    semaphore sem{};
+    thread t{[&]() { sem.acquire(); cout << "after" << endl; }};
+    cout << "before" << endl;
+    this_thread::sleep_for(3s);
+    sem.release();
+    t.join();
+}
+#+end_src
+
+* Semaphor -- Serialisierung
+#+BEGIN_EXAMPLE
+           Semaphore sem{};
+
+
+void a() {              void b() {
+    opa1();                 sem.acquire();
+    sem.release();          opb1();
+}                       }
+#+END_EXAMPLE
+
+* Semaphor -- Rendezvous
+Erweiterung der Serialisierung, sodass diese in beide Richtungen funktioniert:
+#+BEGIN_EXAMPLE
+void a() {              void b() {
+    opa1();                 opb1();
+    opa2();                 opb2();
+}                       }
+#+END_EXAMPLE
+
+* Semaphor -- Rendezvous -- 2
+#+BEGIN_EXAMPLE
+           Semaphore a_arrived{};
+           Semaphore b_arrived{};
+
+
+void a() {               void b() {
+  opa1();                  opb1();
+  a_arrived.release();     b_arrived.release();
+  b_arrived.acquire();     a_arrived.acquire();
+  opa2();                  opb2();
+}                        }
+#+END_EXAMPLE
+
+* Semaphor -- Rendezvous -- 3
+Achtung: Gefahr eines Deadlocks!
+#+BEGIN_EXAMPLE
+           Semaphore a_arrived{};
+           Semaphore b_arrived{};
+
+
+void a() {               void b() {
+  opa1();                  opb1();
+  b_arrived.acquire();     a_arrived.acquire();
+  a_arrived.release();     b_arrived.release();
+  opa2();                  opb2();
+}                        }
+#+END_EXAMPLE
+
+* Semaphor -- Mutex
+#+BEGIN_EXAMPLE
+           Semaphore mtx{1};  // # max. Threads
+           cnt = 0;
+
+
+void a() {              void b() {
+    mtx.acquire();          mtx.acquire();
+    cnt += 1;               cnt += 1;
+    mtx.release();          mtx.release();
+}                       }
+#+END_EXAMPLE
+
+* Semaphor -- Latch
+\vspace{1em}
+#+BEGIN_EXAMPLE
+Semaphore mtx{1};
+Semaphore latch{};
+cnt = 0;
+
+// each thread
+opbefore();
+
+mtx.acquire();
+cnt += 1;
+if (cnt == n) latch.release();
+mtx.release();
+
+latch.acquire();
+latch.release();
+
+opafter();
+#+END_EXAMPLE
+ab =C++20=: =latch=, NYI in =g++=
+
+* Semaphor -- Barrier
+- Latch kann nicht mehr verwendet werden!
+- Barrier ist ein Latch, das wiederverwendet werden kann
+- Achtung: Begriffe!
+  - Ein Latch wird oft als Barrier bezeichnet
+  - Ein Barrier wird oft als Cyclic Barrier bezeichnet
+- ab =C++20=: =barrier=, NYI in =g++=
+
+
+* COMMENT xxx =latch= und =barrier=
+nyi
+#+header: :exports code :tangle src/latch.cpp
+#+begin_src C++
+#include <iostream>
+#include <latch>
+
+using namespace std;
+
+int main() {
+    latch l{3};
+}
+#+end_src
+
+* Semaphor -- Producer/Consumer
+#+BEGIN_EXAMPLE
+Semaphore full_cnt{};
+Semaphore empty_cnt{4}; // replace n appropriately!
+Semaphore mtx{1};
+
+void put(WorkPacket p) {
+    empty_cnt.acquire();
+    mtx.acquire();
+    // add p to queue
+    mtx.release();
+    full_cnt.release();
+}
+#+END_EXAMPLE
+
+* Semaphor -- Producer/Consumer -- 2
+#+BEGIN_EXAMPLE
+WorkPacket take() {
+    full_cnt.acquire();
+    mtx.acquire();
+    // get p from queue
+    mtx.release();
+    empty_cnt.release();
+    return p;
+}
+#+END_EXAMPLE
+
+- =empty_cnt= und =full_cnt= spiegeln nicht die tatsächliche Anzahl
+  an leeren und vollen Plätzen wieder (Zeit!)
+- =empty_cnt= + =full_cnt= \le n
+
+* Read-Write Lock
+- Readers/Writers Problem
+- Einsatz, wenn
+  - Zugriffe in lesend und schreibend unterteilbar
+  - mehr lesende als schreibende Zugriffe
+  - der Overhead akzeptabel ist
+- In \cpp14 mittels =shared_lock= / =unique_lock= realisierbar
+
+* Read-Write Lock -- 2
+#+header: :exports code :results output :tangle src/rwlock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+#include <iostream>  // rwlock.cpp
+#include <shared_mutex>  // since C++14!
+#include <thread>
+#include <random>
+using namespace std;
+using namespace std::chrono;
+// ATTN: only shared_timed_mutex until C++14!
+shared_mutex mtx;
+#+end_src
+
+* Read-Write Lock -- 3
+#+header: :exports code :results output :tangle src/rwlock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+void reader(string name) {
+    random_device rd;
+    mt19937 gen{rd()};
+    uniform_int_distribution<> dis{100, 500};
+    while (true) {
+        this_thread::sleep_for(
+          milliseconds{dis(gen)});
+        shared_lock<shared_mutex> sl{mtx};
+        cout << name << ": enters" << endl;
+        this_thread::sleep_for(milliseconds{100});
+        cout << name << ": leaves" << endl;
+    }
+}
+#+END_SRC
+
+* Read-Write Lock -- 4
+#+header: :exports code :results output :tangle src/rwlock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+void writer(string name) {
+    random_device rd;
+    mt19937 gen{rd()};
+    uniform_int_distribution<> dis{0, 100};
+    while (true) {
+        this_thread::sleep_for(
+          milliseconds{dis(gen)});
+        unique_lock<shared_mutex> ul{mtx};
+        cout << name << ": enters" << endl;
+        this_thread::sleep_for(milliseconds{1000});
+        cout << name << ": leaves" << endl;
+    }
+}
+#+END_SRC
+
+* Read-Write Lock -- 5
+#+header: :exports code :results output :tangle src/rwlock.cpp :flags -std=c++1y -latomic -lpthread :main no
+#+BEGIN_SRC C++
+int main() {
+    thread rdr1{reader, "r1"};
+    thread rdr2{reader, "r2"};
+    thread rdr3{reader, "r3"};
+    thread wtr{writer, "w1"};
+    rdr1.join();
+    rdr2.join();
+    rdr3.join();
+    wtr.join();
+}
+#+END_SRC
+
+* Read-Write Lock -- 6
+Beispielausgabe:
+
+: w1: enters
+: w1: leaves
+: r1: entersr2: enters
+: r3: enters
+:
+: r1: leaves
+: r3: leaves
+
+* Atomare Variable
+\vspace{1.5em}
+#+header: :exports code
+#+begin_src C++ :results output :tangle src/atomic.cpp :flags -std=c++17 -latomic -lpthread :main no
+#include <iostream>
+#include <thread>
+#include <atomic>
+using namespace std;
+struct AtomicCounter {
+  atomic<int> value{};
+  void incr(){ ++value; }
+  void decr(){ --value; }
+  int get(){ return value.load(); } };
+
+int main() {  AtomicCounter c;
+  thread t1{[&c](){ c.incr(); cout << c.get(); }};
+  thread t2{[&c](){ c.incr(); cout << c.get(); }};
+  t1.join();  t2.join(); }
+#+end_src
+
+: 21

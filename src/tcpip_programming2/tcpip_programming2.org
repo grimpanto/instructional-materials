@@ -1,0 +1,574 @@
+#+TITLE: Verteilte Systeme \linebreak \small...für C++ Programmierer \hfill TCP/IP Programmierung 2 - Clients (synchron)
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Wiederholung -- Server
+\vspace{1em}
+\small
+#+header: :exports code :tangle src/time_server.py
+#+begin_src python
+import socket, struct, time
+PORT = 8037
+TIME1970 = 2208988800  # sec: 1.1.1900 - 1.1.1979
+serversock = socket.socket(socket.AF_INET,
+                           socket.SOCK_STREAM)
+serversock.bind(("", PORT))
+serversock.listen(3)  # size of backlog queue
+
+while True:
+    clientsock, clientaddr = serversock.accept()
+    print("Verbindung von:", clientaddr)
+    t = int(time.time()) + TIME1970
+
+    # pack into 4 byte integer network-byte-order (!)
+    t = struct.pack("!I", t)
+
+    clientsock.send(t)
+    clientsock.close()
+#+end_src
+
+* Wiederholung -- Client
+\vspace{1em}
+\small
+#+header: :exports code :tangle src/time_client.py
+#+begin_src python
+import socket, struct, time, datetime
+PORT = 8037
+# PORT = 37  # if using a real one, e.g. time.nist.gov
+TIME1970 = 2208988800  # sec: 1.1.1900 - 1.1.1979
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+sock.connect(("", PORT))
+# sock.connect(("time.nist.gov", PORT))
+
+t = sock.recv(4)
+
+t = struct.unpack("!I", t)[0] - TIME1970
+
+sock.close()
+
+print(datetime.datetime.fromtimestamp(t))
+#+end_src
+
+* TCP Zustandsdiagramm
+#+BEGIN_CENTER
+#+ATTR_LATEX: :width \textwidth
+[[./tcp_fsm.png]]
+#+END_CENTER
+
+* Berkeley-Sockets API -- TCP-Client
+1. Socket anlegen (=socket()=)
+2. Port an Socket binden (=bind()=)
+   - Am Client nur, wenn /über/ einen bestimmten Port die
+     Daten gesendet werden sollen
+3. Verbinden (=connect()=)
+4. Senden (=send()=)
+5. Empfangen (=recv()=)
+6. Schließen (=close()=)
+
+* Berkeley-Sockets API -- TCP-Server
+1. Socket anlegen (=socket()=)
+2. Port an Socket binden (=bind()=)
+3. Bereit zum Empfangen (=listen()=)
+4. Annehmen einer Verbindung (=accept()=)
+5. Senden (=send()=)
+6. Empfangen (=recv()=)
+7. Schließen (=close()=)
+   
+* Synchrone Kommunikation mit asio
+#+BEGIN_CENTER
+#+ATTR_LATEX: :width 8cm
+[[./sync_ops.pdf]]
+#+END_CENTER
+
+* Aktive Sockets (Client)
+1. Anlegen
+   #+BEGIN_SRC C++
+   tcp::socket sock{ctx};
+   #+END_SRC
+2. Öffnen
+   #+BEGIN_SRC C++
+   // also with error_code (as usually)
+   sock.open(tcp::v4());
+   // 1 & 2:
+   // tcp::socket sock{ctx, tcp::v4()};
+   // but this may throw an exception!
+   #+END_SRC
+3. Setzen von Optionen (optional)
+   #+BEGIN_SRC C++
+   // e.g.: TCP_NODELAY: disables Nagle algo
+   sock.set_option(tcp::no_delay{true});
+   #+END_SRC
+
+* Aktive Sockets (Client) -- 2
+\vspace{1em}
+4. [@4] Explizites Binden (/meist/ nur bei Servern \to =acceptor=)
+   #+BEGIN_SRC C++
+   sock.bind(tcp::endpoint(tcp::v4(), 1234));
+   // 1 & 2 & 4:
+   // tcp::socket sock{ctx,
+   //   tcp::endpoint(tcp::v4(), 1234)};
+   #+END_SRC
+5. Verbinden
+   #+BEGIN_SRC C++
+   sock.connect(make_address("127.0.0.1"), 80);
+   #+END_SRC
+   \vspace{1mm}
+   implizites Öffnen & Binden inklusive! (d.h. Schritt 2 & 4)
+
+* Active Sockets (Client) -- 3   
+6. [@6] Senden/Empfangen
+   - =sock.send()= ... sendet mind. ein Byte
+     - und liefert # der gesendeten Bytes
+   - =write(sock,...)= ... sendet alle Daten
+   - =sock.receive()= ... empfängt mind. ein Byte
+   - =read(sock,...)= ... empfängt angegebene Datenmenge
+   - =read_until(sock,...)= ... bis angegebenes Zeichen
+7. Schließen
+   - =sock.shutdown(...)= ... shutdown einer Richtung:\newline
+     =sock.shutdown(tcp::socket::shutdown_send);=\newline
+     weiters: =shutdown_receive=, =shutdown_both=
+   - =sock.close()= ... Socket schließen
+  
+* "buffer"-Objekte
+\vspace{1em}
+- "buffer"-Objekt: Speicherregion als ein Tupel von
+  Zeiger und Länge
+  - auch: Array von POD, =vector= von POD, =std::string=
+    - POD (plain old data): skalare Typen; Arrays von POD; Klasse, die
+      nur nicht-statische POD Members enthält und keine vom Benutzer
+      zur Verfügung gestellten Konstruktoren, keine Initialisierungslisten, keine Basisklasse,
+      keine virtuellen Funktionen
+- Zwei Arten
+  - =const_buffer=, wenn =(const void*, size_t)=
+    - d.h. zum Senden
+  - =mutable_buffer=, wenn =(void*, size_t)=
+    - d.h. zum Empfangen
+    - kann implizit in einen =const_buffer= konvertiert werden
+
+* "buffer"-Objekte -- 2
+\vspace{1em}
+- Das asio-API verwendet allerdings *direkt* weder =const_buffer= noch =mutable_buffer=,
+  sondern Objekte, die den Anforderungen von
+  - =ConstBufferSequence= bzw.
+    - repräsentiert Sequenz von =const_buffer='s Objekten
+    - =const_buffer= erfüllt =ConstBufferSequence= Anforderung
+  - =MutableBufferSequence= (analog) genügen.
+    - =const_buffer= erfüllt =ConstBufferSequence= Anforderung
+- =buffer()=
+  - Funktion, die =ConstBufferSequence= bzw. =MutableBufferSequence= anlegt
+  - verschiedene überladene Funktionen!
+- "buffer"-Objekte übernehmen nicht die 'ownership'!
+
+* Synchroner Fix-Echo-Client
+\vspace{1em}
+synchroner Echo-Client mit Puffer *fixer Größe*
+#+header: :exports code :results code :tangle src/sync_echo_client1.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_client1.cpp
+#include <asio.hpp>
+using namespace std;  using namespace asio::ip;
+int main() { // simple error handling with exc.
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};  // IO object
+ // try each endpoint until connected (blocking):
+        asio::connect(sock, results); //→ function!
+        cout << "connected" << endl;
+ #+end_src
+
+* Synchroner Fix-Echo-Client -- 2
+\vspace{1em}
+#+header: :exports code :results none :tangle src/sync_echo_client1.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        const char request[]{"ping-pong"};
+        size_t request_length = strlen(request);
+        asio::write(sock,
+          asio::buffer(request, request_length));
+        cout << "sent" << endl;
+        
+        char reply[20];
+        size_t reply_length = asio::read(sock,
+          asio::buffer(reply, request_length));
+          
+        cout << "reply is: ";
+        cout.write(reply, reply_length);
+        cout << "\n";
+    } catch (asio::system_error& e) {
+        cerr << e.what() << endl; } }
+#+end_src
+
+* Wiederholung -- Server
+\vspace{2em}
+\small
+#+header: :exports code :results code :tangle src/stream_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // stream_echo_server.cpp
+#include <asio.hpp>
+using namespace std; using namespace asio::ip;
+int main() {  // no error handling at all
+    asio::io_context ctx;
+    tcp::endpoint ep{tcp::v4(), 9999};
+    tcp::acceptor acceptor{ctx, ep}; // IO object
+    acceptor.listen();
+
+    tcp::socket sock{ctx};
+    acceptor.accept(sock);
+    tcp::iostream strm{std::move(sock)};
+    //shorter: tcp::iostream strm{acceptor.accept()};
+
+    string data;
+    strm >> data;  // also: getline(strm, data)
+    strm << data;
+    strm.close();  }
+#+end_src
+
+* Synchroner Fix-Echo-Client -- 3
+\vspace{1em}
+- Ausführung mit *=stream_echo_server=*
+- Starten von Client \to Client beendet sich nicht
+- Wird Client abgebrochen, beendet sich auch Server
+- Es kommt zu folgender Ausgabe:
+
+: $ server&
+: $ client
+: connected
+: sent
+: # pressing CTRL-C now
+: 'server&' has ended
+
+- Warum? \pause
+  - Weil kein =\n= vom Client gesendet wird!
+
+* Synchroner Fix-Echo-Client -- 4
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_echo_client2.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_client2.cpp
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_echo_client2.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_echo_client2.cpp
+        const char request[]{"ping-pong\n"};  // ←
+        size_t request_length = strlen(request);
+ 
+        asio::write(sock, asio::buffer(request,
+          request_length));
+        cout << "sent" << endl;
+        
+        char reply[20];
+        size_t reply_length = asio::read(sock,
+          asio::buffer(reply, request_length));
+        cout << "Reply is: ";
+        cout.write(reply, reply_length);
+        // → no output of \n necessary, isn't it?
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Synchroner Fix-Echo-Client -- 5
+\vspace{1em}
+- Ausführung mit *=stream_echo_server=*
+- Starten von Client \to Client beendet sich!
+- Server beendet sich
+- Es kommt zu folgender Ausgabe:
+
+: $ server&
+: $ client
+: connected
+: sent
+: read: End of file
+: 'server&' has ended
+
+- Warum? \pause =client= erwartet ein Zeichen zu viel \to =\n=!
+
+* Synchroner Fix-Echo-Client -- 6
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_echo_client3.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_client3.cpp
+#include <array>
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_echo_client3.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_echo_client3.cpp
+        const char request[]{"ping-pong\n"};
+        size_t request_length = strlen(request);
+
+        asio::write(sock, asio::buffer(request,
+            request_length));
+        cout << "sent" << endl;
+
+        char reply[20];
+        size_t reply_length = asio::read(sock,//↓
+          asio::buffer(reply, request_length - 1));
+        cout << "Reply is: ";
+        cout.write(reply, reply_length);
+        cout << "\n";  // ← it's necessary!
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Synchroner Fix-Echo-Client -- 7
+Ausgabe:
+
+: connected
+: sent
+: Reply is: ping-pong
+: 'server&' has ended
+
+\pause
+Buffer dzt. aus einem =char=-Array, aber auch z.B.
+- =std::string=
+- =std::array=
+
+* Synchroner Fix-String-Echo-Client
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_echo_client_string.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_client_string.cpp
+#include <array>
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_echo_client_string.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_echo_client_string.cpp
+        // don't do it this way...
+        const char request[]{"ping-pong\n"};
+        size_t request_length = strlen(request);
+        asio::write(sock, asio::buffer(request,
+            request_length));
+        cout << "sent" << endl;
+        string reply(20, ' ');  // ↓
+        //string reply{"                      "};
+        size_t reply_length = asio::read(sock,
+          asio::buffer(reply, request_length - 1));
+        cout << "Reply is: ";
+        cout.write(reply.data(), reply_length);
+        cout << "\n";
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Synchroner Fix-Array-Echo-Client
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_echo_client_array.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_echo_client_array.cpp
+#include <array>
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_echo_client_array.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_echo_client_array.cpp
+        const char request[]{"ping-pong\n"};
+        size_t request_length = strlen(request);
+        asio::write(sock, asio::buffer(request,
+            request_length));
+        cout << "sent" << endl;
+        array<char, 20> reply;
+        size_t reply_length = asio::read(sock,//↓
+          asio::buffer(reply, request_length - 1));
+        cout << "Reply is: ";
+        //cout << string(reply.begin(),
+        //    reply.begin() + reply_length) << endl;
+        cout << string(begin(reply),
+              begin(reply) + reply_length) << endl;
+        cout << "\n";
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Behandlung der Eingabe von Daten
+- *Erkenntnis 1*: entweder lesen bis
+  - erwartete Anzahl von Zeichen erreicht \pause oder
+  - EOF der Eingabe \pause oder
+  - bis ein Endezeichen in Daten (z.B. =\n=)
+- *Erkenntnis 2*: man weiß nicht immer wie lange
+  die zu empfangenen Daten sind!
+
+* Synchroner EOF-Echo-Client
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_eof_echo_client.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_eof_echo_client.cpp
+#include <array>
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results =
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_eof_echo_client.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_eof_echo_client.cpp
+        const char request[]{"ping-pong\n"};
+        asio::write(sock, asio::buffer(request,
+            strlen(request)));
+        cout << "sent" << endl;
+        char reply[20];  error_code ec;
+        size_t reply_length = asio::read(sock,
+          asio::buffer(reply), ec);  // ←
+        if (ec.value() != asio::error::eof) {
+        cout<<ec.message()<<':'<< ec.value()<<endl;
+            return 1; }
+        cout << "Reply is: ";
+        cout.write(reply, reply_length);
+        cout << "\n";
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Synchroner EOL-Echo-Client
+\vspace{1em}
+#+header: :exports none :results code :tangle src/sync_eol_echo_client.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // sync_eol_echo_client.cpp
+#include <array>
+#include <asio.hpp>
+using namespace std;
+using namespace asio::ip;
+int main() {
+    asio::io_context ctx;
+    tcp::resolver resolver{ctx};
+    try {
+        auto results = 
+          resolver.resolve("localhost", "9999");
+        tcp::socket sock{ctx};
+        asio::connect(sock, results);
+        cout << "connected" << endl;
+#+end_src
+
+#+header: :exports code :results code :tangle src/sync_eol_echo_client.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+        // sync_sentinel_echo_client.cpp
+        const char request[]{"ping-pong\n"};
+        asio::write(sock, asio::buffer(request,
+            strlen(request)));
+        cout << "sent" << endl;
+
+        asio::streambuf buf;  // ← var. length!
+        string reply;
+        // read until server sends '\n'
+        asio::read_until(sock, buf, '\n');  // ←
+        istream is{&buf};
+        getline(is, reply);
+        
+        cout << "Reply is: " << reply << endl;
+    } catch (asio::system_error& e) {
+        std::cerr << e.what() << std::endl; } }
+#+end_src
+
+* Stream Buffers
+- Template =std::streambuf=
+  - Input und Output zu Zeichensequenz
+  - wird verwendet in =istream=, =ostream=
+  - spezialisierte Templates
+    - =filebuf= (=fstream=, =ifstream=, =ofstream=)
+    - =stringbuf= (=stringstream=, =[io]stringstream=)
+    - für =cin=, =cout=
+- Template =asio::basic_streambuf=
+  - abgeleitet von =std::streambuf=
+- Template =asio::streambuf=
+  - ist Instanzierung =asio::basic_streambuf=
+
+* Stream Buffers -- 2
+- Template =asio::basic_socket_streambuf=
+  - Input und Output von Bytes über Socket
+  - abgeleitet von =asio::basic_streambuf=
+- Überladungen mit =asio::streambuf= anstatt
+  - =MutableBufferSequence= bei =read=
+  - =DynamicBufferSequence= bei =read_until=
+  - =ConstBufferSequence= bei =write=
+
+* Stream EOL-Echo-Server
+#+header: :exports code :results code :tangle src/stream_eol_echo_server.cpp :flags -std=c++1y -latomic -lpthread -I ~/workspace/builds/asio-master/asio/include/ :main no
+#+begin_src C++
+#include <iostream>  // stream_eol_echo_server.cpp
+#include <asio.hpp>
+using namespace std; using namespace asio::ip;
+int main() {  // no error handling at all
+    asio::io_context ctx;
+    tcp::endpoint ep{tcp::v4(), 9999};
+    tcp::acceptor acceptor{ctx, ep}; // IO object
+    acceptor.listen();
+    tcp::iostream strm{acceptor.accept()}};
+    string data;
+    strm >> data;
+    strm << data << '\n';  // ←
+    strm.close();  }
+#+end_src

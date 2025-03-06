@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Dr. Günter Kolousek" />
+  <title>Sichere Daten ?</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="reveal.js/css/reveal.min.css"/>
+    <style type="text/css">code{white-space: pre;}</style>
+    <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+    </style>
+    <link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+    <!--[if lt IE 9]>
+    <script src="reveal.js/lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Sichere Daten ?</h1>
+    <h2 class="author">Dr. Günter Kolousek</h2>
+    <h3 class="date">Juni, 2014</h3>
+</section>
+
+<section id="quellen" class="slide level2">
+<h1>Quellen</h1>
+<ul>
+<li>Einführung in die Kryptographie, Dipl.-Ing. Otto Horak, 1990</li>
+<li>Geheime Botschaften, Simon Singh, dtv, 1999</li>
+<li>Einführung in die Kryptographie, Johannes Buchmann, Springer, 2008</li>
+<li>Moderne Verfahren der Kryptographie, Albrecht Beutelspacher, Vieweg, 1999</li>
+<li>PGP &amp; GPG - Email for the Practical Paranoid, Michael W. Lucas, No Starch Press, 2006</li>
+<li>Wikipedia</li>
+<li><a href="http://heise.de/newsticker">http://heise.de/newsticker</a></li>
+</ul>
+</section>
+<section id="agenda" class="slide level2">
+<h1>Agenda</h1>
+<blockquote>
+<p>Linux-centric!</p>
+</blockquote>
+<ul>
+<li>Sicherheit</li>
+<li>Passwörter</li>
+<li>Sicherheitsanwendungen</li>
+<li>SSH</li>
+<li>GPG — Dateien</li>
+<li>GPG — Emails</li>
+</ul>
+</section>
+<section><section id="sicherheit" class="titleslide slide level1"><h1>Sicherheit</h1></section><section id="überblick" class="slide level2">
+<h1>Überblick</h1>
+<ul>
+<li>Einteilung &amp; Begriffe</li>
+<li>Angriffe</li>
+<li>Grundbedrohungen</li>
+<li>Sicherheitsdienste</li>
+<li>Mechanismen</li>
+</ul>
+</section><section id="einteilung-begriffe" class="slide level2">
+<h1>Einteilung &amp; Begriffe</h1>
+<ul>
+<li>Kodierung
+<ul>
+<li>Eindeutige Zuordnung jedes Zeichens der Def</li>
+<li>Base64, ISBN, Bytecode, Manchesterkodierung,…</li>
+</ul></li>
+<li>Steganographie
+<ul>
+<li>das Verbergen von Botschaften</li>
+</ul></li>
+<li>Kryptologie
+<ul>
+<li>das Verbergen des Sinns der Botschaft</li>
+<li>2 Teilgebiete
+<ul>
+<li>Kryptographie</li>
+<li>Kryptoanalyse</li>
+</ul></li>
+</ul></li>
+</ul>
+</section><section id="kodierung" class="slide level2">
+<h1>Kodierung</h1>
+<p>Base64</p>
+<ul>
+<li>3 Bytes ↔ 4 Bytes</li>
+<li>Abbildung von je 6 Bits auf <code>A</code>-<code>Z</code>, <code>a</code>-<code>z</code>, <code>0</code>-<code>9</code>, <code>+</code> und <code>/</code></li>
+<li>Füllzeichen ist <code>=</code></li>
+<li><p>Dekodiere!</p>
+<pre><code>U2ljaGVyaGVpdCBmw7xyIGFsbGU=</code></pre></li>
+</ul>
+<div class="fragment">
+<pre class="sourceCode python"><code class="sourceCode python">
+&gt;&gt;&gt; <span class="ch">import</span> base64
+&gt;&gt;&gt; base64.b64decode(<span class="st">&quot;U2ljaGVyaGVpdCBmw7xyIGFsbGU=&quot;</span>)</code></pre>
+</div>
+<div class="fragment">
+<pre class="sourceCode python"><code class="sourceCode python">
+b<span class="st">&#39;Sicherheit f</span><span class="ch">\xc3\xbc</span><span class="st">r alle&#39;</span>
+&gt;&gt;&gt; b<span class="st">&#39;Sicherheit f</span><span class="ch">\xc3\xbc</span><span class="st">r alle&#39;</span>.decode()
+<span class="co">&#39;Sicherheit für alle&#39;</span></code></pre>
+</div>
+</section><section id="steganographie" class="slide level2">
+<h1>Steganographie</h1>
+<ul>
+<li>China
+<ul>
+<li>Botschaft auf Seide ➙ Kügelchen ➙ Wachs ➙ Bote</li>
+</ul></li>
+<li>1.JH
+<ul>
+<li>“Milch” von Thithymallus ➙ unsichtbare Tinte</li>
+</ul></li>
+<li>15.JH
+<ul>
+<li>Alaun in Essig ➙ hartgekochtes Ei ➙ Schale</li>
+</ul></li>
+<li><ol start="2" type="1">
+<li>Weltkrieg</li>
+</ol>
+<ul>
+<li>Text ➙ Foto ➙ verkleinert ➙ Punkt</li>
+</ul></li>
+<li>Heute
+<ul>
+<li>Bilder, Audio und Video</li>
+</ul></li>
+</ul>
+</section><section id="auguste-kerkhoffs-von-nieuwenhof" class="slide level2">
+<h1>Auguste Kerkhoffs von Nieuwenhof</h1>
+<blockquote>
+<p>“Die Sicherheit eines Kryptosystems darf nicht von der Geheimhaltung des Algorithmus abhängen. Die Sicherheit gründet sich nur auf die Geheimhaltung des Schlüssels.”</p>
+</blockquote>
+</section><section id="kryptographie" class="slide level2">
+<h1>Kryptographie</h1>
+<ul>
+<li>Transposition</li>
+<li>Substitution</li>
+<li>Produktchiffren</li>
+<li>mathematische Probleme</li>
+</ul>
+</section><section id="transposition" class="slide level2">
+<h1>Transposition</h1>
+<ul>
+<li>Bilden einer Permutation des Klartextes</li>
+<li>Zeilenschrift
+<ul>
+<li>Skytale der Spartaner: Stab aufwickeln ➙ schreiben ➙ abwickeln</li>
+<li>Zeilen einlesen, Spalten auslesen</li>
+</ul></li>
+<li><p>Zick-Zack-Transposition</p>
+<pre><code>A       R       M
+  L   O   I   H   U
+    G       T       S</code></pre></li>
+</ul>
+</section><section id="substitution---1" class="slide level2">
+<h1>Substitution - 1</h1>
+<p>monoalphabetisch</p>
+<ul>
+<li>Ersetzen jedes Buchstabens des Klartextes durch ein anderes Symbol</li>
+<li>Julius Caesar: Ersetzung durch Buchstaben 3 Positionen weiter</li>
+<li>Allgemeiner: a ↔ J, b ↔ L,…</li>
+<li>Einfacher: Schlüsselwort (ohne Leerzeichen &amp; Wiederholungen), dann restlichen Buchstaben</li>
+</ul>
+</section><section id="substitution---2" class="slide level2">
+<h1>Substitution - 2</h1>
+<p>polyalphabetisch</p>
+<ul>
+<li>Chiffrierscheibe von Alberti (15. Jh)
+<ul>
+<li>Verdrehen um einen Wert nach einigen Worten</li>
+</ul></li>
+<li><p>Blaise de Viginère</p>
+<pre><code>
+   | 0 1 2 3 4 5 6 7 8...
+ 0 | A B C D E F G H I...
+ 1 | B C D E F G H I J...
+ 2 | C D E F G H I J K...
+ ...
+
+Passwort: CABA
+Klartext: DADDI
+Chiffrat: FAEDK</code></pre></li>
+</ul>
+</section><section id="produktchiffren" class="slide level2">
+<h1>Produktchiffren</h1>
+<ul>
+<li>Verknüpfung elementarer Krypto-Funktionen</li>
+<li><p>ADFGVX Chiffre</p>
+<pre><code>
+   | A D F G V X     Klartext:      S   C   H   U   T   Z
+---|------------     Substitution: V X F A G A X D X A X X
+ A | G 7 E 5 R M
+ D | A 1 N Y B 2     Transpositionsschlüssel: 6 1 4 3 2 5
+ F | C 3 D 4 F 6     Transposition:  VX FA GA
+ G | H 8 I 9 J 0                     XD XA XX
+ V | K L O P Q S
+ X | T U V W X Z     Chiffrat: XD GX AA FX AX VX</code></pre></li>
+<li><ol start="2" type="1">
+<li>Weltkrieg: Enigma</li>
+</ol></li>
+<li><p>Heute: DES, Blowfish, Camellia, AES (siehe später)</p></li>
+</ul>
+</section><section id="angriffe" class="slide level2">
+<h1>Angriffe</h1>
+<ul>
+<li>Passive Angriffe</li>
+<li>Aktive Angriffe</li>
+</ul>
+</section><section id="passive-angriffe" class="slide level2">
+<h1>Passive Angriffe</h1>
+<ul>
+<li>Abhören von Daten</li>
+<li>Abhören von Teilnehmeridentitäten</li>
+<li>Verkehrsflussanalyse</li>
+</ul>
+</section><section id="aktive-angriffe" class="slide level2">
+<h1>Aktive Angriffe</h1>
+<ul>
+<li>Modifikation von Daten</li>
+<li>Einfügen oder Löschen von Daten</li>
+<li>Wiederholen oder Verzögern von Informationen</li>
+<li>Verweigerungsangriffe</li>
+<li>Vortäuschen einer falschen Identität</li>
+<li><p>Leugnen einer Kommunikationsbeziehung</p></li>
+<li>Trittbrettfahrer (Hijacking)</li>
+<li>Erzeugung von Systemanomalien</li>
+<li>Verändern der Hardware
+<ul>
+<li>22.6.2014, Russland: Prozessoren auf ARM Basis</li>
+</ul></li>
+</ul>
+</section><section id="grundbedrohungen" class="slide level2">
+<h1>Grundbedrohungen</h1>
+<ul>
+<li>Verlust der Vertraulichkeit</li>
+<li>Verlust der Integrität</li>
+<li>Verlust der Authentizität</li>
+<li>Verlust der Verbindlichkeit</li>
+<li>Verlust der Verfügbarkeit</li>
+</ul>
+</section><section id="sicherheitsdienste" class="slide level2">
+<h1>Sicherheitsdienste</h1>
+<ul>
+<li>Authentifizierung</li>
+<li>Geheimhaltung</li>
+<li>Integrität</li>
+<li>Zugriffskontrolle</li>
+<li>Nicht-Zurückweisung</li>
+</ul>
+</section><section id="mechanismen" class="slide level2">
+<h1>Mechanismen</h1>
+<ul>
+<li>Symmetrische Verschlüsselung</li>
+<li>Asymmetrische Verschlüsselung</li>
+<li>Message Digests</li>
+<li>Message Authentication Codes</li>
+<li>Digitale Signatur</li>
+<li>Zertifikat</li>
+</ul>
+</section><section id="zufallszahlen" class="slide level2">
+<h1>Zufallszahlen</h1>
+<ul>
+<li>Verwendung</li>
+<li>Zufallszahlengeneratoren
+<ul>
+<li>nicht deterministische
+<ul>
+<li>Thermisches Rauschen von Widerstand,…</li>
+<li>(Systemzeit für) Benutzerinteraktion,…</li>
+</ul></li>
+<li>deterministische
+<ul>
+<li>Berechnung ➙ Startwert</li>
+<li>➙ Pseudozufallszahlen</li>
+<li>Dual_EC_DRBG: Zufallszahlen ➙ NSA
+<ul>
+<li>In Produkten von RSA Security!</li>
+</ul></li>
+<li>Mikroprozessorinstruktion (Intel’s RdRand)
+<ul>
+<li>Versuch: Linux Kernel</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</section><section id="symmetrisch" class="slide level2">
+<h1>Symmetrisch</h1>
+<ul>
+<li>Ein Schlüssel je Kommunikationskanal</li>
+<li>basieren auf Substitutionen &amp; Permutationen</li>
+<li>Vorteile
+<ul>
+<li>schnell</li>
+<li>auch in Hardware</li>
+</ul></li>
+<li>Nachteile
+<ul>
+<li># der Schlüssel</li>
+<li>sichere Kanäle zum Schlüsseltransfer</li>
+<li>➙ Schlüsselverwaltung!</li>
+</ul></li>
+</ul>
+</section><section id="symm.-verfahren" class="slide level2">
+<h1>Symm. Verfahren</h1>
+<ul>
+<li>DES (IBM, NSA)
+<ul>
+<li>56 Bits ➙ Aufwand 2<sup>39</sup> (niedrig)</li>
+</ul></li>
+<li>3DES
+<ul>
+<li>168 Bits ➙ 2<sup>112</sup> (mittel)</li>
+</ul></li>
+<li>Twofish (Bruce Schneier): kein Patent, public domain!
+<ul>
+<li>128, 192, 256 Bits ➙ 2<sup>256</sup> (maximal)</li>
+</ul></li>
+<li>Camellia (Mitsubishi, NTT):
+<ul>
+<li>128, 192, 256 Bits ➙ 2<sup>256</sup> (maximal)</li>
+</ul></li>
+<li>And the winner is…   AES
+<ul>
+<li>128, 192, 256 Bits ➙ 2<sup>256</sup> (maximal)</li>
+</ul></li>
+</ul>
+</section><section id="asymmetrisch" class="slide level2">
+<h1><u>A</u>symmetrisch</h1>
+<ul>
+<li>Schlüsselpaar: öffentlich und privat</li>
+<li>basieren auf mathematischen Problemen</li>
+<li>Vorteil: leichtere Schlüsselverwaltung, aber
+<ul>
+<li>Authentizität des öffentlichen Schlüssels</li>
+<li>Zurückziehen eines Schlüssels</li>
+</ul></li>
+<li>Nachteile
+<ul>
+<li>langsamer</li>
+</ul></li>
+</ul>
+</section><section id="asymm.-verfahren" class="slide level2">
+<h1><u>A</u>symm. Verfahren</h1>
+<ul>
+<li>RSA: Rivest-Shamir-Adleman
+<ul>
+<li>zerlegen einer Zahl in Primfaktoren</li>
+<li>1024, 2048, 4096, 8192 Bits ➙ 2<sup>167.8</sup> (maximal)</li>
+</ul></li>
+<li>ECC (Elliptic Curve Cryptography)
+<ul>
+<li>diskreter Logarithmus in Gruppe der Punkte auf elliptischen Kurve</li>
+<li>NIST ➙ NSA
+<ul>
+<li>192/224/256/384/521 Bits ➙ 2<sup>260.5</sup> (maximal)</li>
+</ul></li>
+<li>Curve25519
+<ul>
+<li>256 Bits ➙ 2<sup>128</sup> (hoch)</li>
+</ul></li>
+</ul></li>
+</ul>
+</section><section id="schlüsselaustausch" class="slide level2">
+<h1>Schlüsselaustausch</h1>
+<ul>
+<li>Mittels Bote, Brieftaube,…</li>
+<li>Shamirs Three-Pass Protocol</li>
+<li>Diffie-Hellman</li>
+</ul>
+</section><section id="shamirs-three-pass-protocol" class="slide level2">
+<h1>Shamirs Three-Pass Protocol</h1>
+<ul>
+<li>➙ “2 Vorhängeschlösser”</li>
+<li>Vorhängeschloss = Verschlüsselung</li>
+<li>Authentizität ist nicht gewährleistet!</li>
+<li>daher: 2 Attacken möglich…</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Abfangen des Paketes und versehen mit eigenem Schloss</li>
+<li>Ersetzen des Paketes durch eigenes Paket</li>
+</ul>
+</div>
+</section><section id="diffie-hellman---1" class="slide level2">
+<h1>Diffie-Hellman - 1</h1>
+<ul>
+<li>Whitfield Diffie &amp; Martin Hellman</li>
+<li>Lösen diskreter Algorithmus
+<ul>
+<li>prime Restklassengruppe ;-)</li>
+<li>p … Primzahl</li>
+<li>g … Primitivwurzel</li>
+<li>Zahlen mit mehreren Hundert Stellen</li>
+</ul></li>
+</ul>
+</section><section id="diffie-hellman---2" class="slide level2">
+<h1>Diffie-Hellman - 2</h1>
+<figure>
+<img src="diffie.png" alt="Quelle: Wikipedia" /><figcaption>Quelle: Wikipedia</figcaption>
+</figure>
+</section><section id="man-in-the-middle" class="slide level2">
+<h1>Man in the Middle</h1>
+<figure>
+<img src="mitm.png" alt="Quelle: Wikipedia" /><figcaption>Quelle: Wikipedia</figcaption>
+</figure>
+</section><section id="message-digests---1" class="slide level2">
+<h1>Message Digests - 1</h1>
+<ul>
+<li>MD</li>
+<li>Einwegfunktion, Hash
+<ul>
+<li>nicht rückrechenbar</li>
+<li>Ergebnis feste Länge</li>
+<li>gleichmäßige Aufteilung
+<ul>
+<li>kleine Änderungen - große Wirkung</li>
+</ul></li>
+</ul></li>
+<li>Zweck
+<ul>
+<li>Integrität</li>
+</ul></li>
+<li>Verwendung
+<ul>
+<li>Anhängen</li>
+<li>separate Übertragung</li>
+</ul></li>
+</ul>
+</section><section id="message-digest---2" class="slide level2">
+<h1>Message Digest - 2</h1>
+<ul>
+<li>Verfahren
+<ul>
+<li>(MD5), (SHA-1)</li>
+<li>SHA-2: SHA-256 (hoch), SHA-384, SHA-512</li>
+<li>SHA-3: SHA3-256, SHA3-384, SHA3-512</li>
+</ul></li>
+<li>Abschätzung für SHA-256 (Erde: 2<sup>170</sup> Atome)
+<ul>
+<li>2<sup>30</sup> Hashwerte pro Sekunde (Radeon HD5830: 622*10<sup>6</sup>/s)
+<ul>
+<li>1 Jahr besteht aus 2<sup>25</sup> Sekunden</li>
+</ul></li>
+<li>2<sup>30</sup> (ca. 1 Milliarde) Rechner arbeiten gleichzeitig</li>
+<li>Zeit[Jahr]: 2<sup>256</sup> / (2<sup>30</sup> * 2<sup>25</sup> * 2<sup>30</sup>) = 2<sup>171</sup> = 2993155353253689176481146537402947624255349848014848</li>
+<li>Sonne wird in 2<sup>30</sup> Jahren zur Supernova!</li>
+</ul></li>
+</ul>
+</section><section id="message-digest---praxis" class="slide level2">
+<h1>Message Digest - Praxis</h1>
+<ul>
+<li>Lade Gpg4win von <a href="http://gpg4win.org/download.html">http://gpg4win.org/download.html</a></li>
+<li><p>überprüfe den Message Digest (in Linux):</p>
+<pre><code>sha1sum gpg4win*.exe</code></pre></li>
+<li><p>überprüfe in Windows:</p>
+<pre><code>fciv.exe -sha1 gpg4win*.exe</code></pre></li>
+</ul>
+</section><section id="message-authentication-code" class="slide level2">
+<h1>Message Authentication Code</h1>
+<ul>
+<li>MAC</li>
+<li>wie MD aber Passwort</li>
+<li>Zweck
+<ul>
+<li>Verifikation der Integrität</li>
+<li>Symmetrische Form der Authentifizierung</li>
+</ul></li>
+<li>Verfahren: HMAC</li>
+</ul>
+</section><section id="digitale-signatur" class="slide level2">
+<h1>Digitale Signatur</h1>
+<ul>
+<li>Garantie, dass Nachricht
+<ul>
+<li>von dem Signierer stammt</li>
+<li>nicht verändert wurde</li>
+</ul></li>
+<li>Signieren
+<ul>
+<li>MD erzeugen</li>
+<li>mit privaten Schlüssel verschlüsseln</li>
+</ul></li>
+<li>Überprüfen
+<ul>
+<li>mit öffentlichen Schlüssel entschlüsseln</li>
+<li>MD berechnen und dann vergleichen</li>
+</ul></li>
+<li>Eigenschaften
+<ul>
+<li>nicht fälschbar und nicht abstreitbar</li>
+<li>einfach überprüfbar</li>
+</ul></li>
+<li>Verfahren: OpenPGP, X.509</li>
+</ul>
+</section><section id="zertifikat" class="slide level2">
+<h1>Zertifikat</h1>
+<ul>
+<li>“Digitaler Ausweis”
+<ul>
+<li>Zusammenhang: öffentlichem Schlüssel &amp; Name</li>
+</ul></li>
+<li>enthält:
+<ul>
+<li>Name des Zertifikatsinhaber</li>
+<li>öffentlicher Schlüssel</li>
+<li>Name der Zertifizierungsinstanz</li>
+<li>Gültigkeitszeitraum</li>
+<li>Verweise auf Zertifikatssperrlisten</li>
+</ul></li>
+<li>signiert mit privatem Schlüssel der Zertifizierungsinstanz</li>
+<li>Verfahren: OpenPGP, X.509</li>
+</ul>
+</section></section>
+<section><section id="passwörter" class="titleslide slide level1"><h1>Passwörter</h1></section><section id="anforderungen" class="slide level2">
+<h1>Anforderungen</h1>
+<ul>
+<li class="fragment">möglichst lang</li>
+<li class="fragment">verschiedene Zeichenklassen</li>
+<li class="fragment">leicht zu merken</li>
+<li class="fragment">nicht mehrfach verwenden</li>
+<li class="fragment">regelmäßig ändern</li>
+<li class="fragment">nicht aufschreiben</li>
+</ul>
+</section><section id="tipps" class="slide level2">
+<h1>Tipps</h1>
+<ul>
+<li>Groß- und Kleinbuchstaben</li>
+<li><code>1</code> statt <code>l</code>, <code>!</code> statt <code>I</code>, <code>4</code> statt <code>A</code>,…</li>
+<li>Sonderzeichen wie <code>&quot;</code>,<code>$</code>,<code>!</code>,… einbauen</li>
+<li>keine Umlaute,…   ➙ Kodierung!</li>
+</ul>
+<p>¿ ¿ ¿</p>
+<ul>
+<li>Wörter aus verschiedenen Sprachen</li>
+<li>Satz jeweils Anfangsbuchstaben</li>
+</ul>
+</section><section id="aber-wie" class="slide level2">
+<h1>Aber wie?</h1>
+<ul>
+<li>widersprüchliche Anforderungen!</li>
+<li>daher: ein Tool verwenden</li>
+</ul>
+<div class="fragment">
+<blockquote>
+<p>➙ KeePassX <br></p>
+</blockquote>
+</div>
+<div class="fragment">
+<ul>
+<li>Win$: <a href="http://www.keepassx.org/">http://www.keepassx.org/</a></li>
+<li>Ubuntu bzw. Manjaro: Package Manager</li>
+</ul>
+</div>
+</section></section>
+<section><section id="sicherheits--anwendungen" class="titleslide slide level1"><h1>Sicherheits- anwendungen</h1></section><section id="nsl" class="slide level2">
+<h1>NSL</h1>
+<p>“National Security Letter”</p>
+<ul>
+<li>Lavabit: ✝ 2013</li>
+<li>Google
+<ul>
+<li>2013: gerichtlich verloren!</li>
+<li>jedes Jahr: NSLs zwischen 1000 und 3000 Benutzer!</li>
+</ul></li>
+<li>Microsoft, 2014
+<ul>
+<li>Herausgabe der Daten eines Geschäftskunden</li>
+<li>FBI zog NSL zurück</li>
+</ul></li>
+<li>Nicht nur Server in den USA!</li>
+<li>TrueCrypt?</li>
+</ul>
+<p>2000 bis 2013: ca. <strong>300000</strong>!</p>
+</section><section id="überblick-1" class="slide level2">
+<h1>Überblick</h1>
+<ul>
+<li>Dateiverschlüsselung</li>
+<li>Kommunikation
+<ul>
+<li>Punkt zu Punkt Verbindung</li>
+<li>VPN</li>
+</ul></li>
+<li>Filehosting</li>
+<li>Instant Messaging</li>
+<li>E-Mail-Verschlüsselung</li>
+</ul>
+</section><section id="dateien" class="slide level2">
+<h1>Dateien</h1>
+<h3 id="windows">Windows</h3>
+<p>Systemeigene Möglichkeiten:</p>
+<ul>
+<li>EFS (basierend auf NTFS)
+<ul>
+<li>USB Sticks meist FAT</li>
+<li>keine ganze Partition</li>
+</ul></li>
+<li>Bitlocker
+<ul>
+<li>nur ganze Partition</li>
+<li>auch Systempartition!</li>
+</ul></li>
+</ul>
+<p>Analog für Mac OSX: FileFault</p>
+</section><section id="dateien-1" class="slide level2">
+<h1>Dateien</h1>
+<h3 id="linux">Linux</h3>
+<ul>
+<li>EncFS
+<ul>
+<li>Verzeichnisse</li>
+</ul></li>
+<li>LUKS
+<ul>
+<li>Partition</li>
+<li>gesamtes System (alle Partitionen)</li>
+</ul></li>
+</ul>
+</section><section id="dateien-2" class="slide level2">
+<h1>Dateien</h1>
+<h3 id="systemübergreifend">Systemübergreifend</h3>
+<ul>
+<li>TrueCrypt
+<ul>
+<li>Container
+<ul>
+<li>versteckte Container</li>
+</ul></li>
+<li>Partition</li>
+</ul></li>
+<li>OpenSSL
+<ul>
+<li>Secure Socket Layer</li>
+<li>TLS: Transport Layer Security</li>
+</ul></li>
+<li>GPG
+<ul>
+<li>Gnu Privacy Guard</li>
+</ul></li>
+<li>ccrypt
+<ul>
+<li>AES</li>
+</ul></li>
+</ul>
+</section><section id="ccrypt---1" class="slide level2">
+<h1>ccrypt - 1</h1>
+<blockquote>
+<p>http://ccrypt.sourceforge.net/</p>
+</blockquote>
+<ul>
+<li><p>Verschlüsseln</p>
+<pre><code>ccrypt -e test.txt</code></pre>
+➙ <code>test.txt.cpt</code></li>
+<li><p>Brute force</p>
+<pre><code>ccguess test.txt.cpt</code></pre></li>
+<li><p>Entschlüsseln</p>
+<pre><code>ccrypt -d test.txt.cpt</code></pre></li>
+</ul>
+</section><section id="ccrypt---2" class="slide level2">
+<h1>ccrypt - 2</h1>
+<ul>
+<li><p>“gleicher” Schlüssel wie Referenzdatei</p>
+<pre><code>ccrypt -e test.txt -y test2.txt.cpt</code></pre></li>
+<li><p>Entschlüsseln auf stdout</p>
+<pre><code>ccrypt -d test.txt.cpt -c</code></pre></li>
+<li><p>Verschlüsseln mehrerer Dateien</p>
+<pre><code>ccrypt -e test*.txt</code></pre></li>
+<li><p>Linux</p>
+<pre><code>ccencrypt test.txt
+ccdecrypt test.txt.cpt</code></pre></li>
+<li><p>Hilfe</p>
+<pre><code>ccrypt -h</code></pre>
+<pre><code>man ccrypt</code></pre></li>
+</ul>
+</section><section id="kommunikation" class="slide level2">
+<h1>Kommunikation</h1>
+<ul>
+<li>Punkt zu Punkt Verbindung
+<ul>
+<li>SSH</li>
+<li>TLS</li>
+</ul></li>
+<li>VPN
+<ul>
+<li>IPsec</li>
+<li>TLS ➙ OpenVPN</li>
+<li>SSH (nur TCP)</li>
+</ul></li>
+<li>Tor
+<ul>
+<li>Anonymisierung von Verbindungsdaten</li>
+</ul></li>
+</ul>
+</section><section id="tls" class="slide level2">
+<h1>TLS</h1>
+<ul>
+<li>SSL … Secure Socket Layer
+<ul>
+<li>SSL 3.1 = TLS 1.0</li>
+</ul></li>
+<li>Authentifizierung des Servers
+<ul>
+<li>asymmetrisch mittels Zertifikaten</li>
+</ul></li>
+<li>Symmetrische Verschlüsselung der Kommunikation
+<ul>
+<li>Diffie-Hellman Schlüsselaustausch</li>
+</ul></li>
+<li>https
+<ul>
+<li>https = https über TLS</li>
+<li>Sollte möglichst immer verwendet werden</li>
+<li>Leider auch nicht “absolut” sicher</li>
+</ul></li>
+<li>➙ Heartbleed-Bug von OpenSSL (2014)
+<ul>
+<li>Heartbeat: Keine Überprüfung der Länge</li>
+</ul></li>
+</ul>
+</section><section id="filehosting" class="slide level2">
+<h1>Filehosting</h1>
+<ul>
+<li>Spideroak (closed source, USA)</li>
+<li>Wuala (closed source, Schweiz)</li>
+<li><p>Seafile (open source)</p></li>
+<li>Boxcryptor (closed source, DE)
+<ul>
+<li>Verschlüsselung für “alle” Filehoster
+<ul>
+<li>Dropbox, Google Drive,…</li>
+</ul></li>
+</ul></li>
+</ul>
+</section><section id="e-mail" class="slide level2">
+<h1>E-Mail</h1>
+<ul>
+<li>Leitungsverschlüsselung
+<ul>
+<li>TLS mittels STARTTLS</li>
+</ul></li>
+<li>Ende zu Ende Verschlüsselung
+<ul>
+<li>OpenPGP</li>
+<li>S/MIME</li>
+<li>Nachteile
+<ul>
+<li>unsicher: Verbindungsdaten, Header</li>
+<li>“komplizierte Bedienung”</li>
+</ul></li>
+</ul></li>
+<li>Verschlüsselte E-Mail-Provider…
+<ul>
+<li>Lavabit</li>
+</ul></li>
+</ul>
+</section><section id="sonstige-anwendungen" class="slide level2">
+<h1>Sonstige Anwendungen</h1>
+<ul>
+<li>Anti-Virus</li>
+<li>Firewalls</li>
+<li>Intrusion Detection System</li>
+<li>Audit-Tools</li>
+</ul>
+</section><section id="instant-messaging" class="slide level2">
+<h1>Instant Messaging</h1>
+<ul>
+<li>Pflicht
+<ul>
+<li>end-to-end Verschlüsselung</li>
+<li>authentifiziert</li>
+</ul></li>
+<li>Kür
+<ul>
+<li>kein zentraler Server</li>
+<li>Forward Secrecy
+<ul>
+<li>kein Zugriff auf alte Chat-Sessions</li>
+</ul></li>
+<li>Multi-Encryption</li>
+</ul></li>
+<li>Systeme
+<ul>
+<li>Threema (anstatt Whatsapp)?</li>
+<li><a href="https://crypto.cat/">https://crypto.cat/</a>
+<ul>
+<li>Firefox, Chrome, Safari, Opera</li>
+<li>iPhone! Android is coming soon.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section></section>
+<section><section id="ssh" class="titleslide slide level1"><h1>SSH</h1></section><section id="prinzipien" class="slide level2">
+<h1>Prinzipien</h1>
+<ul>
+<li>TCP, Port 22</li>
+<li>Authentifizierung des Servers
+<ul>
+<li>mittels Public Key</li>
+<li>Fingerprint</li>
+</ul></li>
+<li>Verschlüsselte Verbindung
+<ul>
+<li>Diffie-Hellman Schlüsselaustausch</li>
+<li>symmetrische Verschlüsselung</li>
+</ul></li>
+<li>Authentifizierung des Benutzers
+<ul>
+<li>Passwort</li>
+<li>Public Key</li>
+</ul></li>
+</ul>
+</section><section id="openssh" class="slide level2">
+<h1>OpenSSH</h1>
+<ul>
+<li>ssh
+<ul>
+<li>Ausführen von Befehlen und tunneln</li>
+</ul></li>
+<li>scp, sftp
+<ul>
+<li>Kopieren von Dateien</li>
+</ul></li>
+<li>ssh-keygen
+<ul>
+<li>Generieren von Schlüsseln</li>
+</ul></li>
+<li>ssh-keyscan
+<ul>
+<li>Auslesen von öffentlichen Schlüsseln</li>
+</ul></li>
+<li>ssh-agent
+<ul>
+<li>Hält privaten Schlüssel im Arbeitsspeicher</li>
+</ul></li>
+<li>ssh-add
+<ul>
+<li>privaten Schlüssel zu ssh-agent hinzufügen</li>
+</ul></li>
+</ul>
+<!--
+http://www.jfranken.de/homepages/johannes/vortraege/ssh1_inhalt.de.html
+http://www.jfranken.de/homepages/johannes/vortraege/ssh2_inhalt.de.html
+-->
+
+</section><section id="ssh---windows" class="slide level2">
+<h1>SSH - Windows</h1>
+<ul>
+<li>cygwin <a href="https://www.cygwin.com/">https://www.cygwin.com/</a></li>
+</ul>
+<p><br/> <em>oder</em> <br/><br/></p>
+<ul>
+<li>PuTTY <a href="http://www.putty.org/">http://www.putty.org/</a></li>
+<li>WinSCP <a href="http://winscp.net/">http://winscp.net/</a></li>
+</ul>
+</section><section id="openssh---praxis-1" class="slide level2">
+<h1>OpenSSH - Praxis 1</h1>
+<ol type="1">
+<li>Löschen des Verzeichnisses <code>~/.ssh</code>
+<ul>
+<li><code>rm -r ~/.ssh</code></li>
+</ul></li>
+<li>Anmelden am edvossh
+<ul>
+<li><code>ssh ko@edvossh.htlwrn.ac.at</code></li>
+<li>Fingerprint (siehe später)!</li>
+</ul></li>
+<li>“Schützen” von <code>~/.ssh</code>
+<ul>
+<li><code>chmod -R go= ~/.ssh</code></li>
+</ul></li>
+<li>Abmelden
+<ul>
+<li><code>exit</code></li>
+</ul></li>
+<li>Ansehen der Datei <code>known_hosts</code>
+<ul>
+<li><code>cat ~/.ssh/known_hosts</code></li>
+</ul></li>
+<li>Nochmals anmelden: Kein Fingerprint!</li>
+</ol>
+</section><section id="openssh---praxis-2" class="slide level2">
+<h1>OpenSSH - Praxis 2</h1>
+<ol type="1">
+<li><strong>edvossh</strong>
+<ul>
+<li><code>rm ~/.ssh/authorized_keys</code></li>
+</ul></li>
+<li>Keys generieren (vorerst keine Passphrase)
+<ul>
+<li><code>ssh-keygen</code></li>
+<li><code>cat ~/.ssh/id_rsa</code></li>
+<li><code>cat ~/.ssh/id_rsa.pub</code></li>
+</ul></li>
+<li>Öffentlichern Key auf Server kopieren
+<ul>
+<li><code>ssh-copy-id ko@edvossh.htlwrn.ac.at</code></li>
+</ul></li>
+<li><strong>edvossh</strong> (Kein Passwort mehr!)
+<ul>
+<li><code>cat authorized_keys</code></li>
+</ul></li>
+<li>SSH Key eines entfernten Rechners abfragen
+<ul>
+<li><code>ssh-keyscan edvossh.htlwrn.ac.at</code></li>
+</ul></li>
+</ol>
+</section><section id="openssh---praxis-3" class="slide level2">
+<h1>OpenSSH - Praxis 3</h1>
+<p><em>Key darf <strong>NIE</strong> verloren gehen ➙ Passphrase</em></p>
+<ol type="1">
+<li>Key generieren: Überschreiben! Mit Passphrase!</li>
+<li>Key auf Server (Passwort: wieder einzugeben!)
+<ul>
+<li><code>ssh-copy-id ko@edvossh.htlwrn.ac.at</code></li>
+</ul></li>
+<li>An edvossh anmelden &amp; danach abmelden
+<ul>
+<li>Passphrase ist einzugeben!</li>
+</ul></li>
+<li>SSH agent starten (wenn nicht läuft)
+<ul>
+<li><code>ssh-agent `which bash`</code></li>
+<li>oder wenn Fish Shell: <code>ssh-agent (which fish)</code></li>
+</ul></li>
+<li>Passphrase dem Agent mitteilen
+<ul>
+<li><code>ssh-add</code></li>
+</ul></li>
+<li>edvossh anmelden: keine Passphrase notwendig</li>
+</ol>
+</section><section id="openssh---praxis-4" class="slide level2">
+<h1>OpenSSH - Praxis 4</h1>
+<ol type="1">
+<li>Zum edvossh kopieren
+<ul>
+<li><code>scp test.txt ko@edvossh.htlwrn.ac.at:</code></li>
+</ul></li>
+<li>Vom edvossh kopieren
+<ul>
+<li><code>scp ko@edvossh.htlwrn.ac.at:test.txt .</code></li>
+</ul></li>
+<li>Anzeigen des Fingerprints
+<ul>
+<li><code>ssh-keygen -l -f ~/.ssh/id_rsa</code></li>
+</ul></li>
+<li>Nachträgliches Ändern der Passphrase
+<ul>
+<li><code>ssh-keygen -p -f ~/.ssh/id_rsa</code></li>
+</ul></li>
+<li>Public key nachträglich erzeugen
+<ul>
+<li><code>ssh-keygen -y -f ~/.ssh/id_rsa</code></li>
+</ul></li>
+</ol>
+</section><section id="lokales-tunneln---1" class="slide level2">
+<h1>Lokales Tunneln - 1</h1>
+<ul>
+<li>Annahme
+<ul>
+<li>www.htlwrn.ac.at Port 80 ist hinter Firewall (unsinnig!)</li>
+</ul></li>
+<li>Lösung
+<ul>
+<li><code>ssh -N -L 8080:www.htlwrn.ac.at:80 ko@edvossh.htlwrn.ac.at</code></li>
+<li><code>-N</code> … es werden keine Kommandos ausgeführt</li>
+<li><code>-L</code> … lokales port forwarding</li>
+<li><code>-C</code> … komprimiert die Daten</li>
+<li><code>-f</code> … schickt ssh in den Hintergrund</li>
+</ul></li>
+</ul>
+</section><section id="lokales-tunneln---2" class="slide level2">
+<h1>Lokales Tunneln - 2</h1>
+<ul>
+<li>Annahme
+<ul>
+<li>Webserver auf edvossh.htlwrn.ac.at ist hinter Firewall
+<ul>
+<li><em>kein Webserver am edvossh!</em></li>
+</ul></li>
+</ul></li>
+<li>Lösung
+<ul>
+<li><code>ssh -N -L 8080:localhost:80 ko@edvossh.htlwrn.ac.at</code></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Annahme
+<ul>
+<li>Lokalen Port auf entfernten Port umleiten (kein Tunneln)</li>
+</ul></li>
+<li>Lösung
+<ul>
+<li><code>ssh -N -L 8080:www.htlwrn.ac.at:80 localhost</code></li>
+<li>ungesichert!</li>
+<li>ssh Server auf localhost!</li>
+</ul></li>
+</ul>
+</div>
+</section><section id="entferntes-tunneln" class="slide level2">
+<h1>Entferntes Tunneln</h1>
+<ul>
+<li>Annahme
+<ul>
+<li>Lokaler Rechner und Webserver hinter Firewall</li>
+<li>Zugriff auf Webserver von Home-PC</li>
+</ul></li>
+<li>Lösung
+<ul>
+<li><code>ssh -N -R 8080:webserver:80 homepc.at</code></li>
+<li>Webbrowser am Home-PC kann über Port 8080 auf Webserver zugreifen</li>
+</ul></li>
+</ul>
+</section></section>
+<section><section id="gpg-dateien" class="titleslide slide level1"><h1>GPG — Dateien</h1></section><section id="gpg" class="slide level2">
+<h1>GPG</h1>
+<ul>
+<li>PGP
+<ul>
+<li>1991: Phil Zimmermann</li>
+</ul></li>
+<li>Open PGP
+<ul>
+<li>PGP: Pretty Good Privacy</li>
+<li>GPG: Gnu Priacy Guard</li>
+</ul></li>
+<li>Anwendungsgebiete
+<ul>
+<li>Verschlüsselung von Daten: E-Mail, Datei</li>
+<li>Signaturen: Erstellung, Verifikation</li>
+</ul></li>
+</ul>
+</section><section id="world-of-trust" class="slide level2">
+<h1>World of Trust</h1>
+<ul>
+<li>öffentliche Schlüssel z.B. auf Keyserver</li>
+<li>Authentizität des Schlüssels?
+<ul>
+<li>gehört Schlüssel wirklich zu der Identität?</li>
+</ul></li>
+<li>2 Möglichkeiten
+<ul>
+<li>vertrauenswürdige Zertifizierungsstelle</li>
+<li>WoT</li>
+</ul></li>
+<li>WoT
+<ul>
+<li>XXX</li>
+</ul></li>
+</ul>
+</section><section id="installation" class="slide level2">
+<h1>Installation</h1>
+<ul>
+<li>MacOSX, Linux…: Paketmanager deiner Wahl!</li>
+<li>Windows: Gpg4win <a href="http://www.gpg4win.de/">http://www.gpg4win.de/</a>
+<ul>
+<li>GPG</li>
+<li>Kleopatra, GPA: Zertifikatsmanager</li>
+<li>GggOL: Plugin für Outlook</li>
+<li>GpgEX: Erweiterung für Explorer zur Dateiverschlüsselung</li>
+<li>Claws-Mail: E-Mail-Programm</li>
+<li>Gpg4win-Kompendium: Dokumentation</li>
+</ul></li>
+<li>Thunderbird: Add-on</li>
+</ul>
+</section></section>
+<section><section id="gpg-email" class="titleslide slide level1"><h1>GPG — Email</h1></section><section id="nachrichten-versenden" class="slide level2">
+<h1>Nachrichten versenden</h1>
+<ol type="1">
+<li>Alice sendet K<sub>pub</sub> an Bob
+<ul>
+<li>optional: K<sub>pub</sub> an Keyserver</li>
+</ul></li>
+<li>Bob fügt K<sub>pup</sub> zu Schlüsselring hinzu</li>
+<li>Bob sendet an Alice
+<ul>
+<li>verschlüsselt mit K<sub>pub</sub> von Alice</li>
+</ul></li>
+<li>Alice entschlüsselt mit K<sub>priv</sub></li>
+</ol>
+<p>➙ Praxis!</p>
+</section><section id="feind-lauscht-mit" class="slide level2">
+<h1>Feind lauscht mit…</h1>
+<ol type="1">
+<li>Alice sendet K<sub>pub,B</sub> an Bob</li>
+<li>Mallory kontrolliert Kanal
+<ul>
+<li>tauscht K<sub>pub,B</sub> gegen K<sub>pub,M</sub> aus</li>
+</ul></li>
+<li>Alice fügt K<sub>pub,M</sub> zum Schlüsselring hinzu</li>
+<li>Alice sendet verschlüsselte E-Mail an Bob</li>
+<li>Mallory fängt E-Mail ab und kann Inhalt lesen</li>
+</ol>
+</section><section id="zertifizierungsstelle" class="slide level2">
+<h1>Zertifizierungsstelle</h1>
+<ul>
+<li>Certificate authority (CA)</li>
+<li>Stellen Zertifikate aus</li>
+<li>Firmen oder öffentliche Organisationen</li>
+<li>Benutzer muss diesen Stellen vertrauen
+<ul>
+<li>kommerzielle Anbieter ➙ Geld</li>
+</ul></li>
+<li>Öffentlicher Schlüssel einer CA?
+<ul>
+<li>sicherer Kanal</li>
+<li>Zertifikat einer “höheren” CA</li>
+</ul></li>
+<li>sind besondere Angriffspunkte!</li>
+<li>und was ist bei Fehlern?!</li>
+</ul>
+</section><section id="web-of-trust-wot" class="slide level2">
+<h1>Web of Trust (WOT)</h1>
+</section></section>
+    </div>
+  </div>
+
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.min.js"></script>
+
+  <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        theme: 'moon', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+//          { src: 'reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; }, }
+//          { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+]});
+    </script>
+    </body>
+</html>

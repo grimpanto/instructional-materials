@@ -1,0 +1,772 @@
+#+TITLE: Objektorientierung
+#+AUTHOR: Dr. Günter Kolousek
+#+DATE: \copy Dr. Günter Kolousek \hspace{12ex} [[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usetikzlibrary{shapes,arrows}
+#+LATEX_HEADER:\usetikzlibrary{automata,positioning}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+#+LATEX_HEADER: \newcommand{\N}{\ensuremath{\mathbb{N}}\xspace}
+#+LATEX_HEADER: \newcommand{\R}{\ensuremath{\mathbb{R}}\xspace}
+#+LATEX_HEADER: \newcommand{\Z}{\ensuremath{\mathbb{Z}}\xspace}
+#+LATEX_HEADER: \newcommand{\Q}{\ensuremath{\mathbb{Q}}\xspace}
+# +LATEX_HEADER: \renewcommand{\C}{\ensuremath{\mathbb{C}}\xspace}
+#+LATEX_HEADER: \renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+#+LATEX_HEADER: \newcommand{\sneg}[1]{\ensuremath{\overline{#1}}\xspace}
+#+LATEX_HEADER: \renewcommand{\mod}{\mbox{ mod }}
+
+#+LATEX_HEADER: \newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+# +LATEX_HEADER: \newcommand{\sub}[1]{\textsubscript{#1}}
+# +LATEX_HEADER: \newcommand{\super}[1]{\textsuperscript{#1}}
+#+LATEX_HEADER: \newcommand{\union}{\ensuremath{\cup}}
+
+#+LATEX_HEADER: \newcommand{\sseq}{\ensuremath{\subseteq}\xspace}
+
+#+LATEX_HEADER: \usepackage{textcomp}
+#+LATEX_HEADER: \usepackage{ucs}
+#+LaTeX_HEADER: \usepackage{float}
+
+#+latex_header: \usepackage{centernot}
+
+# +LaTeX_HEADER: \shorthandoff{"}
+
+#+LATEX_HEADER: \newcommand{\imp}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\ar}{\ensuremath{\rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\bicond}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\biimp}{\ensuremath{\leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\conj}{\ensuremath{\wedge}\xspace}
+#+LATEX_HEADER: \newcommand{\disj}{\ensuremath{\vee}\xspace}
+#+LATEX_HEADER: \newcommand{\anti}{\ensuremath{\underline{\vee}}\xspace}
+#+LATEX_HEADER: \newcommand{\lnegx}{\ensuremath{\neg}\xspace}
+#+LATEX_HEADER: \newcommand{\lequiv}{\ensuremath{\Leftrightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\limp}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\aR}{\ensuremath{\Rightarrow}\xspace}
+#+LATEX_HEADER: \newcommand{\lto}{\ensuremath{\leadsto}\xspace}
+
+#+LATEX_HEADER: \renewcommand{\neg}{\ensuremath{\lnot}\xspace}
+
+#+LATEX_HEADER: \newcommand{\eset}{\ensuremath{\emptyset}\xspace}
+
+* Ursprung der Objektorientierung
+- Programmiersprachen (programming language, PL)
+  - Simula (1967)
+  - Smalltalk (1972)
+- AI (70er Jahre): Frames
+  - Artificial intelligence (Künstliche Intelligenz)
+- Datenmodellierung (80er Jahre)
+- Benutzerinterface (80er Jahre)
+- führte zu:
+  - object-oriented programming (OOP)
+  - object-oriented design (OOD)
+  - object-oriented analysis (OOA)
+
+* Idee
+- Struktur der Software orientiert sich an Realiät
+  - Abbildung eines Ausschnittes bzw. Sichtweise der realen Welt
+- Objekt: Gegenstand oder das Ziel des Denkens oder Handelns
+  - Reale Welt enthält /Objekte/, die /interagieren/
+- \to OOP: Objekte, die zur Laufzeit exisistieren und interagieren
+  - empfangen Nachrichten
+  - verarbeiten und speichern Daten
+  - senden Nachrichten
+
+* Konzepte
+- Objekt
+- Identität
+- Klassifizierung
+- Kapselung (Datenkapselung)
+- Vererbung
+- Polymorphie
+
+* Objekt (object)
+\vspace{1.5em}
+- Konkretes oder abstraktes Ding
+- Jedes Objekt hat
+  - eine eindeutige Identität
+    - außer... Wertobjekte
+  - einen aktuellen Zustand
+    - Instanzvariablen (instance variable, data member, attribute, Eigenschaft)
+  - ein Verhalten
+    - Operationen: meist Methoden (methods, member function)
+- Objekte kommunizieren durch Nachrichten (message)
+  - meist: Aufruf von Methoden
+- In objektorientierten Programmiersprachen: Verhalten und Struktur des
+  Zustandes \to Klasse & Vererbung
+  - ... alternativ
+    - objekt-basiert (keine Vererbung)
+    - prototypen-basiert (Prototypenobjekte)
+
+* Identität -- (object) identity
+- eindeutig!
+  - kein anderes Objekt hat gleiche Identität
+- unabhängig vom internen Zustand
+- Objektidentität \neq Objektgleichheit
+  - dasselbe vs. das Gleiche
+- Seichte Gleichheit vs. tiefe Gleichheit
+  - seichte Gleichheit (shallow equality)
+    - interne Zustände sind identisch
+  - tiefe Gleichheit (deep equality)
+    - interne Zustände sind gleich (aber nicht identisch)
+- Seichte Kopie vs. tiefe Kopie
+  - shallow copy, deep copy
+
+* Klassifizierung -- classification
+\vspace{1.5em}
+- Objekte werden gruppiert
+  - \to Klassifikation
+    - sinnvoll: nach Verhalten
+    - alternativ: nach Eigenschaften, Struktur, Aussehen,...
+- Objektklasse (object class)
+  - Namensgebung:
+    - Name der Klasse \to Substantiv
+    - Namen der Methoden \to Verben
+  - beschreibt Struktur des Zustandes und Verhalten von Objekten
+  - realisiert (implementiert) einen /Typ/
+  - Klasse selber kann
+    - Verhalten aufweisen (Klassenmethoden)
+    - Zustand aufweisen (Klassenvariablen)
+  - Abstrakte Klasse hat keine Instanzen (abstract class)
+  - in manchen PL: Klasse kann selbst Objekt sein!
+    - \to Klasse der Klasse = Metaklasse
+
+* Klassifizierung -- Typ vs. Klasse
+#+begin_quote
+Designing good classes is hard because designing good
+types is hard. Good types have a natural syntax,
+intuitive semantics, and one or more efficient
+implementations\\
+\mbox{ } \hfill -- Scott Meyers
+#+end_quote
+
+* Objekt -- 2
+- es können beliebig viele Instanzen (engl. instance, Exemplar, Ausprägung)
+  einer Klasse erzeugt werden (Instanziierung)
+- in OO: ist Instanz einer Klasse
+  - Einfach- bzw. Mehrfachklassifikation
+    - single inheritance: Java, C#
+    - multi inheritance: \cpp, Python
+- kann mehrere Typen haben
+  - zeitlich gleichzeitig bzw. zeitlich änderbar (Rollen)
+
+* Kapselung -- encapsulation
+auch: information hiding
+- Schutz vor unerlaubten Zugriff auf internen Zustand
+  - durch eindeutig definierte Schnittstelle
+  - Zugriff über Methoden
+- Unterstützung in Programmiersprachen
+  - durch Schlüsselwörter: =private=, =protected=, =public= (Java, C#, \cpp)
+    - u.U. auch package-visibility (z.B. Java, C#)
+  - Smalltalk: Instanzvariablen privat, Methoden öffentlich
+  - Python: Instanzvariablen und Methoden öffentlich
+    - außer: quasi-private beginnend mit =__=
+  - Properties: Python, C#
+- bezieht sich nicht nur auf Klassen!
+
+* Kapselung -- 2
+- Vorteile
+  - Implementierung kann geändert werden
+    - ohne andere Programmteile ändern zu müssen
+  - weniger Abhängigkeiten zu anderen Programmteilen
+  - verbesserte Übersichtlichkeit
+  - besser zu testen
+- Nachteile
+  - Performanceverlust durch Funktionsaufrufe
+  - Programmieraufwand
+
+* Schnittstelle -- interface
+- legt Menge von Signaturen fest
+- unterspezifiziert
+- keine Instanzen eines Interfaces
+- keine Implementierung
+- "eine Klasse implementiert ein Interface"
+  - Interface unterspezifiert...
+    - daher Implementierung der Signaturen "irgendwie"
+  - ADT ist voll spezifiziert...
+    - \to "eine Klasse implementiert einen Typ"
+
+* Vererbung -- inheritance
+\vspace{1.5em}
+- Mechanismus, um neue Klassen (bzw. Typen, Interfaces) aus existierenden
+  Klassen (bzw. Typen, Interfaces) zu definieren
+- Unterklasse erbt Instanzvariablen der Oberklasse
+- Unterklasse (bzw. Typ, Interface) erbt Methoden der Oberklasse (bzw. Typ, Interface)
+- Unterklasse kann
+  - neue Instanzvariable oder Methoden (auch überladene[fn::gleicher Name, aber
+    unterschiedliche Anzahl bzw. Typen der Parameter]) definieren
+  - geerbte Methoden überschreiben (overriding[fn::gleiche Signatur wie Methode aus Oberklasse\vspace{1em}])
+- Begriffe
+  - Unterklasse (U): Subklasse, abgeleitete Klasse, Kindklasse
+  - Oberklasse (O): Superklasse, Basisklasse, Elternklasse
+    
+* Arten der Vererbung
+- Mittels Vererbung wird eine Generalisierung erreicht
+  #+Attr_LaTeX: :height 3cm
+  [[./inheritance.png]]
+- 3 Arten der Generalisierung
+  - Implementierungsvererbung
+  - Spezialisierungsvererbung
+  - Spezfikationsvererbung oder Subtypbeziehung
+
+* Begriffe
+\vspace{1.5em}
+- Kovarianz: Der deklarierte Typ eines Elements im Untertyp ist ein Untertyp
+  des deklarierten Typs des entsprechenden Elements im Obertyp
+  - d.h. $PO \ge PU$ bzw. $RO \ge RU$
+    - d.h.: Typhierarchie hat gleiche Richtung zur Vererbungshierarchie
+    \vspace{-0.5em}
+- Kontravarianz: Der deklarierte Typ eines Elements im Untertyp ist ein
+  Obertyp des deklarierten Typs des Elements im Obertyp
+  - d.h. $PU \ge PO$ bzw. $RU \ge RO$
+    - d.h.: Typhierarchie entgegen der Richtung der Vererbungshierarchie
+    \vspace{-0.5em}
+- Invarianz: Der deklarierte Typ eines Elements im Untertyp ist gleich
+  dem deklarierten Typ des entsprechenden Elements im Obertyp
+  - d.h.: Typen sind in gleich: $PU = PO$ bzw. $RU = RO$
+
+* "Varianz" in \cpp{}: Vererbung 
+- Methode =RO O::op()= wird durch =RU U::op()= überschrieben
+- \to Signaturen müssen gleich sein!!!
+- Typ des Rückgabewertes
+  - =RO = RU= oder
+  - =RO= ist =B*= bzw. =B&= \to =RU= ist =D*= bzw. =D&=, wenn $B \ge D$
+    - d.h. Pointer und Referenzen sind /kovariant/!
+
+* "Varianz" in \cpp{}: Vererbung -- 2
+\vspace{1.5em}
+\scriptsize
+#+begin_src C++
+struct Coat {};  struct DogCoat : Coat {};
+
+struct Animal {
+    virtual void make_noise() { puts("beep beep"); }
+    //virtual Coat coat() { return coat_; }
+    virtual Coat& coat() { return coat_; }
+    virtual void set_coat(Coat*) {};
+    virtual ~Animal() = default;
+  private:
+    Coat coat_;
+};
+struct Dog : Animal {
+    void make_noise() override { puts("bow-wow"); }
+    // DogCoat coat() override { return DogCoat{}; }
+    // ->  invalid covariant return type for
+    //        ‘virtual DogCoat Dog::coat()’
+    DogCoat& coat() override { return coat_; }
+    //void set_coat(DogCoat*) override;
+    //  ‘void Dog::set_coat(DogCoat*)’ marked ‘override’,
+    //    but does not override
+  private:
+    DogCoat coat_;
+};
+#+end_src
+
+* "Varianz" in \cpp{}: Vererbung -- 3
+#+begin_src c++
+int main() {
+    Dog golu;
+    golu.make_noise();  // -> bow-bow
+    Animal* animal{&golu};
+    animal->make_noise();  // -> bow-bow
+}
+#+end_src
+
+* "Varianz" in \cpp{}: Arrays
+- Array von Subtypen \to object slicing!
+- keine Arrays von Referenzen!
+- Array von Pointer \to Polymorphie ✓
+- keine Zuweisung von Arrays mit unterschiedlichen Typen
+  - d.h. /invariant/
+  - auch nicht, wenn diese in einer Vererbungsbeziehung stehen
+
+* "Varianz" in \cpp{}: Arrays -- 2
+\vspace{1.5em}
+\scriptsize
+#+begin_src c++
+    // object slicing:
+    Animal animals[5]{ Dog{}, Dog{} };
+    animals[0].make_noise(); // -> beep beep
+    // why? object slicing:
+    Animal rex{golu};
+    rex.make_noise(); // -> beep beep
+
+    // keine Arrays von Referenzen:
+    // Animal& animals2[5];
+    // -> declaration of ‘animals2’ as array of references
+
+    // Array von Pointer:
+    Animal* animals2[5]{ new Dog{}, new Dog{} };
+    animals2[0]->make_noise();  // -> bow-bow
+
+    // keine Zuweisung von Arrays mit unterschiedlichen Typen
+    Dog* dogs[5];
+    //animals2 = dogs;  // incompatible types in assignment
+    //dogs = animals2;  // incompatible types in assignment
+#+end_src
+
+* "Varianz" in \cpp{}: Templates
+\vspace{1em}
+- Templates sind ebenfalls /invariant/!
+  - jedes Mal ein neuer Typ
+
+  #+latex: {
+  \footnotesize
+  #+begin_src c++
+      vector<Dog> dogs3;
+      vector<Animal> animals3;
+      //animals3 = dogs3;  //  no match for ‘operator=’...
+      //dogs3 = animals3;  //  no match for ‘operator=’...
+  #+end_src
+  #+latex: }
+- Abhilfe? \to copy constructor, assignment operator!
+  - z.B. =std::function= der Standardbibliothek
+    \scriptsize
+    #+begin_src c++
+    using AnimalDoctor = function<void(Animal*)>;
+    using DogDoctor = function<void(Dog*)>;
+    
+    auto maxi{[](Animal*){}};
+    auto mini{[](Dog*){}};
+
+    DogDoctor a{mini};
+    DogDoctor b{maxi};
+    //AnimalDoctor c{mini};  // no matching function for call...
+    AnimalDoctor d{maxi};
+    #+end_src
+
+* "Varianz" in Java und C#
+\vspace{1.5em}
+- Arrays in Java: /kovariant/
+
+  #+latex: {
+  \vspace{0.25em}
+  \scriptsize
+  #+begin_src java
+  class Animal {
+  }
+  
+  class Dog extends Animal {
+  }
+  
+  class Cat extends Animal {
+  }
+  
+  public class Test {
+      public static void main(String[] args) {
+          Animal animals[] = new Animal[5];
+          Dog dogs[] = new Dog[5];
+          
+          animals = dogs;
+          animals[0] = new Dog();
+          animals[1] = new Cat();
+          // -> java.lang.ArrayStoreException: Cat
+      }
+  }
+  #+end_src
+  #+latex: }
+\vspace{-0.5em}
+\to broken also in C# (außer bei =System.ValueType=-Typen)!
+
+* "Varianz" in Java und C# -- 2
+- Java
+  - Methoden
+    - Rückgabetyp kovariant!
+    - Parametertyp kontravariant!
+- C#
+  - Methoden: wie in C++
+  - Delegates
+    - Rückgabetyp kovariant
+    - Parametertyp kontravariant
+
+* "Varianz" in C#: Vererbung
+\vspace{1.5em}
+\scriptsize
+#+begin_src csharp
+using System;
+
+class Animal {}
+
+class Dog : Animal {}
+
+class AnimalBreeder {
+    public virtual Animal make_animal() { return new Animal(); }
+    //public virtual void say_hi(Animal a) { a.make_noise(); }
+}
+
+class DogBreeder : AnimalBreeder {
+  //public override Dog make_animal() { return new Dog(); }
+  // -> 'DogBreeder.make_animal()': return type must be 'Animal' to
+  //     match overridden member 'AnimalBreeder.make_animal()'
+  //public override void say_hi(Dog a) { d.make_noise(); }
+  // ->  'DogBreeder.say_hi(Dog)': no suitable method found to override
+}
+#+end_src
+
+* "Varianz" in C#: delegates
+\vspace{1.5em}
+\scriptsize
+#+begin_src csharp
+public class Test {
+  static Dog make_dog() { return new Dog(); }
+  static void make_noise1(Dog d) { Console.WriteLine("bow-bow"); }
+  static void make_noise2(Animal d) { Console.WriteLine("beep beep"); }
+  
+  public static void Main() {
+      Func<Animal> func = make_dog;
+      Action<Dog> action1 = make_noise1;
+      Action<Dog> action2 = make_noise2;
+      //Action<Animal> action3 = make_noise1;
+  }
+}
+#+end_src
+
+* Begriffe -- 2
+- Vorbedingung, engl. pre-condition, kurz $pre$
+  - Bedingung, die am Beginn der Operation wahr sein muss, damit
+    Operation wie spezifiziert funktioniert.
+- Nachbedingung, engl. post-condition, kurz $post$
+  - Bedingung, die am Ende der Operation wahr ist, wenn Vorbedingungen
+    wahr sind.
+- Invariante, engl. invariant, kurz $inv$
+  - Bedingung, die während der gesamten Ausführung der Operation
+    wahr ist. Z.B., dass Werte nicht geändert werden
+
+* Vor- und Nachbedingungen in \cpp{}23
+\vspace{1em}
+- =expects=, =ensures=, =assert=
+- modifier
+  - =default=: runtime checking klein
+  - =audit=: runtime checking groß
+  - =axiom=: keine runtime checking
+
+\vspace*{1em}
+\scriptsize
+#+begin_src c++
+double sqrt(double x)
+  [[ expects: x >= 0 ]]
+  [[ ensures ret: ret * ret = x ]] {
+    double res{0};
+    while (1) {
+        /* calculate something */
+        [[ assert audit : res >= 0 ]];
+        /* calculate something, too */
+        /* break out when ready */
+    }
+    return res;
+}
+#+end_src
+
+* Implementierungsvererbung
+- keine konzeptionelle Beziehung zwischen
+  Ober- und Unterklasse wird vorausgesetzt.
+- Vererbung von Eigenschaften (properties) steht im Vordergrund
+- Motivation: code-sharing
+- Alternative: Aggregation und Delegation
+  - oder: private Vererbung in \cpp
+- Beispiel: Ellipse als Unterklasse von Kreis
+- Synonyme: Codeverbung, nicht-strikte Vererbung, willkürliche Vererbung
+
+* Spezialisierungsvererbung
+\vspace{1.5em}
+- Taxonomische Beziehung (hierarchische Klassifikation) zwischen Ober- und Unterbegriffen
+  - Wissensrepräsentation, semantische Datenmodellierung
+- U is-a O: U Instanzen sind spezielle O Instanzen
+  - \to extensionale Ebene
+    - Extension: Gesamtheit der Dinge über die sich Begriff erstreckt
+    - d.h. Menge der Instanzen von U ist Teilmenge von O
+    \vspace{-0.5em}
+- Beispiele: Integer is-a Rational, Kreis is-a Ellipse
+- Bedingungen
+  - $\forall o: pre(U::op) \imp pre(O::op)$
+    - speziell für Typen: $\text{PO} \ge \text{PU}$ (kovariant)
+  - $\forall o: post(U::op) \imp post(O::op)$
+    - speziell für Typen: $\text{RO} \ge \text{RU}$ (kovariant)
+- Synonym: is-a Beziehung (Achtung: Homonym!)
+
+* Spezifikationsvererbung
+- Substitutionsprinzip
+  - U muss alle öffentlichen Operationen von O anbieten
+    - durch erben oder überschreiben
+  - Die in U überschriebenen Operationen müssen
+    in allen Situationen aufrufbar sein, in denen die
+    Operation von O aufrufbar sind und kompatible
+    Ergebnisse liefern
+- in jeder Phase der SW Entwicklung!!!
+
+* Spezifikationsvererbung -- 2  
+- Bedingungen
+  - $\forall o: pre(O::op) \imp pre(U::op)$
+    - d.h. $U::op$ darf keine strengeren Vorbedingungen voraussetzen als $O::op$ 
+    - speziell für Typen: $\text{PU} \ge \text{PO}$ (kontravariant)
+  - $\forall o: post(U::op) \imp post(O::op)$
+    - d.h. $U::op$ muss zumindest das erreichen, das auch $O::op$ erreicht
+    - speziell für Typen: $\text{RO} \ge \text{RU}$ (kovariant)
+- Synonyme: Subtypbeziehung, strikte Vererbung, essentielle Vererbung
+
+* Liskov'sches Substitutionsprinzip
+\vspace{1em}
+- Formulierung der Spezifikationsvererbung
+- Liskov'sches Substitutionsprinzip
+  - Barbara Liskov, 1988
+  - Es muss gewährleistet sein, dass ein Exemplar eines Subtyps
+    überall dort stehen kann, wo ein Exemplar des Supertyps
+    erlaubt ist!
+- Eine Methode im Basistyp darf nie durch eine Methode im Subtyp ersetzt
+  werden, die
+  - einen Parameter nicht "verträgt", den die Supertypmethode
+    verträgt (kontravariant),
+  - deklariert, abrupt mit einer Ausnahme enden zu können, mit der
+    nicht auch die Supertyp-Methode hätte terminieren können (kovariant),
+  - oder einen Rückgabewert liefert, den nicht auch die
+    Supertyp-Methode hätte liefern können (kovariant).
+
+* Kreis-Ellipse Problem
+- Kreis ist eine Ellipse \to =Circle= von =Ellipse= ableiten
+  - \to Spezialisierungsvererbung
+  - Methoden =stretch_x= und =stretch_y= in =Ellipse=?!
+    - =Circle= erbt diese Methoden \to dann kein Kreis mehr!
+    - =Circle= überschreibt Methoden \to Verstoß gegen Liskov'sches
+      Substitutionsprinzip, da sich ein Objekt von =Kreis= nicht
+      verhält wie man es sich von einer Ellipse erwaret
+
+* Kreis-Ellipse Problem -- 2
+- Ellipse hat eine Achse mehr als ein Kreis \to =Ellipse= von =Circle= ableiten
+  - \to Implementierungsvererbung
+  - aber widersinnig: Ellipse ist kein Subtyp von Kreis!
+    - Methode =radius= von =Circle= wird an =Ellipse= vererbt
+    - verstößt klarerweise ebenfalls gegen Liskov'sches Substitutionsprinzip
+
+* Kreis-Ellipse Problem -- 3
+- Keine Vererbungsbeziehung zwischen =Ellipse= und =Circle=!
+  - u.U. gemeinsame Überklasse =GraphicElement=
+  - u.U. gemeinsame Überklasse =CircleOrEllipse=
+    - beinhaltet gemeinsame Funktionalität
+  - u.U. =Circle::as_ellipse()= liefert veränderbare Instanz von =Ellipse=
+- Nur Klasse =Ellipse= mit Methode =is_circle()=
+- Klassen =Circle= und =Ellipse= /immutable/ implementiert
+  - \to =Circle::stretch_x= liefert neues Objekt zurück
+  - d.h. =Circle= kann von =Ellipse= abgeleitet sein
+
+* Binden -- binding
+- Zuordnung einer Nachricht (Methodenname) zum Code (Implementierung
+  einer Methode)
+- statisches Binden (static binding) ist Binden zur Übersetzungszeit
+- dynamisches Binden (dynamic binding, late binding) ist Binden zur
+  Laufzeit
+- C++, C#: statisches und dynamisches Binden
+- Java, Python, JavaScript: nur dynamisches Binden
+
+* Typgebundenheit -- typing
+\vspace{1em}
+- Typ gebunden an Objekte / Variablen
+  - statisch getypt (statically typed)
+    - Typ ist an Variable gebunden
+    - liegt daher zur Übersetzungszeit fest
+    - Beispiele: Java, C++, C#
+  - dynamisch getypt (dynamically typed)
+    - Typ ist an Objekt gebunden
+    - ist daher erst zur Laufzeit bekannt
+    - Beispiele: Python, JavaScript, Ruby, C#
+    - Duck Typing
+      
+    #+begin_quote
+    When I see a bird that walks like a duck
+    and swims like a duck and
+    quacks like a duck, I call that bird a duck.\\
+    \mbox{ } \hfill -- James Whitcomb Riley (1849 - 1916,\\
+    \hfill amerikanischer Schriftsteller)
+    #+end_quote
+
+* Duck Typing in Python
+#+begin_src python
+class Duck:
+    def quack(self):
+        return "Quaaack!"
+        
+class Person:
+    def quack(self):
+        # glaubt eine Ente zu sein! ;-)
+        return "Quack!"
+
+o = Duck()
+print(o.quack())
+o = Person()
+print(o.quack())
+#+end_src
+
+* Duck Typing -- 2
+Es geht eigentlich nicht darum was etwas /ist/ sondern was etwas /kann/:
+#+begin_quote
+In other words, don't check whether it IS-a duck: check whether it
+QUACKS-like-a duck, WALKS-like-a duck, etc, etc, depending on exactly what
+subset of duck-like behaviour you need to play your language-games with.\\
+\mbox{ } \hfill -- Alex Martelli (Senior Staff Engineer, Google)
+#+end_quote
+
+* C# ab Version 4.0
+\vspace{1em}
+#+begin_src java
+class Duck {
+    void quack() {
+        return "Quaaack!";
+    }
+}
+
+class Person {
+    void quack() {
+        return "Quack!";
+    }
+}
+
+dynamic o = new Duck();
+System.Console.WriteLine(o.quack());
+o = new Person();
+System.Console.WriteLine(o.quack());
+#+end_src
+
+* Polymorphie -- polymorphism
+\vspace{1.5em}
+- Fähigkeit verschiedene Gestalt anzunehmen
+- Polymorphe Operation kann auf Objekten verschiedener Klassen
+  ausgeführt werden und jeweils eine andere Semantik haben.
+  - wird erreicht durch:
+    - Vererben, Überschreiben und dynamischem Binden von Methoden
+    - Überladen (z.B. Methoden, Funktionen, Operatoren)
+- Polymorphe Variable
+  - kann im Laufe der Ausführung eines Programmes
+    auf Instanzen verschiedener Klassen referenzieren. 
+  - hat eine
+    - statische Klasse: wird bei der Deklaration spezifiziert und
+      ist zur Übersetzungszeit bekannt (fix!)
+    - dynamische Klasse: jeweils die Klasse des Objektes, das die
+      Variable zur Laufzeit referenziert (variabel!)
+
+* First class object
+In einer Programmiersprache ist ein Konstrukt (z.B. Funktion oder
+Klasse) ein first class object, wenn es
+- in Variablen und Datenstrukturen gespeichert werden kann
+- als Parameter übergeben werden kann
+- als Return-Wert zurückgegeben werden kann
+- zur Laufzeit erzeugt werden kann
+- eine eigene Identität hat
+
+* First class object -- 2
+#+begin_src python
+def add(a, b):
+    return a + b
+
+def sum_up(seq, f):
+    acc = 0
+    for x in seq:
+        acc = f(acc, x)
+    return acc
+
+print(sum_up(range(1, 11), add))  # -> 55
+print(id(add))  # -> z.B.: 3069449532
+#+end_src
+
+* Typgebundenheit -- 2
+Implizite vs. explizite Typkonversion bei Variablen
+- schwach getypt (weakly typed): PHP, JavaScript, Perl
+  
+  Typ wird implizit in beliebigen Typ gewandelt
+  (implicitly type coercion),
+  - z.B. in PHP:
+    #+latex: { \small
+    #+begin_src php
+    $a = 9; $b = "9"; $c = $a + $b; // -> 18
+    #+end_src
+    \pause
+    #+begin_src php
+    $zahl = 6 + "7.7 Maxi und Minis"; // -> 13.7!!!
+    $zahl = 8 + "Maxi und Minis-9";  // -> 8!!!
+    #+end_src
+    #+latex: }
+  - z.B. in Javascript
+    #+begin_src Javascript
+    a = 4; b = "2"; c = a + b;  // -> "42"
+    #+end_src
+
+* Typgebundenheit -- 3
+#+begin_quote
+In Java, everything is an object.\\
+In Closure, everything is a list.\\
+In Javascript, everything is a terrible mistake.\\
+\mbox{ }\hfill -- unbekannt
+#+end_quote
+
+* Typgebundenheit -- 4
+- stark getypt (strongly typed): Java, Python, C#
+  
+  Typ wird nicht implizit, sondern muss explizit konvertiert
+  (explicitly type coercion), z.B.:
+  #+latex: { \small
+  #+begin_src python
+  a=9; b="9"; c=a + int(b); # Python -> 18
+  #+end_src
+  #+latex: }
+  Aber in Java:
+  #+latex: { \small
+  #+begin_src java
+  out.println(a + " + " + b + " = " + a + b);
+  // -> 1 + 2 = 12
+  #+end_src
+  #+latex: }
+* Metaklassen
+#+begin_src python
+class Base:
+    pass
+
+class Klass(Base):
+    pass
+
+class Meta(type):
+    pass
+
+class KlassWithMeta(metaclass=Meta):
+    pass
+
+kwm = KlassWithMeta()
+#+end_src
+
+* Metaklassen -- 2
+\vspace{1em}
+[[./typediagram.png]]
+
+* Metaklassen -- 3
+\vspace{1.5em}
+\footnotesize
+#+begin_example
+>>> issubclass(Klass, Base) and issubclass(Base, object)
+True
+>>> issubclass(KlassWithMeta, object)
+True
+>>> kwm = KlassWithMeta()
+>>> isinstance(kwm, KlassWithMeta)
+True
+>>> type(kwm)
+<class '__main__.KlassWithMeta'>
+>>> type(KlassWithMeta)
+<class '__main__.Meta'>
+>>> type(Meta)
+<class 'type'>
+>>> issubclass(Meta, type)
+True
+>>> type(object)
+<class 'type'>
+>>> type(type)
+<class 'type'>
+>>> issubclass(type, object)
+True
+#+end_example
+

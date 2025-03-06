@@ -1,0 +1,196 @@
+
+
+#+TITLE: Python \hfill Unit 3\linebreak \small...für Anfänger
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Execushares
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+#+LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{C++\xspace}
+
+* Division mit Rest in $\mathbb{N}$
+** Division                                                  :B_block:BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.4
+:BEAMER_ENV: block
+:END:
+#+BEGIN_SRC python
+>>> 8 // 2 
+4
+>>> 7 // 2
+3
+#+END_SRC
+
+** Modulo                                                    :B_block:BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.4
+:BEAMER_ENV: block
+:END:
+#+BEGIN_SRC python
+>>> 8 % 2 
+0
+>>> 7 % 2
+1
+#+END_SRC
+
+
+* Division mit Rest in $\mathbb{Z}$
+** Division                                                  :B_block:BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.4
+:BEAMER_ENV: block
+:END:
+#+BEGIN_SRC python
+>>> 7 // 3
+2
+>>> -7 // 3 
+-3
+>>> 7 // -3
+-3
+>>> -7 // -3
+2
+#+END_SRC
+
+** Modulo                                                    :B_block:BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.4
+:BEAMER_ENV: block
+:END:
+#+BEGIN_SRC python
+>>> 7 % 3
+1
+>>> -7 % 3 
+2
+>>> 7 % -3
+-2
+>>> -7 % -3
+-1
+#+END_SRC
+
+
+
+
+
+
+* Namen
+#+BEGIN_SRC python
+>>> r
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'r' is not defined
+>>> r = 3
+>>> r
+3
+>>> import math
+>>> 2 * r * math.pi
+6.283185307179586
+#+END_SRC
+
+
+* =input=
+#+BEGIN_SRC python
+>>> r = input("Radus= ")
+Radius= 2
+>>> 2 * r * math.pi
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: can't multiply sequence by non-int of type 'float'
+>>> r
+'2'
+>>> 2 * int(r) * math.pi
+12.566370614359172
+#+END_SRC
+
+
+* =abs=
+#+BEGIN_SRC python
+>>> x = 1
+>>> abs(x)
+1
+>>> x = -2
+>>> abs(x)
+2
+>>> x = 0
+>>> abs(0)
+0
+#+END_SRC
+
+
+* Funktionen vs. Prozedur
+#+BEGIN_SRC python
+>>> a = math.sqrt(4)
+>>> a
+2.0
+>>> x = print(2)
+2
+>>> x
+>>> print(x)
+None
+#+END_SRC
+
+
+* Objekt
+#+BEGIN_EXAMPLE
+>>> name = "Maxi"
+>>> type(name)  # Typ
+<class 'str'>
+>>> id(name)  # Identitdät
+3068043648
+>>> # Zustand eines Strings
+>>> name + "!"  # Verhalten
+'Maxi!'
+#+END_EXAMPLE
+
+
+* Typen
+Jedes Objekt hat einen Typ!
+#+BEGIN_EXAMPLE
+>>> type(None)
+<class 'NoneType'>
+>>> type(print)
+<class 'builtin_function_or_method'>
+>>> type(2)
+<class 'int'>
+>>> type(int)
+<class 'type'>
+>>> int
+<class 'type'>
+>>> type(type)
+<class 'type'>
+#+END_EXAMPLE
+
+
+* Vertauschung mittels Hilfsvariable
+#+BEGIN_SRC python
+>>> a = 1
+>>> b = 2
+>>> c = a
+>>> a = b
+>>> b = c
+>>> a
+2
+>>> b
+1
+#+END_SRC
+
+* Vertauschung ohne Hilfsvariable
+?
+#+beamer: \pause
+#+begin_src python
+>>> a = 1
+>>> b = 2
+>>> a = a + b
+>>> b = a - b
+>>> a = a - b
+>>> a
+2
+>>> b
+1
+#+end_src
+
