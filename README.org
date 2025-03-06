@@ -26,7 +26,7 @@ Just a short overview to .NET Core and the basics of C#.
 This is a gentle introduction to Python for beginners of this particular
 programming language.
 
-** [[file:build/securecomm_intro/][A quick primer to secure communication]]
+** [[file:build/securecomm_intro/securecomm.html][A quick primer to secure communication]]
 
 A short presentation to secure communication for the end user.
 
