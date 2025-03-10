@@ -39,3 +39,5 @@ possible of specific programming languages and frameworks.
 
 Nothing fancy, just an old slide deck that covers the basics of
 HTML, CSS, JavaScript, and the foundations of HTTP.
+
+Please note the license.
