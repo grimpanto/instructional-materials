@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>30</x>
+      <y>220</y>
+      <w>390</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>Line
+--
+length : double
+--
++Line(pos : Point, length : double, alpha : double)
++Line(start : Point, end: Point)
++get_length() : double { query }
++set_length(length : double) : void { length &gt; 0 }
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>440</x>
+      <y>10</y>
+      <w>200</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+r1=+pos</panel_attributes>
+    <additional_attributes>180.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>620</x>
+      <y>10</y>
+      <w>90</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Point
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>540</x>
+      <y>60</y>
+      <w>310</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>/Shape2D/
+--
+--
++Shape(pos : Point, alpha : double)
+/+get_area() : double { query }/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>220</x>
+      <y>180</y>
+      <w>30</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>30</x>
+      <y>10</y>
+      <w>420</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>/Shape/
+--
+#alpha : double
+--
++Shape(pos : Point, double alpha)
++set_alpha(alpha : double)
++set_alpha_degree(alpha : double)
++get_alpha() : double { query }
++get_alpha_degree() : double { query }
++move(dx : double, dy : double) : Shape&amp;
++rotate(alpha : double) : Shape&amp;
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>440</x>
+      <y>90</y>
+      <w>120</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;100.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>170</x>
+      <y>380</y>
+      <w>400</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>Square
+--
+-side : double
+--
++Square(pos : Point, side : double, double alpha)
++get_area() : double
++get_side() : double { query }
++set_side(side : double) { side &gt; 0 }
++get_area() : double { query }</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>450</x>
+      <y>130</y>
+      <w>160</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>140.0;10.0;10.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>620</x>
+      <y>130</y>
+      <w>40</w>
+      <h>450</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>20.0;10.0;10.0;430.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>330</x>
+      <y>560</y>
+      <w>570</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>Rectangle
+--
+-side_a : double
+-side_b : double
+--
++Rectangle(pos : Point, alpha : double, sideA : double, sideB : double)
++get_area() : double { query }
++get_side_a() : double { query }
++set_side_a(side : double) { side &gt; 0 }
++get_side_b() : double { query }
++set_side_b(side : double) { side &gt; 0 }
++get_area() : double { query }</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

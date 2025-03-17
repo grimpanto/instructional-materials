@@ -1,0 +1,187 @@
+#+TITLE: \jobname: Primfaktorenzerlegung
+#+AUTHOR: Dipl.-Ing. Dr. Günter Kolousek
+#+DATE: 2019
+#+EXCLUDE_TAGS: note
+
+#+OPTIONS: date:nil tags:nil ^:nil
+# +OPTIONS: date:nil author:nil tags:nil
+#+STARTUP: align
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [DIV=17,no-math]
+#+latex_header: \usepackage{lastpage}
+#+LATEX_HEADER: \usepackage{typearea}
+#+LATEX_HEADER: \usepackage{scrlayer-scrpage}
+#+LATEX_HEADER: \clearpairofpagestyles
+#+LATEX_HEADER: \chead*{\jobname}
+#+LATEX_HEADER: \ifoot*{Dr. Günter Kolousek}
+#+LATEX_HEADER: \ofoot*{\thepage{} / \pageref{LastPage}}
+
+
+#+LATEX_HEADER:\usepackage{tikz}
+#+LATEX_HEADER:\usepackage{fancyvrb}
+#+LATEX_HEADER:\usepackage{hyperref}
+
+# use it to insert break just before a subsection
+# +LATEX_HEADER: \usepackage{titlesec}
+#+LATEX_HEADER: \newcommand{\subsectionbreak}{\clearpage}
+
+#+latex_header: \usepackage{fontspec}
+#+latex_header: \usepackage{polyglossia}
+# +latex_header: \setmainlanguage[babelshorthands=true]{german}
+#+latex_header: \setmainlanguage{german}
+# Utopia Regular with Fourier
+#+latex_header: \usepackage{fourier}
+#+latex_header: \usepackage{newunicodechar}
+#+latex_header: \newunicodechar{ß}{\ss}
+
+#+LATEX_HEADER: \setkomafont{title}{\sffamily\bfseries}
+#+LATEX_HEADER: \setkomafont{author}{\sffamily}
+#+LATEX_HEADER: \setkomafont{date}{\sffamily}
+
+#+LATEX_HEADER: \usepackage{pifont}  % necessary for "ding"
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{☛}{{\ding{43}}}
+#+LATEX_HEADER: \newunicodechar{✔}{{\ding{52}}}
+#+LATEX_HEADER: \newunicodechar{✘}{{\ding{55}}}
+#+LATEX_HEADER: \newunicodechar{◆}{{\ding{169}}}
+
+# +LATEX_HEADER: \usepackage{parskip}
+#+LATEX_HEADER: \usepackage{xspace}
+#+LATEX_HEADER: \newcommand{\cpp}{C++\xspace}
+
+# +LATEX_HEADER: \frenchspacing
+
+#+latex_header: \setlength{\parindent}{0cm}
+#+latex_header: \usepackage{parskip}
+
+#+OPTIONS: toc:nil
+
+# +LATEX: \addtokomafont{disposition}{\normalfont\rmfamily\bfseries\color{blue}}
+
+# latexmk -pvc -pdf -xelatex -view=none --latexoption=-shell-escape themenbereiche.tex
+
+
+[[http://creativecommons.org/licenses/by-nc-nd/4.0/][Creative Commons Namensnennung - Nicht kommerziell - Keine Bearbeitungen 4.0 International Lizenz]]
+
+* Allgemeines
+- *Es gelten die gleichen Richtlinien wie beim ersten Beispiel!!!*
+
+* Aufgabenstellung
+Schreibe ein \cpp Programm =primes=, das eine Zahl (=unsigned long long=)
+auf der Kommandozeile erhält und die Primfaktoren auf der Kommandozeile
+ausgibt.
+
+Die Kommandozeilenschnittstelle hat folgendermaßen zu funktionieren:
+
+#+begin_example
+$ primes -h
+Calculates the prime factors of the given number
+Usage: primes [Options] NUMBER
+
+Positionals:
+  NUMBER UINT REQUIRED        The number
+
+Options:
+  -h,--help                   Print this help message and exit
+$ primes 100a
+Could not convert: NUMBER = 100a
+Run with --help for more information.
+$ primes 100
+2 2 5 5 
+#+end_example
+
+Weiters sind dafür Unit-Tests zu implementieren, die folgendermaßen
+gestartet werden:
+
+#+begin_example
+$ ninja test
+#+end_example
+
+* Anleitung
+Schreibe ein Programm entsprechend der Aufgabenstellung.
+
+- Es soll jetzt =meson= zur Generierung der Builddateien und =ninja=
+  zum eigentlichen Übersetzen verwendet werden. Die Sourcedateien
+  kommen in ein eigenes Unterverzeichnis =src=, die Headerdateien
+  in ein eigenes Unterverzeichnis =include= und die erzeugten
+  Dateien in das Unterverzeichnis =build=. Überfliege dazu das
+  Tutorial =meson_tutorial= und schaue dir den Anfang des Dokumentes
+  mit den relevanten Abschnitten /genau/ an!
+
+  *Wichtig*:
+  - Als Sprachstandard verwenden wir in den Übungen ~c++2a~!
+  - Der Warnlevel wird mit 3 festgelegt!
+  - Jede Warnung wird als Fehler betrachtet!
+    
+- Die Behandlung der Kommandozeilenarguemente wird in einem eigenen
+  Modul =main= durchgeführt. Wir sehen, dass die eigentliche Verarbeitung
+  einfacher ist als beim ersten Beispiel. Trotzdem ist es mühsam und
+  langweilig immer die gleiche Logik zu programmieren. Deshalb verwenden
+  wir jetzt die header-only Bibliothek =CLI11=. Am einfachsten ist diese
+  zu verwenden, wenn einfach die zur Verfügung gestellte Headerdatei =CLI11.hpp=
+  in das Verzeichnis =include= kopiert wird. Das ist zwar aus verschiedensten
+  Gründen nicht optimal (mehrere Projekte, Aktualität), aber vorerst
+  am einfachsten.
+
+  Auftrag: Studiere die Dokumentation von =CLI11=, sodass du in der Lage bist
+  einfache Kommandozeilenverarbeitung mit diesem Tool zu implementieren.
+
+  Beachte wie "Options" in meiner Beispielsausgabe geschrieben wurde.
+  Das kann mittels Formatierung der Hilfeausgabe geändert werden.
+  
+- Die Funktionalität zur Berechnung der Primfaktoren
+  soll in einem eigenen Modul =primes= entwickelt werden. Dafür ist sowohl
+  eine =.cpp= als auch eine =.h= Datei zu schreiben. Das ist ab jetzt
+  Standard!
+
+  Anstatt des Header-Guard kann auch eine =#pragma= Direktive verwendet
+  werden. Eine solche Preprozessordirektive ist eine Anweisung an den
+  Präprozessor, die jedoch nicht standardisiert ist. Das bedeutet,
+  dass diese nicht von jedem Präprozessor verstanden wird.
+
+  In unserem konkreten Fall sieht das so aus, dass wir den Header-Guard
+  einfach durch
+
+  #+begin_example
+  #pragma once
+  #+end_example
+
+  am Anfang der Headerdatei ersetzen können. Alle gängigen Präprozessoren
+  verstehen dies und somit können wir davon Gebrauch machen. Ist einfacher,
+  kürzer und weniger feheranfällig.
+  
+- Bis jetzt haben wir =unsigned long long= verwendet. Der \cpp Standard
+  gibt allerdings keine konkrete Angaben über die Größe einer derartigen
+  Zahl an. Statt dessen gibt es einen Typ =uint64_t= von dem wir sicher
+  sein können, dass es sich um eine vorzeichenlose ganze Zahl mit
+  64 Bits handelt. Entsprechender Header ist zu inkludieren!
+  
+- Diese Funktionalität des Moduls =primes= soll in einem eigenen Namensraum
+  =prime_factorization= entwickelt werden. Dazu ist eine Funktion
+  =calculate_primes= zu schreiben, die eine Zahl vom Typ =uint64_t= bekommt
+  und einen =std::vector= von =uint64_t= Zahlen zurückliefert. Auch
+  der Header für =vector= ist zu inkludieren.
+  
+- Der Algorithmus zur Zerlegung der Zahl =n= in die Primfaktoren kann
+  folgendermaßen verbal formuliert werden:
+  a. Solange =n= durch 2 geteilt werden kann, ist 2 ein Primfaktor und
+     wird zum Ergebnis hinzugefügt, während =n / 2= \hspace{0.1em} zum neuen =n= wird.
+  b. Schleife über alle =i= von 3 bis zur Quadratwurzel von =n= in Zweierschritten:
+     Solange =n= durch =i= geteilt werden kann, =i= zum Ergebnis hinzufügen, während
+     =n / i= \hspace{0.1em} zum neuen =n= wird.
+  c. Wenn =n= größer als 2, dann ist =n= ebenfalls zum Ergebnis hinzuzufügen.
+     
+- Die Quadratwurzel kann mittels =std::sqrt= berechnet werden.
+
+- Zur Ausgabe der Primfaktoren soll eine range-basierte =for=-Schleife
+  verwendet werden.
+
+* Übungszweck dieses Beispiels
+- =meson= und =ninja=
+- =CLI11=
+- =unsigned long long= vs. =uint64_t=
+- Implementierung des Algorithmus zum Ermitteln der Primfaktoren einer Zahl
+- =std::vector=
+- =std::sqrt= und =<cmath>=
+- range-basierte =for=-Schleife
+- =#pragma once=

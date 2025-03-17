@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>40</x>
+      <y>30</y>
+      <w>380</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>Point
+--
++ x : double {readOnly}
++ y : double {readOnly}
+--
++Point()
++Point(x : double, y : double)
++move(dx : double, dy : double) : Point {query}</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

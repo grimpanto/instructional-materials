@@ -35,6 +35,16 @@ A short presentation to secure communication for the end user.
 This covers the curriculum almost completely in a form that is as independent as
 possible of specific programming languages and frameworks.
 
+*** [[file:exercises/cpp][C++ Excercises]]
+
+As part of the curriculum, here you will find assignments that are suitable for
+programmers to get the necessary routine in C++ and at the same time to repeat
+and consolidate many relevant programming concepts.
+
+These assignments have been developed for the final year course in programming
+and software development at a technical secondary school for computer
+science.
+
 ** [[file:build/web_intro/][Webdevelopment for Beginners]]
 
 Nothing fancy, just an old slide deck that covers the basics of

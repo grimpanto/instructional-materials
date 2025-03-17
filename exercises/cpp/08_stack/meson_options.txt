@@ -1,0 +1,8 @@
+
+option('CLI11_include_dir', type : 'string', value : '../builds/cli11/include')
+option('fmt_include_dir', type : 'string', value : '../builds/fmt/include')
+option('fmt_lib_dir', type : 'string', value : '../builds/fmt/build')
+option('doctest_include_dir', type : 'string', value : '../builds/doctest/doctest')
+option('json_include_dir', type : 'string', value : '../builds/json')
+option('spdlog_include_dir', type : 'string', value : '../builds/spdlog/include')
+option('spdlog_lib_dir', type : 'string', value : '../builds/spdlog/build')

@@ -1,0 +1,4 @@
+
+option('CLI11_include_dir', type : 'string', value : '../builds/cli11/include')
+option('fmt_include_dir', type : 'string', value : '../builds/fmt/include')
+option('doctest_include_dir', type : 'string', value : '../builds/doctest/doctest')

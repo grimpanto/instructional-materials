@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>200</x>
+      <y>360</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Point
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>50</x>
+      <y>50</y>
+      <w>400</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>Line
+--
+-alpha : double
+-length : double { length &gt; 0 }
+--
++Line(pos : Point, alpha : double, length : double)
++Line(start : Point, end : Point)
++set_length(length : double)
++get_length() : double { query }
++set_alpha(alpha : double)
++set_alpha_degree(alpha : double)
++get_alpha() : double { query }
++move(dx : double, dy : double)
++rotate(alpha : double)
++rotate_degree(alpha : double)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>240</x>
+      <y>290</y>
+      <w>70</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+r2=+pos</panel_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+</diagram>
