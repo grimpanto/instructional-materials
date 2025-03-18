@@ -1,0 +1,5 @@
+
+message TimeInfo {
+  required int32 id=1;
+  optional string time=2;
+}

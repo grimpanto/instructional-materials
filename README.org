@@ -17,6 +17,13 @@ programming skills.
 A fairly complete teaching aid that covers the curriculum of the
 subject "Networks and Distributed Systems".
 
+*** [[file:exercises/distsys][Excercises]]
+
+As part of the curriculum you will find assignments for the first term of the
+final year that trains the basics of building clients and servers. They serve as
+preparation for the creation of more realistic systems as they are teached in
+the second term.
+
 ** [[file:build/dotnet_intro/][A really short introduction to .NET Core]]
 
 Just a short overview to .NET Core and the basics of C#.

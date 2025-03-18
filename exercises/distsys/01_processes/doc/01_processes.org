@@ -1,0 +1,212 @@
+#+TITLE: Beispiel =01_processes=
+#+AUTHOR: Dr. Günter Kolousek
+#+OPTIONS: H:1 toc:nil
+#+LATEX_CLASS: koma-article
+# +LATEX_CLASS_OPTIONS: [presentation]
+# +BEAMER_THEME: Execushares
+# +COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+# +LATEX_HEADER:\usepackage{pgfpages}
+# +LATEX_HEADER:\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]u
+# +LATEX: \mode<handout>{\setbeamercolor{background canvas}{bg=black!5}}
+#+LATEX_HEADER:\usepackage{xspace}
+#+LATEX: \newcommand{\cpp}{\texttt{C++}\xspace}
+#+LATEX: \setlength{\parindent}{0cm}
+#+LATEX_HEADER:\usepackage{hyperref}
+
+* Allgemeines
+- Drucke dieses Dokument *nicht* aus!
+- Halte *unbedingt* die Coding Conventions ein! Zu finden am ifssh!
+- *Alle* Beispiele müssen innerhalb eines
+  *Git*-Repositories auf github sein.
+  Es soll =<lastname>= benannt werden
+  wobei *nur* Kleinbuchstaben zu verwenden sind. Solch ein Repository kann
+  z.B. mittels =git init mustermann= angelegt werden.
+
+  Stelle zuerst sicher, dass sich eine richtig gefüllte =.gitrc= Datei
+  im Homeverzeichnis befindet bzw. konfiguriere mittels =git config...=!
+- Es ist =oft= zu "commiten". Zumindest *fünf* Mal pro Beispiel.
+  Je mehr desto besser!
+- regelmäßiges Backup deines Repos nicht vergessen (oder github...)
+- Es sind nur Sourcedateien, Konfigurationsdateien und ähnliches
+  ins Repository hinzuzufügen. Explizit nicht hinzuzufügen sind
+  ausführbare Dateien, Softwarearchive, Backupdateien und ähnliches.
+  Dazu ist die =.gitignore= sinnvoll zu warten!!!
+- Ist das Repository nicht in einem entsprechenden Zustand, führt
+  das zu einer *\textcolor{red}{negativen}* Beurteilung!
+- An Betriebssystem sollte Linux verwendet werden, da die Angaben zwar
+  weitgehend generisch, im Einzelfall jedoch auf Linux
+  zugeschnitten, sind!!!
+- Als Entwicklungsumgebung kannst du verwenden was du willst.
+  Bei den praktischen Arbeiten sind nur einige Entwicklungsumgebungen
+  im Testsystem vorhanden. Überprüfe dies im Vorhinein!
+- *Jedes* Beispiel ist in einem Unterverzeichnis =<beispielname>= zu speichern!
+  Für das aktuelle Beispiel heißt dieses Verzeichnis also =01_processes=.
+  In diesem Sinne ist jetzt ein neues Verzeichnis =01_processes= anzulegen.
+
+* Aufgabenstellung
+
+Es geht darum 2 Programme zu schreiben:
+
+- Ein Programm gibt auf =stdout= in einer Endlosschleife im Sekundentakt
+  das Zeichen aus, das auf der Kommandozeile mitgegeben wird.
+- Ein zweites Programm startet zwei Prozesse des ersten Programmes:
+  eines mit dem Zeichen "A" und eines mit dem Zeichen "B".
+
+Die genaue Anleitung folgt im nächsten Abschnitt und setzt ein POSIX
+konformes System vorraus.
+
+* Anleitung
+
+1. Lege ein erstes Meson Projekt gemäß der bereitgestellten =meson.build= an.
+
+2. Schreibe zuerst ein Programm =aba=, das lediglich aus der Datei
+   =aba.cpp= besteht.
+   
+   Dieses Programm soll sich forken und der Elternprozess gibt in einer
+   Endlosschleife das Zeichen "B" aus und der Kindprozess tut das gleiche
+   mit dem Zeichen "A" wobei jeder Prozess zwischen den Ausgaben eine
+   Sekunde schläft.
+
+   Ein Prozess kann mittels der Funktion =sleep(int)= aus der Headerdatei
+   =unistd.h= schlafen gelegt werden.
+
+   Die Ausgabe sollte in entwa folgendermaßen aussehen:
+
+   #+begin_example
+   BABABABABABABABA...
+   #+end_example
+
+   Von was hängt die genaue Ausgabe ab? Muss immer "B" am Anfang stehen?
+
+3. Ändere die das Programm so ab, dass jeder Prozess sich nur eine
+   halbe Sekunde schläft.
+
+   Teste und wenn alles funktioniert, dann weiter zum nächsten
+   Punkt.
+
+4. Ok, funktioniert das so wie du dir das vorgestellt hast? Ja?
+   Nein? Das hängt natürlich davon ab, was du programmiert hast.
+   Aber ich gehe einmal davon aus, dass du so etwas wie =sleep(0.5)=
+   verwendet hast, nicht wahr? Ok, das kann nicht funktionieren,
+   da =sleep= eine ganze Zahl erwartet. Aber der Compiler hat
+   es ja anstandslos akzeptiert...
+
+   Warum?
+
+5. So, jetzt mal richtig. Dazu wechseln wir von dem C-API zu
+   dem \cpp-API:
+
+   #+begin_src C++
+   std::chrono::milliseconds sleeptime(500);
+   std::this_thread::sleep_for(sleeptime);
+   #+end_src
+
+   Dazu musst du die Headers =chrono= und =thread= inkludieren.
+   Wir sehen, dass es hier zwei Unternamensräume gibt.
+
+   Übersetze und schaue dir das Ergebnis wieder an.
+
+   Es könnte durchaus sein, dass du auch so etwas zu Gesicht
+   bekommst:
+
+   #+begin_example
+   BABABABABABAABABA...
+   #+end_example
+
+   Beachte die beiden aufeinanderfolgenden "A"!
+
+6. Ändere das Programm jetzt folgendermaßen ab, dass der Elternprozess nach 3
+   Sekunden den Kindprozess abbricht (also nach 6 "B"s) und sich danach selbst
+   beendet.
+
+   Zum Beenden schicke dem Kindprozess ein entsprechendes Signal, das dieser
+   nicht ablehnen kann...
+
+   Die Ausgabe sollte dann in etwa folgendendermaßen aussehen:
+
+   #+begin_example
+   BABABABABABA
+   #+end_example
+
+   Was ist passiert? Hast du einen Zombie? Wenn ja, warum? Wenn nein, warum
+   nicht?
+
+   Wie lässt sich ein Zombie erzeugen und wie lässt sich dieser auf der Konsole
+   zeigen? Gib die pid aus, lege den Prozess für 10s schlafen und zeige dir den
+   Prozess auf der Konsole mittels =ps <pid>= an.
+
+7. Verändere das Programm jetzt so, dass kein Zombie entsteht (und sich sonst
+   genau gleich verhält).
+   
+   D.h. bis jetzt liegt ein Miniprogramm vor, das nur "A"s bzw. "B"s in
+   zwei Prozessen ausgibt, wobei der Elternprozess den Kindprozess
+   nach insgesamt 3s beendet und danach auf diesen wartet.
+
+8. Schreibe jetzt vorerst ein Programm =charout=, das das als
+   Kommandozeilenargument übergebene Zeichen in einer Endlosschleife
+   auf =stdout= ausgibt, wobei wiederum die 500ms Schlafenszeit einzuhalten
+   ist. Ändere dazu die Datei =meson.build= entsprechend ab, dass ein
+   weiteres Executable erzeugt wird.
+
+   Teste!
+
+9. Schreibe jetzt das Programm =aba= so um, dass es sich im Kindprozess
+   durch das Programm =charout= ersetzt.
+
+   Achte darauf, dass es das Programm =charout= unter Umständen nicht gibt.
+   Diese Fehlersituation sollte erkannt werden und die richtige Fehlermeldung
+   ausgegeben werden. Also in Abhängigkeit von =errno=...
+
+   Außerdem soll sich der Prozess mit dem Exit-Code 1 beenden.
+
+10. Baue nun das Programm =aba= so um, dass sich dieses zwei Mal forkt
+    und jeweils durch =charout= ersetzt, wobei einmal "A" und einmal "B" als
+    Kommandozeilenargument genommen wird.
+
+    Das Hauptprogramm übernimmt das Beenden beider Programme (nach 3
+    Sekunden) und kümmert sich darum, dass keine Zombies entstehen!
+
+11. Nun wollen wir noch auf die Umgebungsvariablen zugreifen.
+    Dazu soll das Programm =aba= anstatt der Zeichen "A" und "B" die
+    Zeichen der Umgebungsvariablen =ABA_LETTER_A= und =ABA_LETTER_B=
+    übernehmen, falls diese Umgebungsvariablen existieren.
+
+12. Letztendlich baue die Ausgabe so, dass diese in der folgenden
+    Art und Weise erscheinen wird (also bzgl. der Formatierung):
+
+    #+begin_example
+    $ aba
+    waiting for 3 seconds
+    ABABABABABAB
+    killing both subprocesses with pids 8120 and 8121
+    waiting for both subprocesses to be dead
+    subprocess 8120 exited with 0
+    subprocess 8121 exited with 0
+    #+end_example
+
+    Existiert das Executable =charout= nicht, dann sollte die Ausgabe
+    folgendermaßen aussehen:
+
+    #+begin_example
+    $ aba
+    waiting for 3 seconds
+    starting charout failed: No such file or directory
+    starting charout failed: No such file or directory
+    
+    killing both subprocesses with pids 8949 and 8950
+    waiting for both subprocesses to be dead
+    subprocess 11661 exited with 1
+    subprocess 11662 exited with 1
+    #+end_example
+
+* Übungszweck dieses Beispiels
+- Meson kennenlernen
+- Verständnis für Prozesse vertiefen
+- Starten von Prozessen mittels =fork=
+- Exit-Codes einsetzen
+- Erstes Kennenlernen von =sleep=, und =sleep_for=
+- Versenden von Signalen, beenden eines anderen Prozesses, warten auf
+  einen beendeten Prozess
+- Verwenden von =execl=, =errno= und =strerror=
+- Zugriff auf Umgebungsvariable

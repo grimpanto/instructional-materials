@@ -1,0 +1,2 @@
+
+option('cli11_include_dir', type : 'string', value : '../builds/cli11/include', description : 'the dir containing CLI11.hpp')
