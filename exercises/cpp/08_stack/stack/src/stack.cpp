@@ -2,12 +2,6 @@
 
 #include "stack.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-#pragma GCC diagnostic pop
-
 #include <string>
 #include <stdexcept>
 

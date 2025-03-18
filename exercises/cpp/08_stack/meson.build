@@ -13,11 +13,14 @@ inc_dir = include_directories(['include',
                                get_option('json_include_dir')])
 
 cc = meson.get_compiler('cpp')
+
 fmt_lib_dir = join_paths(meson.current_source_dir(), get_option('fmt_lib_dir'))
 spdlog_lib_dir = join_paths(meson.current_source_dir(), get_option('spdlog_lib_dir'))
+
 lib_fmt = cc.find_library('fmt',
-                          dirs : [fmt_lib_dir,
-                                 spdlog_lib_dir])
+                          dirs : [fmt_lib_dir])
+lib_spdlog = cc.find_library('spdlog',
+                             dirs : [spdlog_lib_dir])
 
 doctest_dir = include_directories([get_option('doctest_include_dir')])
 
