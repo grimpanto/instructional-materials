@@ -74,5 +74,7 @@ int main(int argc, const char** argv) {
     else
         write_textfile(cout, lines);
 
+    fmt::print("The answer is {}.", 42);
+
     return 0;
 }
