@@ -33,6 +33,13 @@ Just a short overview to .NET Core and the basics of C#.
 This is a gentle introduction to Python for beginners of this particular
 programming language.
 
+***  [[file:exercises/python][Python Excercises]]
+
+These exercises cover the first year of learning Python as it has been used in
+the technical secondary school (HTL) for computer science. The book
+[[https://www.amazon.de/Python-f%C3%BCr-Kids-mitp/dp/382668673X][Python für Kids (mitp für Kids)]] (Gregor Lingl, MITP, 4. überarbeitete
+Auflage 2010 (20. Mai 2008)) serves as the basis for these exercises.
+
 ** [[file:build/securecomm.html][A quick primer to secure communication]]
 
 A short presentation to secure communication for the end user.
@@ -51,13 +58,6 @@ and consolidate many relevant programming concepts.
 These assignments have been developed for the final year course in programming
 and software development at a technical secondary school for computer
 science.
-
-***  [[file:exercises/python][Python Excercises]]
-
-These exercises cover the first year of learning Python as it has been used in
-the technical secondary school (HTL) for computer science. The book
-[[https://www.amazon.de/Python-f%C3%BCr-Kids-mitp/dp/382668673X][Python für Kids (mitp für Kids)]] (Gregor Lingl, MITP, 4. überarbeitete
-Auflage 2010 (20. Mai 2008)) serves as the basis for these exercises.
 
 ** [[file:build/web_intro/][Webdevelopment for Beginners]]
 
