@@ -1,0 +1,110 @@
+
+#+TITLE: Unit 4
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege wiederum ein Verzeichnis an. Nennes es =04_unit4=! In diesem Verzeichnis
+sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+* Schulübungen
+
+1. Löse die Übungsbeispiele aus Kapitel 4!
+
+2. Schreibe ein Programm =wabe2.py= indem jedes einzelnes
+   Sechseck durch eine Funktion =hexagon= gezeichnet wird. D.h.,
+   vor Aufruf der Funktion muss jeweils die Turtle richtig
+   positioniert werden und die Füllfarbe richtig gesetzt werden.
+
+3. Schreibe ein Programm =radioaktiv2.py=, das jeden Kreissektor
+   in einer Funktion =sector= zeichnet.
+
+4. Schreibe ein Programm =quadrate2.py=, das 6 fächerartig
+   angeordnete Quadrate zeichnet. Verwende wieder eine Funktion!
+
+5. Wandle die folgenden Dezimalzahlen jeweils mit der Probiermethode in
+   das binäre Zahlensystem um: 11, 12, 15, 33, 48, 74.
+
+6. Schreibe das Programm =salary.py=, das das Gehalt in 5 Jahren
+   berechnet, wobei wir von einem Anfangsgehalt von 1800€ und einer
+   jährlichen Steigerung 20€ ausgehen.
+
+   D.h. es handelt sich bei unserem Gehaltsmodell um eine lineare
+   Funktion. Im Programm sollen die Werte x, k und d am
+   Anfang als Variable definiert werden und danach das Ergebnis ausgegeben.
+
+7. Erweitere das Programm =salary.py= so, dass der Anfangsgehalt
+   eingegeben werden kann.
+
+8. Erweitere das Programm =salary.py= wiederum, sodass die jährliche
+   Steigerung jeweils 3% beträgt.
+
+9. Schreibe ein Programm =distance.py=, das zwei Punkte auf
+   der Zahlengerade abfragt und den Abstand (Distanz) auf der
+   Standardausgabe ausgibt. Beachte, dass ein Abstand auf einer
+   Strecke immer positiv ist. Löse das Beispiel mit und ohne der
+   Funktion =abs=!
+
+10. Schreibe ein Programm =division.py=, das folgende Formel
+    berechnet:
+
+    \[\frac{a b}{a-b}\]
+    
+    a und b sollen abgefragt werden und danach soll das
+    Ergebnis oder eine Fehlermeldung (Nenner darf nicht Null werden)
+    ausgegeben werden.
+
+11. Schreibe ein Programm =rectangles.py=, das 2 Seiten eines Rechtecks
+    abfragt und danach die Größenklasse ausgibt: kleines Quadrat (Fläche <
+    100 Einheiten), großes Quadrat (Fläche >= 100 Einheiten), kleines Rechteck
+    (Fläche < 200 Einheiten) und großes Rechteck (Fläche >= 200 Einheiten).
+
+12. Schreibe ein Programm =power.py=, das die Berechnung von
+    x^y für ganzzahlige y >= 0 nach folgender
+    Vorschrift vornimmt:
+
+    - wenn x = 1, dann ist x^y = 1
+    - wenn x = -1 und y gerade, dann ist x^y = 1
+    - wenn x = -1 und y ungerade, dann ist x^y = -1
+    - wenn y = 0, dann ist x^y = 1
+    - wenn y = 1, dann ist x^y = x
+    - wenn y > 1, dann wird x^y berechnet
+    - wenn y < 0 oder x und y gleich 0, dann entsprechende Meldung ausgeben
+
+13. Schreibe ein Programm =minimum.py=, das 3 Zahlen abfragt und
+    die kleinste Zahl ausgibt (ohne die Funktion =min= zu verwenden).
+
+14. Schreibe ein Programm =grading.py=, das eine Punktezahl (von 0
+    bis 100) abfragt und daraus die Beurteilung gemäß des folgenden
+    Benotungsschlüssels ermittelt und ausgibt:
+   
+    - 0-50 Punkte: Nicht genügend
+    - 51-62 Punkte: Genügend
+    - 63-78 Punkte: Befriedigend
+    - 79-90 Punkte: Gut
+    - 91-100 Punkte: Sehr gut
+
+
+* Hausübung
+   
+1. Wandle die folgenden Dezimalzahlen jeweils mit der Probiermethode in
+   das binäre Zahlensystem um: 21, 22, 25, 43, 68, 94.
+
+2. Schreibe ein Programm =sort.py=, das 3 Zahlen einliest und
+   diese aufsteigend sortiert ausgibt.
+
+3. Schreibe ein Programm =draw_linfunc.py=, das k und d einer
+   linearen Funktion einliest und damit den Graphen der linearen
+   Funktion im Intervall -10 bis +10 zeichnet. Schreibe eine getrennte
+   Funktion =axes=, die die Achsen (des Koordinatensystems)
+   zeichnet.
+
+4. Erweitere das Programm =draw_linfunc.py=, sodass jetzt die
+   x-Achse beschriftet wird: -10, -9,..., 9, 10.
+
+5. Kapitel 4 lesen!
+

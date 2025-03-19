@@ -1,0 +1,180 @@
+
+#+TITLE: Unit 3
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege wiederum ein Verzeichnis an. Nennes es =03_unit3=! In diesem Verzeichnis
+sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+* Schulübungen
+
+1. Löse das Übungsbeispiel 7 aus Kapitel 2 des Buches. Zeichne 6 Quadrate
+   mit gleichen Seitenlängen, verschiedenen Füllfarben und Stiftfarben,
+   deren linke untere Ecken an einem Punkt übereinanderliegen, aber
+   jedes Dreieck gegebenüber dem Nächsten um 60 Grad verdreht ist.
+   Die Quadrate sollen fächerartig angeordnet werden.
+
+2. Schreibe ein Programm =quadrate.py=, das den Benutzer
+   zuerst nach einer Seitenlänge fragt, dann 3 ineinander
+   verschachtelte Quadrate mit jeweils um 20 kleineren
+   Seitenlängen zeichnet (Variable für die Seitenlänge)!
+   
+3. 525€ werden gleichmäßig unter 6 Kindern aufgeteilt. 
+   Wie viel ganze Schilling bekommt jedes Kind? Wie viel € bleiben übrig?
+
+4. Ein Auto leitet bei einer Geschwindigkeit von 50km/h eine Bremsung
+   mit einer Beschleunigung a von -2m/s^2 ein. Nach welcher Strecke
+   kommt das Auto zum Stillstand und wie lange dauert es?
+
+5. Wie viele Tortenstücke bekommt jeder der fünf Gäste, wenn insgesamt
+   12 Stücke verfügbar sind und jeder gleich viele bekommen soll? Wie
+   viele Tortenstücke bleiben über? Alles in Python ausrechnen!
+      
+6. Berechne den Quotienten und den Rest der ganzzahligen Division
+
+   - von 25 durch 2 (ebenfalls 26 und 27).
+   - von 33 durch 3 (ebenfalls 24, 25, 26 und 27).
+
+   Was fällt dabei auf?
+   
+7. Ein Acker von 6500m^2 wird in Bauparzellen zu je
+   480m^2 geteilt.  Wie viele solche Parzellen kann man bilden?
+   
+8. Die Autobuskosten für eine Fahrt nach Heidenreichstein im
+   Waldviertel betragen 420€. An der Fahrt nehmen a) 24 Personen,
+   a) 27 Personen, c) 36 Personen teil.  Wie viel € muss jeder
+   Teilnehmer mindestens zahlen?
+
+9. Durch eine Wiese führt ein 500 m langer Fußweg. Die Fußgeher haben
+   aber beiderseits dieses Wegs einen Streifen von 20 cm Breite
+   niedergetreten.  Berechne, wie viel kg Heu durch die zwei
+   niedergetretenen Streifen verlorengehen, wenn von 1 m^2 Wiese rund
+   0.25 kg Heu geerntet werden können!
+
+10. Schreibe ein Programm =square1.py=, das den Benutzer nach der
+    Seitenlänge fragt und danach den Umfang und die Fläche ausgibt.
+   
+11. Schreibe ein Programm =rectangle3.py=, das den Benutzer nach
+    den beiden Seiten fragt und danach den Umfang und die Fläche ausgibt.
+
+12. Schreibe ein Programm =rectangle4.py=, das den Benutzer nach
+    dem Umfang und einer Seite fragt und die andere Seite und die
+    Fläche ausgibt.
+   
+13. Schreibe ein Programm =triangle6.py=, das den Benutzer nach den
+    beiden Katheten fragt und danach die Hypotenuse, den Umfang und die
+    Fläche ausgibt.
+
+14. Schreibe ein Programm =triangle7.py=, das den Benutzer nach einer
+    Kathete und der Hypotenuse fragt und danach die anderere Kathete,
+    den Umfang und die Fläche ausgibt.
+
+15. Schreibe ein Programm =kmh2ms.py=, das nach einer Geschwindigkeit
+    in km/h fragt, diese in m/s umrechnet und danach ausgibt.
+
+    Das sollte so aussehen::
+
+    #+BEGIN_EXAMPLE
+    Bitte die Geschwindigkeit in km/h eingeben: 100
+    100km/h = 27.7777777778
+    #+END_EXAMPLE
+
+16. Schreibe ein Programm =ms2kmh.py=, das nach einer Geschwindigkeit
+    in m/s fragt, diese in km/h umrechnet und danach ausgibt.
+
+17. Schreibe ein Programm =velocity.py=, das die Geschwindigkeit
+    einer gleichförmigen Bewegung errechnet und danach ausgibt. Die
+    zurückgelegte Strecke s und die dafür benötigte Zeit sollen eingegeben
+    werden können.
+
+18. Schreibe ein Programm =distance.py=, das die zurückgelegte
+    Strecke s eines frei fallenden Gegenstandes ausrechnet. Der Benutzer
+    soll die Zeitdauer t des freien Falles eingeben können. Definiere
+    die Gravitationskonstante unter dem Namen g (9.81m/s^2).
+
+19. Die Dichte ρ (Rho) (genauer: Massendichte) eines Körpers ist
+    das Verhältnis seiner Masse zu seinem Volumen.
+
+    | Material | ρ [kg/m^{3}] |
+    |----------+--------------|
+    | Papier   |          800 |
+    | Blei     |        11300 |
+    | Platin   |        21400 |
+
+    Schreibe ein Programm =weight.py=, das für jede Materialkonstante
+    eine Variable definiert und eine Tabelle ausgibt, die für jedes
+    Material das Gewicht von 1m^3, 5m^3 und 10m^3 ausgibt.
+   
+20. Man kann die Quadratwurzel näherungsweise folgendermaßen bestimmen:
+
+    \begin{align*}
+    x_1 &= (x_0 + a / x_0) / 2\\
+    x_2 &= (x_1 + a / x_1) / 2\\
+    x_3 &= (x_2 + a / x_2) / 2
+    \end{align*}
+
+    x_0 und a sind jeweils mit der Zahl zu initialisieren, von der
+    die Quadratwurzel bestimmt werden soll. Bei x_3 handelt es sich
+    um die errechnete Näherung.
+
+    Schreibe ein Programm squareroot.py, das eine Zahl erfragt und danach
+    sowohl die errechnete Näherung als auch die genaue Lösung ausgibt. Weiters
+    soll der Fehler als Absolutbetrag (Funktion =abs=) ausgegeben werden.
+
+    Verwende entsprechende Namen!
+      
+21. Bestimme das dezimale Äquivalent sowohl mit der Potenzmethode als
+    auch mit der Hornermethode der folgenden Binärzahlen: 1, 10, 11, 110,
+    101, 1011010
+   
+22. Bestimme wiederum das dezimale Äquivalent sowohl mit der Potenzmethode
+    als auch mit der Hornermethode der folgenden Oktalzahlen: 6666, 1234,
+    0005
+
+23. Bestimme nochmals das dezimale Äquivalent sowohl mit der Potzenzmethode
+    als auch mit der Hornermethode der folgenden Hexadezimalzahlen:
+    ABC, ABCD, ABCDE, ABCDEF, 123, 100
+
+24. Programm =linfunc1.py=: Bestimme alle Ergebnisse der linearen Funktion
+    $f(x) = 2x$ für die Zahlen von 0 bis 10. Welchen Wert hat k? Welchen Wert
+    hat d? Zeichne das Schaubild der Funktion (am Papier)!
+
+25. Programm =linfunc2.py=: Bestimme alle Ergebnisse der linearen Funktion
+    $f(x) = 3x$ für die Zahlen von -5 bis 5. Welchen Wert hat k? Welchen Wert
+    hat d? Zeichne das Schaubild der Funktion (am Papier)!
+
+26. Programm =linfunc3.py=: Bestimme alle Ergebnisse der linearen
+    Funktion $f(x) = 2x+1$ für die Zahlen von 0 bis 10. Welchen
+    Wert hat k? Welchen Wert hat d? Zeichne das Schaubild der Funktion
+    (am Papier)!
+
+
+* Hausübung
+   
+1. 780 Liter Bier werden in 25-Liter-Fässer abgefüllt. Wie viele
+   Fässer werden voll?
+
+2. 2735 Semmeln sollen in Netze zu je 24 Stück verpackt werden. 
+   Wie viele Netze werden benötigt? Wie viele Semmeln bleiben übrig?
+
+3. Rechne mit der Hornermethode jeweils in das Dezimalsystem (händisch):
+
+   * 111_2, 10101_2, 11010110101_2
+   * 17_8, 1234_8, 001100_8
+   * B2_16, AFFE_16, ADA_16
+
+4. Schreibe ein Programm =triangle8.py=, das den Benutzer nach einer
+   Kathete und der Fläche fragt und danach die andere Kathete, die Hypotenuse
+   und den Umfang ausgibt.
+
+5. Programm =linfunc4.py=: Bestimme alle Ergebnisse der linearen
+   Funktion $f(x) = -3x+2$ für die Zahlen von -5 bis 5. Welchen
+   Wert hat k? Welchen Wert hat d? Zeichne das Schaubild der
+   Funktion (am Papier)!
+
+6. Kapitel 3 lesen!

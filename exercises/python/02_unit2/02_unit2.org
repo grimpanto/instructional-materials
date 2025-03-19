@@ -1,0 +1,218 @@
+
+#+TITLE: Unit 2
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege jetzt ein Verzeichnis =pos1= auf deinem USB Stick an und darin ein
+Verzeichnis =excercises=. Im Verzeichnis =excercises= lege von nun an je ein
+weiteres Verzeichnis an, dessen Name sich zusammensetzt aus der Nummer
+(zweistellig mit führender Null), einem Unterstrich (engl. underscore, =_=) und
+dem Namen der Einheit. Im konkreten Fall lege jetzt ein Verzeichnis =02_unit2=
+an!
+
+In diesem Verzeichnis sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+* Schulübungen
+
+1. Schreibe ein Programm =hello.py=, das =Hello, World!= ausgibt.
+
+   Nicht vergessen: Das Programm im Editor (Textbearbeitungsprogramm) in UTF-8
+   abspeichern! Nicht auf den Dateikopf (engl. file header) vergessen!
+
+   Der Dateikopf hat (abweichend vom Buch) *immer* folgendermaßen
+   auszusehen:
+
+   #+BEGIN_EXAMPLE
+   """
+   author: Max Mustermann
+   matnr:  i15999
+   file:   hello.py
+   catnr:  1AHIF-26
+   """
+   #+END_EXAMPLE
+
+2. Schreibe ein Programm =hello2.py=, das =Hello, World!= und
+   in einer nächsten Zeile deinen Vornamen ausgibt. Nicht auf
+   den Dateiheader vergessen.
+
+   Tipp: Jeder Aufruf der Funktion =print= erzeugt eine neue Zeile bei
+   der Ausgabe.
+
+3. Schreibe ein Programm =hello3.py=, das =Hello, World= und
+   *danach* deinen Vornamen ausgibt (in einer Zeile).
+
+4. Schreibe ein Programm =umfang.py=, das ~2 * 3.1415 = ​~ und
+   anschließend das Ergebnis (Umfang des Kreises) ausgibt. Wie groß ist hier
+   der Radius?
+
+5. Schreibe ein neues Programm =umfang2.py=, das ~r = 2, U = ​~ und
+   danach anschließend den Umfang des Kreises ausgibt. Verwende
+   jetzt das Modul =math= und davon =pi=.
+
+6. Schreibe ein Programm =countdown.py=, dass alle Zahlen von 10
+   bis 0 (jeweils in einer eigenen Zeile) ausgibt.
+
+7. Schreibe ein Programm =squares.py=, dass alle Zahlen von
+   0 bis 10 und jeweils daneben die Quadrate ausgibt (durch
+   ein Leerzeichen getrennt).
+
+8. Schreibe ein Programm =squareroots.py=, dass alle Zahlen von
+   0 bis 10 und jeweils daneben die Quadratwurzeln ausgibt.
+   
+9. Schreibe ein Programm =hello4.py=, das =Hello "Stranger"​=
+   ausgibt.
+   
+10. Schreibe ein Programm =hello5.py=, das =Er sagte: "Chez l'ami Roger"​=
+    ausgibt.
+
+11. Schreibe ein Programm =alphabet.py=, das in *einer* Anweisung::
+
+    #+BEGIN_EXAMPLE
+    abc
+    def
+    ghi
+    #+END_EXAMPLE
+      
+    ausgibt. Welche verschiedenen Möglichkeiten kennst du, dies zu
+    bewerkstelligen?
+
+12. Löse die folgenden Turtle-Übungsbeispiele aus Kapitel 2 des Buches!
+
+    a. Zeichne mit ein einfaches Haus (Rechteck mit Dreieck) und
+       speichere es in =haus01.py=.
+      
+    b. Schreibe =sechseck01.py=, das ein regelmäßiges
+       Sechseck mit der Seitenlänge 60 zeichnet. Der Mittelpunkt des
+       Rechtecks soll die Anfangsposition und die Endposition der Turtle sein.
+      
+    c. Schreibe ein Programm =wabe.py=, das eine Bienenwabe in
+       brauner Farbe zeichnet.  Die äußeren Sechsecke sollen mit orange
+       gefüllt werden die innere mit gelb.
+
+    d. Schreibe ein Programm =radioaktiv.py=, das das
+       Radioaktivitätssymbol zeichnet:
+
+       - großes gelbes Quadrat mit schwarzen Rand
+       - im Quadrat 3 schwarze Kreissektoren sodass zwischen diesen jeweils
+         Platz für einen unsichtbaren Kreissektor bleibt.
+       - in der Mitte einen kleinen schwarzen Kreis.
+
+    e. Zeichne ein färbiges Haus mit einer Türe und einem Fenster (Datei
+       =haus02.py=).
+
+13. Ein quadratisches Grundstück hat eine Fläche von 1000m^2.
+    Bestimme die Seitenlänge und den Umfang.
+
+14. Ein Rechteck hat eine Seitenlänge von 0.35km und einen Umfang von 1020.5m.
+    Bestimme die verbleibende Seitenlänge und den Flächeninhalt.
+
+15. Ein Rechteck hat eine Seitenlänge von 320m und einen Fläche von
+    0.08km^2.  Bestimme die verbleibende Seite und den Umfang.
+   
+16. Bestimme die Fläche und den Umfang eines Kreises mit dem *Durchmesser* von
+    15cm.
+
+17. Ein Kreis hat eine Fläche von 323cm^2. Bestimme den Radius und
+    den Umfang (jeweils in Meter).
+
+18. Eine Torte hat einen Durchmesser von 30cm und ist 5cm hoch. Bestimme
+    das Volumen und den Umfang eines einzelnen Tortenstückes, wenn die Torte
+    8 gleich große Tortenstücke geschnitten wird (in der üblichen Art).
+
+19. Bestimme die Ziffernsumme der dezimalen Zahl: 37812901
+
+20. Bestimme das arithmetische Mittel der Zahlen: 45, 3, 12, 1, 19, 26.
+
+21. Bestimme das dezimale Äquivalent mittels der Potenzmethode der folgenden
+    Zahlen:
+
+    - 1_2
+    - 10_2
+    - 11_2
+    - 011_2
+    - 110_2
+    - 101_2
+    - 1011010_2
+
+22. Wann ist eine binäre Zahl ungerade? Wann gerade? Warum?
+
+23. Die Whitespace-Zeichen haben im ASCII Zeichensatz die folgenden Werte:
+
+    - Tabulator: 09_16
+    - Line Feed: 0A_16
+    - Carriage Return: 0D_16
+    - Space: 20_16
+   
+    Bestimme jeweils das dezimale Äquivalent mit der Potenzmethode.
+
+24. Bestimme wiederum das dezimale Äquivalent mittels der Potenzmethode
+    der folgenden Oktalzahlen:
+   
+    - 777
+    - 123
+    - 80
+
+25. Bestimme nochmals das dezimale Äquivalent mittels der Potzenzmethode
+    der folgenden Hexadezimalzahlen:
+
+    - 12
+    - A
+    - F
+    - 1C
+    - FF
+    - 2FF
+
+
+* Hausübung
+
+1. Rechne jeweils in das Dezimalsystem (händisch):
+
+   - 1111_2, 10111_2, 1001101101.11_2
+   - 11_8, 456_8, 777_8
+   - A1_16, CAFE_16, FFFF_16
+
+2. Schreibe ein Programm =raute.py=, das folgendes Muster auf ausgibt::
+
+   #+BEGIN_EXAMPLE
+     * 
+    ***
+   *****
+    ***
+     *
+   #+END_EXAMPLE
+   
+3. Programm =triangle1.py=: Zeichne ein auf der spitze
+   stehendes gleichseitiges Dreieck mit einer Kantenlänge von 3cm.
+
+4. Programm =triangle2.py=: Ein rechtwinkeliges Dreieck mit
+   einer Hypotenuse von 5cm und einer Kathete von 3cm. Berechne
+   die zweite Kathete, die Fläche und den Umfang!
+
+   Zeichne das Dreieck mit der Turtle, sodass die längere Kathete in
+   der x-Achse und die kürzere Kathete in der y-Achse liegt. Wähle
+   einen geeigneten Maßstab!
+
+5. Programm =olympic_rings.py=: Zeichne die olympischen Ringe!
+
+6. Ein Auto beginnt bei einer Geschwindigkeit von 50km/h eine
+   eine Beschleunigung a von 2m/s^2 ein.
+
+   - Nach welcher Strecke hat das Auto eine Geschwindigkeit von
+     77km/h erreicht und wie lange dauert es (in Sekunden und Stunden)?
+
+   - Stelle die Gleichung für die lineare Funktion auf (Einheiten s und
+     m/s)!
+
+   - Programm =linfunc_car.py=: Zeichne das Koordinatensystem
+     und die Gerade dieser linearen Funktion.
+
+     - x-Achse in einem Bereich von -1s bis +5s.
+     - y-Achse in einem Bereich von -1m/s bis 25m/s
+
+7. Kapitel 2 lesen!
+

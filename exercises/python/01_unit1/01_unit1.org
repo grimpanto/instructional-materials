@@ -1,0 +1,159 @@
+
+#+TITLE: Unit 1
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER: \setlength{\parindent}{0cm}
+#+LATEX_HEADER_EXTRA:
+
+* Schulübungen
+
+Übe mit der Windows PowerShell. Wechsle dein Arbeitsverzeichnis nur,
+wenn angegeben:
+
+1. Starte eine Konsole mit der PowerShell.
+2. Wechsle in das Root-Verzeichis (handelt es sich um einen absoluten oder
+   relativen Pfadnamen?)
+3. Zeige den Namen deines Arbeitsverzeichnisses an.
+4. Wechsle in dein HOME-Verzeichis (absoluter oder relativer Pfad?)
+5. Lege ein Verzeichis =test= an
+6. Zeige dir den Verzeichnisinhalt deines Arbeitsverzeichnisses an.
+7. Wechsle in das Verzeichnis =test= (absoluter oder relativer Pfad?)
+8. Wechsle in das übergeordnete Verzeichnis
+9. Lege mit einem Editor deiner Wahl eine Textdatei =abc.txt= im
+   Home-Verzeichnis an.
+10. Zurück zur PowerShell... Kopiere diese Datei in das Verzeichnis =test=
+11. Lösche die Datei =abc.txt= aus deinem Home-Verzeichnis
+12. Kopiere die Datei =abc.txt= aus dem Verzeichnis =test= in
+    dein Home-Verzeichnis.
+13. Lösche die Datei =abc.txt=, die sich im Verzeichnis =test= befindet.
+14. Verschiebe die Datei =abc.txt= in das Verzeichnis =test=.
+15. Lasse dir den Inhalt der Datei =abc.txt= auf der Konsole ausgeben.
+16. Lösche den Bildschirminhalt der Konsole.
+17. Nenne die Datei =abc.txt= in =def.txt= um.
+18. Lasse dir den Inhalt des Verzeichnisses =test= anzeigen und verwende einen
+    absoluten Pfadnamen.
+19. Lösche das Verzeichnis =test=.
+20. Schließe die PowerShell.
+
+Die folgenden Übungen sind mit dem Python-Interpreter zu lösen:
+
+1. Berechne die Summe von 1123 und 992.
+2. Berechne die Summe der folgenden Zahlen: 1,2,3,4
+3. Berechne die Summe aus 1123 und -992.
+4. Berechne die Summe aus -1123 und 992.
+5. Berechne die Summe aus der ganzen Zahl 2 und der Gleitkommazahl 3.
+6. Berechne die Differenz von 345 und 123.
+7. Berechne den Quotienten von 123 und 45.
+8. Berechne den Quotienten von 999 und 0.
+9. Berechne das Produkt aus 345 und 987.
+10. Berechne die Anzahl der Sekunden in einem Jahr.
+11. Berechne: 1 + 2 \cdot 3 - 4
+12. Berechne: (1+2)(3-4)
+13. Berechne die Summe aus der Zahl 4 und dem Dreifachen von 0.345.
+14. Berechne das 12-fache der Summe von 523 und 2145.
+15. Berechne die Differenz von 5 und der Differenz von 3 und 2.
+16. Berechne: 2^2
+17. Berechne: 3^2
+18. Berechne: 2^3
+19. Berechne alle Zweierpotenzen bis zur Hochzahl 10 (also von 0 bis 10). Lerne
+    diese *auswendig*!
+20. Berechne: 2^{2^2}
+21. Berechne: 2^{2^3}
+22. Berechne: (2^2)^3 Was fällt dir im Vergleich zur vorhergehenden
+    Angabe auf?
+23. Berechne jeweils: 10^0, 8^0, 2^0, 0^0
+24. Berechne 2 hoch 1024.
+25. Berechne die Geschwindigkeit eines Motorrades (1)
+
+    Ein Motorrad legt innerhalb von 2 Stunden 252km zurück. Es liegt
+    eine gleichförmige Bewegung zugrunde, d.h. das Motorrad
+    beschleunigt nicht (und bremst daher auch nicht). Berechne die
+    Geschwindigkeit.
+
+26. Berechne die Geschwindigkeit eines Motorrades (2)
+
+    Ein Motorrad legt innerhalb von 63 Minuten 132km zurück. Es liegt
+    eine wieder gleichförmige Bewegung zugrunde, d.h. das Motorrad
+    beschleunigt nicht (und bremst daher auch nicht). Berechne die
+    Geschwindigkeit.
+
+27. Berechne die zurückgelegte Strecke eines Lastwagens (1)
+
+    Ein Lastwagen fährt mit einer durchschnittlichen Geschwindigkeit
+    von 92km/h. Welche Strecke legt dieser Lastwagen in 3 Stunden und
+    15 Minuten zurück? Welche Strecke in 20 Minuten?
+
+28. Berechne die zurückgelegten Strecke eines Lastwagens (2)
+
+    Der Lastwagen legt innerhalb von 75 Minuten eine Strecke von 115km
+    zurück. Welche Strecken hat dieser Lastwagen nach 1 Stunde, 2
+    Stunden und 3 Stunden zurückgelegt?
+
+29. Ein Motorrad beschleunigt mit 0.5m/s^2
+
+    - Welche Geschwindigkeit hat das Motorrad in 10s? Gib die
+      Antwort sowohl in [m/s] als auch in [km/h] an.
+
+    - Welche Entfernung hat das Motorrad in diesen 10s zurückgelegt. Gib
+      die Antwort sowohl in [m] als auch in [km] an.
+   
+    Handelt es sich um ein schnelles Motorrad?
+
+30. Ein Gegenstand wird von 100m Höhe fallen gelassen. Wie lange benötigt
+    dieser bis zum Aufkommen am Boden (g = 9.81m/s^2)?
+   
+31. Berechne den Verkaufspreis eines Autos
+
+    Ein Autohändler will einen Audi 3000 verkaufen. Um eine vernünftige
+    Gewinnspanne zu erzielen, hat er den Preis auf 41500€ festgesetzt
+    (Nettobetrag). Allerdings muss der Kunde ja die Umsatzsteuer
+    bezahlen, die der Autohändler an das Finanzamt abliefern muss. Die
+    Umsatzsteuer beträgt 20%. Wie hoch ist der Betrag der Umsatzsteuer
+    und wie viel muss der Käufer wirklich für das Auto bezahlen
+    (Bruttobetrag)?
+
+32. Berechne den Nettogehalt
+
+    Mit deinem Arbeitgeber hast du ein Gehalt vereinbart. Leider
+    bekommst du diesen Betrag nicht auf dein Bankkonto überwiesen, da
+    sowohl Sozialversicherungsbeiträge (Pension, Krankenversicherung,…)
+    abgezogen werden als auch die Einkommenssteuer an das Finanzamt zu
+    entrichten ist.
+
+    Nehmen wir an, dass du mit deinem Arbeitgeber ein Bruttogehalt von
+    1800€ vereinbart hast. Um es einfach zu halten, gehen wir davon
+    aus, dass die Sozialversicherungsbeiträge einen Umfang von 20%
+    ausmachen. D.h. zuerst müssen diese von 1800€ abgezogen werden. Vom
+    verbliebenen Betrag muss noch die Einkommenssteuer abgezogen
+    werden. Wiederum der Einfachheit halber gehen wir davon aus, dass
+    diese ein Drittel von dem schon verminderten Betrag ausmachen.
+
+
+* Hausübungen
+
+1. Berechne das Dreifache der Differenz von 5 und der Summe von
+   3 und 4 (ein Ausdruck).
+
+2. Erhöhe den Basisbetrag von 1234€ um 20%, ziehe davon einen Fixbetrag
+   von 200€ ab und teile den erhaltenen Betrag in 3 gleich große Teile
+   (ein Ausdruck).
+   # Lösung: (1234*1.2 - 200) / 3 = 426.93
+
+3. Ein Lastwagen und ein Auto sind 100km von einander entfernt und fahren
+   zum gleichen Zeitpunkt weg. Sie fahren aufeinander zu. Der Lastwagen
+   hat eine Geschwindigkeit von 50km/h und das Auto eine Geschwindigkeit
+   von 70km/h.
+
+   Wann treffen diese beiden Fahrzeuge aufeinander? Wie weit ist der
+   Lastwagen dann gefahren? Wie weit das Auto?
+   # Lösung: 50', Lastwagen: 41.6km, Auto: 58.3km
+
+4. Suche die ASCII-Tabelle im Internet (Wikipedia) und finde die dezimalen
+   Werte von CR (carriage return) und von LF (line feed).
+   # 13 10
+
+5. Kapitel 1 lesen!
+

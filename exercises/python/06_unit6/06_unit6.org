@@ -1,0 +1,92 @@
+
+#+TITLE: Unit 6
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege wiederum ein Verzeichnis an. Nennes es =06_unit6=! In diesem Verzeichnis
+sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+* Schulübungen
+
+1. Schreibe eine Funktion =arith_mean= (arithmetic mean), die
+   das arithmetische Mittel (Mittelwert) dreier übergebener Zahlen
+   zurückliefert.
+
+   Nenne die Datei =mathelib.py=.
+
+2. Schreibe ein Programm =mathe.py=, das den Benutzer nach drei
+   Zahlen fragt und danach das arithmetische Mittel berechnet und ausgibt.
+   Verwende dazu die Funktion aus dem vorhergehenden Punkt.
+
+   Verwende dazu folgende Anweisung: =from mathelib import *=.
+   
+3. Schreibe eine Funktion =geom_mean=, die das geometrische Mittel
+   zweier übergebenen Zahlen ($\sqrt{a b}$) zurückliefert. Ist das
+   Produkt negativ, dann soll der Wert -1 zurückgeliefert werden.
+
+   Füge diese Funktion zu der Datei =mathelib.py= hinzu.
+
+4. Erweitere das Programm =mathe.py=, sodass der Benutzer jetzt
+   gefragt wird, ob das arithmetische Mittel oder das geometrische Mittel
+   berechnet werden soll.
+
+5. Erweitere das Programm =mathe.py= nochmals, sodass bei einem
+   Rückgabewert von -1 bei Aufruf der Funktion =geom_mean= eine Fehlermeldung
+   ausgegeben werden soll (z.B. "Das geometrische Mittel kann nicht berechnet werden").
+
+6. Erweitere das Programm =mathe.py= nochmals, sodass die Fehlermeldung
+   um die Angabe der eingegebenen Zahlen erweitert wird. D.h., gibt der
+   Benutzer die Zahlen 3 und -4 ein, dann soll die Fehlermeldung z.B.
+   folgendermaßen aussehen:
+   "Das geometrische Mittel der Zahlen 3 und -4 kann nicht berechnet werden".
+
+   Verwende dazu die =format= Methode des =str= - Typs.
+
+7. Schreibe eine Funktion =sum=, die zwei Zahlen addiert und als
+   Ergebnis zurückliefert. Füge diese Funktion wiederum dem Modul
+   =mathelib= hinzu.
+
+8. Erweitere das Programm =mathe.py= um die Abfrage zum Addieren.
+   Gib von hier an immer eine formatierte Ausgabe mittels =format=
+   des =str= - Typs aus!
+
+9. Erweitere das Programm =mathe.py= nochmals, sodass **nach**
+   Auswahl für das Addieren der Benutzer gefragt werden soll, ob
+   Zahlen addiert oder Zeichenketten zusammengefügt werden sollen.
+   Der Aufruf der Funktion =sum= soll dementsprechend gestaltet werden.
+
+10. Schreibe eine Funktion =v=, die die Geschwindigkeit eines
+    im freien Fall befindlichen Körper (luftleerer Raum) nach einer
+    gegebenen Anzahl von Sekunden zurückliefert. Wieder in =mathelib.py=
+    mit Einbindung in =mathe.py=. Die Zeit darf nicht negativ sein,
+    wenn doch, dann Rückgabe von -1.
+
+11. Schreibe eine Funktion =s=, die die zurückgelegte Strecke
+    eines im freien Fall befindlichen Körper (luftleerer Raum) nach einer
+    gegebenen Anzahl von Sekunden zurückliefert. Ansonsten wie im vorhergehenden
+    Punkt!
+   
+12. Schreibe eine Funktion =mod= (wieder in =mathelib.py=), die
+    den Rest der beiden übergebenen Zahlen ermittelt und zurückliefert.
+    Allerdings darf weder der =%= noch der =//= Operator verwendet
+    werden. Du darfst allerdings gerne =int()= verwenden. Baue
+    die neue Funktion wieder in =mathe.py= ein!
+   
+13. Schreibe eine Funktion =square_root=, die die Quadratwurzel
+    einer übergebenen Zahl berechnet. Die Berechnung soll durch Potenzierung
+    mit 0.5 erfolgen! Tritt bei der Berechnung eine Exception auf, dann
+    ist diese abzufangen und der Wert -1 zurückzugeben!
+
+14. Schreibe eine Funktion =div=, die den Quotienten zweier übergebener
+    Zahlen zurückliefert. Tritt bei der Berechnung eine Exception auf,
+    dann ist diese abzufangen und der Wert 0 zurückzuliefern.
+ 
+
+* Hausübung
+   
+Kapitel 6 lesen!

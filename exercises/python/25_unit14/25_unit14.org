@@ -1,0 +1,88 @@
+
+#+TITLE: Unit 14
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege wiederum ein Verzeichnis an. Nennes es =24_unit14=! In diesem Verzeichnis
+sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+* Schulübungen
+In diesem Beispielblock werden geübt:
+
+- Operationen auf mehrdimensionalen Listen vertieft
+- Verarbeiten von Kommandozeilenparameter
+
+Und hier sind die Angaben:
+
+1. Schreibe ein Hauptprogramm, das es erlaubt zwei Zahlengruppen
+   als Kommandozeilenparameter mitzugeben. Die Zahlen innerhalb einer
+   Zahlengruppe sind jeweils durch Beistriche von einander getrennt:
+
+   #+BEGIN_EXAMPLE
+   python3 unit14.py 1,2,3 4,5,6
+   #+END_EXAMPLE
+
+   Speichere die Zahlen in 2 Listen ab. Verwende dazu die
+   =split=-Methode.
+
+2. Schreibe eine Funktion =mul(op1, op2)=, die eine Multiplikation
+   der beiden Operanden durchführt. Es handelt es sich bei den
+   Operanden um jeweils um eine Liste von Zahlen. Als Ergebnis
+   liefert diese Funktion eine zweidimensionale Liste zurück, die jede
+   Zahl von =op1= mit jeder Zahl von =op2= multipliziert enthält:
+
+   #+BEGIN_SRC python
+   >>> mul([1, 2, 3], [4, 5, 6])
+   [[4, 5, 6], [8, 10, 12], [12, 15, 18]]
+   #+END_SRC
+
+3. Rufe die Funktion =mul= (=int= in Funktion =mul= einbauen)
+   mit den Zahlen der Kommandozeile auf und
+   führe eine formatierte Ausgabe durch:
+
+   #+BEGIN_EXAMPLE
+   python3 unit14.py 1,2,3 4,5,6
+   
+    x    4    5    6
+    1    4    5    6
+    2    8   10   12
+    3   12   15   18
+    #+END_EXAMPLE
+
+    Die Formatierung soll für Faktoren von 0 bis 99 schön formatiert
+    dargestellt werden.
+
+4. Schreibe eine Funktion =sum_row_col(table)=, die für die übergebene
+    zweidimensionale Liste =table= die Zeilensummen und Spaltensummen
+    errechnet und diese jeweils als eigene Liste zurückliefert. Bei dieser
+    Liste handelt es sich um eine Tabelle, d.h., dass alle Zeilen
+    gleich lang sind:
+
+    #+BEGIN_EXAMPLE
+    >>> sum_row_col([[4, 5, 6], [8, 10, 12], [12, 15, 18]])
+    ([15, 30, 45], [24, 30, 36])
+    #+END_EXAMPLE
+
+    D.h. es wird ein Tupel bestehend aus zwei Listen zurückgeliefert.
+    Die erste Liste enthält die Summen der einzelnen Zeilen und die zweite
+    Liste die Summen der einzelnen Spalten.
+
+5. Baue nun die Funktion =sum_row_col= in das Hauptprogramm ein und
+   ändere die Ausgabe so um, dass auch die Zeilen- und Spaltensummen
+   ausgegeben werden. Ergänze weiters um die Summe aller Zeilensummen
+   bzw. um die Summe aller Spaltensummen:
+
+   #+BEGIN_EXAMPLE
+   python3 unit14.py 1,2,3 4,5,6
+   
+    x     4     5     6
+    1     4     5     6    15
+    2     8    10    12    30
+    3    12    15    18    45
+         24    30    36    90
+   #+END_EXAMPLE 

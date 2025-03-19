@@ -1,0 +1,202 @@
+
+#+TITLE: Bonus 2
+#+AUTHOR: Dr. Günter Kolousek
+
+#+OPTIONS: texht:t toc:nil
+#+LATEX_CLASS: koma-article
+#+LATEX_CLASS_OPTIONS: [parskip=half]
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+
+Lege wiederum ein Verzeichnis an. Nennes es =26_bonus2=! In diesem Verzeichnis
+sollen alle Dateien der jeweiligen Einheit abgelegt werden.
+
+Programmiere Tic-Tac-Toe!
+
+Entwickle das Spiel Tic-Tac-Toe mit einer einfachen AI (artificial
+intelligence, künstliche Intelligenz).
+
+Das Programm soll gemäß des folgenden Aktivitätsdiagramms (engl. activity
+diagram) funktionieren:
+
+[[./bonus2.png]]
+
+Das Beispiel ist insoferne schwerer, da du selber geeignete Funktionen
+schreiben musst und nur der prinzipielle Ablauf und die Ein- und Ausgaben
+festgelegt sind.
+
+Trotzdem hier einige Hilfestellungen:
+
+a. Wähle für das Spielfeld einfach eine Liste mit 9 Einträgen.
+
+b. Folgende Funktionen wären sicher nicht schlecht:
+
+   - =input_player_letter()= Fragt nach Spielerzeichen ("X" oder "O").
+
+   - =who_goes_first()= Ermittelt welcher Spieler (Computer oder Mensch)
+     zuerst beginnt.
+  
+   - =draw_board(board)= zeichnet ein Spielfeld.
+
+   - =get_player_move(board)= Fragt Benutzer nach seinem Zug.
+
+   - =shall_play_again()= Fragt, ob noch ein Spiel gespielt werden soll.
+
+   - =get_computer_move(board, computer_letter)= Ermittelt den nächsten
+     Zug des Computers.
+
+   Außerdem sind folgende Funktionen unter Umständen sinnvoll.
+
+   - =is_winner(board, letter)= Ermittelt, ob der angegebene Spieler
+     ("X" oder "O") gewinnt.
+
+   - =choose_random_move(board, moves)= wählt einen gültigen Zug
+     aus der Liste =moves=.
+
+   - =is_space_free(board, move)= fragt ab, ob der gewählte Zug
+     noch möglich ist.
+
+   - =make_move(board, move, letter)= führt einen Zug durch.
+
+   - =is_board_full(board)= ermittelt, ob das Spielfeld voll ist.
+
+   - =get_board_copy(board)= liefert eine Kopie des Spielfeldes zurück.
+
+c. "frage nach Benutzername" und "wähle Starter".
+
+Die Ausgabe könnte folgendermaßen aussehen:
+
+#+BEGIN_EXAMPLE
+Willkommen zu der wunderbaren Welt des Tic Tac Toe!
+Willst du X oder O sein?
+X
+Der Computer beginnt!
+#+END_EXAMPLE
+
+Natürlich könnte es auch sein, dass der Spieler beginnen darf. Die Auswahl,
+ob Spieler oder Computer beginnt soll mit der Funktion =randint= aus
+dem Modul =random= ermittelt werden.
+
+Der Benutzer kann auch Kleinbuchstaben eingeben, aber die Anzeige wird
+immer in Großbuchstaben durchgeführt.
+
+Hier die Anleitung:
+
+1. "zeige Spielfeld"
+
+   Das Spielfeld sollte leer so aussehen:
+
+   #+BEGIN_EXAMPLE
+      |   |
+      |   |
+      |   |
+   -----------
+      |   |
+      |   |
+      |   |
+   -----------
+      |   |
+      |   |
+      |   |
+   #+END_EXAMPLE
+
+   und (teilweise) befüllt so:
+   
+   #+BEGIN_EXAMPLE
+      |   |
+    O |   | O
+      |   |
+   -----------
+      |   |
+    X |   |
+      |   |
+   -----------
+      |   |
+    O |   | X
+      |   |
+    #+END_EXAMPLE 
+
+   Verwende wieder die =format=-Methode!
+       
+2. "frage nach Zug"
+
+   Diese Abfrage sollte folgendermaßen ablaufen:
+   
+   #+BEGIN_EXAMPLE
+   Wie lautet der nächste Zug (1-9)?
+   7
+   #+END_EXAMPLE
+
+   Die Eingabe soll wieder überprüft werden!
+
+   Die Feldnummern werden folgendermaßen festgelegt (wie der Nummerblock
+   auf der Tastatur):
+
+   #+BEGIN_EXAMPLE
+      |   |
+    7 | 8 | 9
+      |   |
+   -----------
+      |   |
+    4 | 5 | 6
+      |   |
+   -----------
+      |   |
+    1 | 2 | 3
+      |   |
+    #+END_EXAMPLE
+    
+3. "ermittle Zug"
+
+   Der Computer "berechnet" den nächsten Zug nach folgendem Algorithmus:
+
+   a. Zuerst wird überprüft, ob der Computer im nächsten Zug gewinnen kann.
+
+      Dazu werden alle freien Felder durchprobiert und nach jedem Versuch
+      überprüft, ob das Spiel schon gewonnen ist. Wenn das Spiel dadurch
+      gewonnen wurde, wird dieser Zug gewählt, anderenfalls wird der nächste
+      mögliche Zug probiert.
+
+      Wenn keiner dieser möglichen Züge zum Sieg führt, mache beim
+      nächsten Punkt weiter.
+
+      Hinweis: Wie ist dieses "probieren" am besten zu realisieren? Mache
+      einfach eine Kopie des Spielfeldes, setze den Zug und überprüfe, ob der
+      Computer gewinnt. Wenn ja, dann kann die Funktion (welche denn?) den
+      gültigen Zug zurückliefern. Die Kopie des Boards kann dann ja wieder
+      vergessen werden.
+
+      Weiterer Tipp: Kopiere manuell oder benutze die Funktion
+      =copy= aus dem Modul =copy=.
+
+   b. Überprüfe nun, ob der Spieler in dem nächsten Zug gewinnen kann und
+      blockiere diesen gegebenenfalls.
+
+      Dazu werden wieder alle freien Felder durchprobiert und nach jedem
+      Versuch (d.h. der Spieler wird auf das aktuelle freie Feld gesetzt)
+      überprüft, ob das Spiel durch den Spieler gewonnen würde. Wenn ja,
+      dann setze genau auf dieses Feld den Computer.
+
+      Wenn nicht, dann mache beim nächsten Punkt weiter.
+
+   c. Überprüfe, ob einer der Ecken frei ist. Wenn ja, dann dorthin setzen.
+      Wenn nein, dann beim nächsten Punkt weiter.
+
+   d. Überprüfe, ob die Mitte frei ist. Wenn ja, dann dorthin setzen.
+      Wenn nein, dann beim nächsten Punkt weiter.
+
+   e. Wähle zufällig eines der freien Felder.
+
+4. "frage nach Neustart"
+
+   #+BEGIN_EXAMPLE
+   Der Computer hat gewonnen!
+   Willst du noch einmal spielen? (ja/nein)
+   #+END_EXAMPLE
+
+   Der Benutzer kann beliebig Groß- oder Kleinbuchstaben verwenden und
+   der Anfang des Wortes soll genügen. D.h. "j", "J", "ne" oder "neI"
+   sind alle gültig.
+
+5. Bonus-Bonus: Schreibe das Programm so um, dass es mit der Turtle
+   gespielt werden kann (altes Programm vorher sichern).
