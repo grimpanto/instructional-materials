@@ -28,12 +28,19 @@ the second term.
 
 Just a short overview to .NET Core and the basics of C#.
 
+*** [[file:exercises/csharp][C# Excercises]]
+
+As part of the curriculum of the fourth year, here you will find
+assignments that should empower students to learn C# as well as several
+topics like the basics of compiler technology, understand and
+use patterns, and make use of UML diagrams.
+
 ** [[file:build/python_intro/][A gentle introduction to Python]]
 
 This is a gentle introduction to Python for beginners of this particular
 programming language.
 
-***  [[file:exercises/python][Python Excercises]]
+*** [[file:exercises/python][Python Excercises]]
 
 These exercises cover the first year of learning Python as it has been used in
 the technical secondary school (HTL) for computer science. The book
