@@ -1,0 +1,814 @@
+#+TITLE: Beispiel 05: report
+
+#+AUTHOR: \copy 2011/12 Dr. Günter Kolousek
+#+EMAIL:  ko@htlwrn.ac.at
+#+DATE:   2011-11-27
+
+#+SETUPFILE: "../../html.org"
+#+DESCRIPTION:
+#+KEYWORDS:
+
+#+LINK_HOME: ../..
+#+OPTIONS: toc:nil
+
+Dieses Beispiel soll ein Programm implementieren, das einen Report
+(Bericht) aus einer Menge von Umsätzen erstellt.
+
+* Überblick und prinzipielle Funktionsweise
+
+  Wir gehen davon aus, dass wir eine Datei mit lauter Umsätzen von
+  Verkäufern je Produkt und Monat als auch den erzielten Umsatz
+  (Verkaufspreis und verkaufte Anzahl) in einer Datei vorliegend haben.
+
+  Solch eine Mengen von Datensätzen (z.B. aus dem ersten Quartal eines
+  Jahres) könnte folgendermaßen aussehen:
+
+  | Artikel          | Verkäufer | VK-Preis | Stück | Monat |
+  |------------------+-----------+----------+-------+-------|
+  | Audi A6          | Maier     |    55000 |     1 |     1 |
+  | Audi Q5          | Maier     |    60000 |     1 |     2 |
+  | VW Golf          | Maier     |    18000 |     2 |     1 |
+  | VW Golf          | Maier     |    18000 |     2 |     2 |
+  | VW Golf          | Maier     |    18000 |     1 |     3 |
+  | VW Golf          | Huber     |    18000 |     3 |     2 |
+  | VW Golf          | Müller    |    18000 |     2 |     2 |
+  | VW Golf          | Müller    |    18000 |     2 |     1 |
+  | BMW X6           | Kaiser    |   120000 |     1 |     2 |
+  | BMW 5GT          | König     |    80000 |     2 |     3 |
+  | BMW 5GT          | König     |    80000 |     2 |     3 |
+  | Dodge Challenger | Sandmann  |    35000 |     1 |     1 |
+  | Dodge Challenger | Sandmann  |    35000 |     1 |     1 |
+  | Honda Civic      | Sandmann  |    28000 |     2 |     3 |
+  | Honda Civic      | Dorfer    |    28000 |     2 |     1 |
+  | Honda Civic      | Dorfer    |    28000 |     1 |     3 |
+
+  In weiterer Folge soll diese Tabelle so sortiert werden, dass das
+  Hauptkriterium die Artikel und innerhalb von gleichen Artikeln nach
+  dem Verkäufer sortiert wird. Damit sieht die Tabelle folgendermaßen
+  aus:
+   
+  | Artikel          | Verkäufer | VK-Preis | Stück | Monat |
+  |------------------+-----------+----------+-------+-------|
+  | Audi A6          | Maier     |    55000 |     1 |     1 |
+  | Audi Q5          | Maier     |    60000 |     1 |     2 |
+  | BMW 5GT          | König     |    80000 |     2 |     3 |
+  | BMW 5GT          | König     |    80000 |     2 |     3 |
+  | BMW X6           | Kaiser    |   120000 |     1 |     2 |
+  | Dodge Challenger | Sandmann  |    35000 |     1 |     1 |
+  | Dodge Challenger | Sandmann  |    35000 |     1 |     1 |
+  | Honda Civic      | Dorfer    |    28000 |     2 |     1 |
+  | Honda Civic      | Dorfer    |    28000 |     1 |     3 |
+  | Honda Civic      | Sandmann  |    28000 |     2 |     3 |
+  | VW Golf          | Huber     |    18000 |     3 |     2 |
+  | VW Golf          | Maier     |    18000 |     2 |     1 |
+  | VW Golf          | Maier     |    18000 |     2 |     2 |
+  | VW Golf          | Maier     |    18000 |     1 |     3 |
+  | VW Golf          | Müller    |    18000 |     2 |     2 |
+  | VW Golf          | Müller    |    18000 |     2 |     1 |
+   
+  Es soll jetzt ein Report auf der Konsole ausgegeben werden, der für
+  jeden Verkäufer und jedes Produkt die Umsatzsumme und für jedes
+  Produkt die Gesamtumsatzsumme als auch den Gesamtumsatz ausgibt. Das
+  soll so aussehen:
+
+  #+begin_src sh
+  ********* Umsatzstatistik nach Produkten und Verkäufer **********
+  Produkt              Verkäufer        Umsatzsumme
+   
+  Audi A6              Maier             55000 *
+  Audi A6                                55000 **
+   
+  Audi Q5              Maier             60000 *
+  Audi Q5                                60000 **
+   
+  BMW 5GT              König            320000 *
+  BMW 5GT                               320000 **
+   
+  BMW X6               Kaiser           120000 *
+  BMW X6                                120000 **
+   
+  Dodge Challenger     Sandmann          70000 *
+  Dodge Challenger                       70000 **
+   
+  Honda Civic          Dorfer            84000 *
+  Honda Civic          Sandmann          56000 *
+  Honda Civic                           140000 **
+   
+  VW Golf              Huber             54000 *
+  VW Golf              Maier             90000 *
+  VW Golf              Müller            72000 *
+  VW Golf                               216000 **
+  Gesamtumsatz                          981000 ***
+  #+end_src
+
+* Begriffe
+
+  - Unter einer Batchverarbeitung (Stapelverarbeitung) versteht man in der
+    Informatik eine sequentielle Verarbeitung einer festgelegten Menge von
+    Daten (z.B. Erstellen aller Lohnabrechnungen für alle Mitarbeiter
+    für ein bestimmtes Monat).
+
+  - Ein Datensatz besteht aus einer Folge von Datenfeldern. Jedes Datenfeld
+    ist durch einen Namen und einem Typ gekennzeichnet. In unserem
+	Beispiel haben wir die Datenfelder /Artikel/, /Verkäufer/, /Verkaufspreis/
+	(VK-Preis), /Stück/ und /Monat/.
+
+	Im relationalem Modell (das die Basis von relationalen Datenbanken
+    bildet) entspricht jedes Datenfeld einem Attribut.  Die Anordnung
+    der Attribute entspricht dort einem Tupel.
+
+  - Ein Gruppenbegriff oder Ordnungsbegriff ist ein Datenfeld nach
+	dem die Datensätze geordnet werden können.
+
+  - Alle Datensätze mit gleichem Ordnungsbegriff bilden eine Gruppe.
+
+  - Ein Gruppenwechsel liegt vor, wenn sich der Gruppenbegriff durch
+    Verarbeiten eines neuen Satzes ändert, und somit eine neue Gruppe
+    verarbeitet werden soll.
+
+	Existiert nur ein Gruppenbegriff spricht man von einem einfachen
+	Gruppenwechsel, bei zwei Gruppenbegriffen von einem zweifachen
+	Gruppenwechsel, bei n Gruppenbegriffen von einem n-fachen Gruppenwechsel.
+
+* Nun zum Programmieren!
+
+  1. Schreibe eine =usage= Funktion in einem Programm =report.py= (und
+     zugreifbar auch unter =report=), die einfach nur den folgenden
+     Text ausgibt und danach das Programm mit dem Exitcode 1 beendet:
+
+	 #+begin_src src
+     usage: report [--help|-h|-s] [FILE]
+     Print a sales statistics report ordered by product and salesclerk.
+         
+       --help|-h ... Help!
+       -s ... sort it before producing the report
+       FILE ... file name or - (stdin). If FILE is missing read from stdin
+	 #+end_src
+
+  2. So jetzt noch einmal eine Funktion =parse_argv= in gewohnter
+     Weise! Die Funktion erwartet sich die Optionen und Parameter der
+     Kommandozeile (ohne den Programmnamen) als Sequenz und soll ein
+     Tupel mit dem Namen der Datei und einem boolschen Wert (=True=
+     ... sortieren!) zurückliefern.
+	 
+     Wird kein Dateiname angegeben oder nur der Bindestrich soll =​"-"​=
+     für den Namen der Datei zurückgeliefert werden.
+
+	 Diese Kommandozeilenverarbeitung soll so programmiert werden,
+	 dass alle Optionen vor den Parametern kommen müssen. Falsche
+	 Optionen, Optionen nach dem Parameter oder mehrere Parameter
+	 werden als "falsch" zurückgewiesen:
+
+	 #+begin_src sh
+	 $ report -t sales_statistics.csv
+     usage: report [--help|-h|-s] [FILE]
+     Print a sales statistics report ordered by product and salesclerk.
+              
+       --help|-h ... Help and exit!
+       -s ... sort it before producing the report
+       FILE ... file name or - (stdin). If FILE is missing read from stdin
+      
+     Unknown option: '-t'
+     $ report -s sales_statistics.csv xxx
+     usage: report [--help|-h|-s] [FILE]
+     Print a sales statistics report ordered by product and salesclerk.
+              
+       --help|-h ... Help and exit!
+       -s ... sort it before producing the report
+       FILE ... file name or - (stdin). If FILE is missing read from stdin
+      
+     Additional options or parameters past FILE
+	 #+end_src
+
+  3. Auch hier gilt wieder: Es ist sinnvoll das Modul als Programm
+	 ausführen zu können als auch einfach nur als Modul zu importieren.
+	 Deshalb müssen wir unter anderem Funktionen schreiben.
+
+	 Beginnen wir mit einer Funktion =main=. Diese soll 
+	 vorerst einmal nur die Funktion =parse_argv= aufgerufen.
+
+  4. Schreibe eine Funktion =process=, die folgende Parameter bekommt:
+
+     - einen Dateinamen als Parameter, der den Dateinamen angibt
+	 - einen boolschen Wert, der angibt, ob die Daten vorher noch
+	   zu sortieren sind.
+
+	 Vorerst soll diese Funktion lediglich die Datei öffnen und die
+	 Daten einfach auf =stdout= ausgeben.
+
+	 Im Gegensatz zu unserem vorherigen Ansatz verbessern wir
+     unseren Ansatz beim Bearbeiten von Dateien: Als generelle
+     Regel gilt, dass jede Datei, die geöffnet wird auch wieder
+     geschlossen werden muss. D.h. unabhängig davon, ob irgendwo eine
+     Exception auftritt oder nicht.
+
+	 Damit wollen wir unseren bisherigen Ansatz verbessern. Vorausgesetzt
+	 es gibt eine Funktion =process_and_print= (gibt es in diesem Beispiel
+	 nicht!), dann würde unser primitiver Ansatz folgendermaßen aussehen:
+
+	 #+begin_src python
+	 f = open(filename)
+	 for line in f:
+	     process_and_print(line)
+	 f.close()
+	 #+end_src
+
+	 Es könnte ja durchaus sein, dass in der Funktion =process_and_print=
+	 ein Fehler (also eine Exception) auftritt und die Datei nicht mehr
+	 geschlossen wird! Beendet sich der Prozess wird die Datei vom
+	 Betriebssystem geschlossen, aber wenn sich der Prozess nicht beendet,
+	 dann bleibt die Datei geöffnet. Passiert dies oft (vielleicht in
+	 einer Schleife), dann werden Ressourcen vom Betriebssystem angefordet,
+	 die nicht mehr freigegeben werden. Sehr schlecht!!!
+
+	 Deshalb werden wir jetzt unser Muster zum Öffnen und Schließen
+	 von Dateien folgendermaßen umbauen:
+
+	 #+begin_src python
+     f = None
+	 try:
+         f = open(filename)
+	     for line in f:
+	         process_and_print(line)
+     except:
+         print("Fehler")
+	 finally:
+         if f:
+	         f.close()
+     #+end_src
+
+	 Benötigt man die Fehlerbehandlung nicht lokal, dann kann man
+	 das vereinfachen zu:
+
+	 #+begin_src python
+     f = open(filename)
+	 try:
+	     for line in f:
+	         process_and_print(line)
+	 finally:
+         f.close()
+     #+end_src	 
+
+	 Da dies jedoch etwas "umständlich" ist kann dies mit einer
+	 =with= Anweisung einfacher gestaltet werden:
+
+	 #+begin_src python
+	 with open(filename) as f:
+	     for line in f:
+	         process_and_print(line)
+	 #+end_src
+
+	 Allerdings ist damit lediglich das Schließen der Datei
+     gewährleistet.  Eine eventuell auftretende Exception wird in
+     beiden Fällen derzeit nicht behandelt! Das ist an sich auch gut
+     so, denn Fehler soll ja gemeldet werden und unter Umständen macht
+     es erst Sinn den Fehler in einer äußeren Funktion zu behandeln!
+
+	 D.h. ein vollständiges Beispiel mit direkter Behandlung eines
+	 eventuell auftretenden Fehlers sieht folgendermaßen aus:
+
+	 #+begin_src python
+	 try:
+	     with open(filename) as f:
+             for line in f:
+                 process_and_print(line)
+	 except:
+	     print("Es ist ein Fehler aufgetreten!")
+	 #+end_src
+
+	 So, baue jetzt dieses Konstrukt in die Funktion =process= gemäß
+     der Angabe am Beginn dieses Punktes ein!
+
+  5. Führe eine neue Funktion =process_file= ein, die die folgenden
+     formalen Parameter erwartet:
+
+     a. einen Positionsparameter, also einen ganz normalen formalen Parameter,
+        der angegeben werden muss und eine offene Datei angibt.
+	 b. einen Keywordparameter =sortit=, mit dem Defaultwert =False=,
+        der angibt, dass die Daten vorher noch zu sortieren sind.
+	 c. einen Keywordparameter =writeback=, ebenfalls mit dem Defaultwert
+        =False=, der angibt, dass die Daten in die Datei zurückzuschreiben
+        sind.
+
+	 Vorerst soll diese Funktion lediglich das Ausgeben der Zeilen
+	 aus der offenen Datei übernehmen und die Keywordparameter außer
+	 Acht lassen.
+
+	 Baue diese Funktion in =process= ein!
+
+  6. Bis jetzt wurde einfach nur jede Zeile der Datei einfach
+	 ausgegeben. In weiterer Folge wollen wir jedoch die Datei
+	 als CSV (comma separated value) - Datei interpretieren.
+
+	 Eine CSV Datei ist eine Textdatei, die je Zeile einen Datensatz
+	 beinhaltet. Die Datenfelder des Datensatzes sind üblicherweise
+	 durch einen Beistrich getrennt (auch wenn andere Trennzeichen
+	 möglich sind).
+
+	 Eine einfache Art einen Datensatz in die einzelnen Datenfelder
+	 aufzuteilen, ist einfach die Zeile mittels der Methode =split=
+	 zu trennen.
+
+	 Das funktioniert sehr gut, solange in den einzelnen Datenfeldern
+	 kein Komma vorkommt! Wenn ein Komma vorkommt, dann ist eine
+	 Möglichkeit das Datenfeld in doppelte Hochkomma einzuschließen.
+	 Hmm, aber was ist wenn ein doppeltes Hochkomma vorkommen soll?
+	 Dann ist dieses mit einem doppelten Hochkomma zu entwerten
+     (engl. escape).
+
+	 Beispiel: =1,2,"3,4",5,"6""7",8= würde folgende Datenfelder
+	 (in einer Liste) liefern: =['1', '2', '3,4', '5', '6"7', '8']=.
+
+	 Dieses Format wird von M$ Excel verwendet, wenn ein Sheet nach
+	 CSV exportiert wird.
+
+	 Wie können wir allerdings damit umgehen? So etwas selber zu
+	 parsen ist gar nicht so einfach (wenn man nicht weiß wie).
+
+	 Aber es gibt ein Modul in Python, das einem weiterhilft und
+	 einfach zu bedienen ist:
+
+	 #+begin_src python
+	 import csv
+     with open("sales_statistics.csv") as f:
+         reader = csv.reader(f)
+	     for record in reader:
+	         print(record)
+	 #+end_src
+
+	 Ausprobieren und (richtig) in die Funktion =process_file= einbauen!
+
+  7. Jeder Datensatz ist derzeit in einer Liste enthalten. Wie wir im 
+     vorherigen Beispiel =lfind= gesehen haben, ist es allerdings
+	 sinnvoll auf die einzelnen Datenfelder per Name zugreifen zu
+	 können.
+	 
+     Ein =namedtuple= ist eine geeignete Möglichkeit einen Datensatz
+	 abzuspeichern, der sich nicht ändert.
+
+	 Was aber, wenn sich die Daten ändern und wenn wir außerdem noch
+	 Methoden je Datensatz haben, die wir aufrufen wollen? Hier eignet
+	 sich das Konzept der Klasse (siehe Theorieunterricht).
+
+	 Schreibe eine Klasse =Sale=, die die Attribute =product=, =salesclerk=,
+	 =price=, =quantity= und =month= hat.
+
+	 Schreibe weiters dazu einen Konstruktor 
+     =__init__(self, product, salesclerk, price, quantity, month)= 
+     der alle Attribute als Parameter bekommt und für jeden Parameter ein
+     Attribut als Instanzvariable setzt. =product= und =salesclerk=
+	 sollen als String abgespeichert werden und alle anderen jeweils als
+	 ganze Zahl.
+
+	 Schreibe außerdem eine Methode =__str__(self)=, die folgende
+	 Repräsentation zurückliefert:
+
+	 #+begin_src python
+     Sale(Audi A6, Meier, 55000, 1, 1)
+	 #+end_src
+
+	 Die Ausgabe des Programmes sollte jetzt einfach einmal so
+	 aussehen:
+
+	 #+begin_src sh
+	 Sale(Audi A6, Maier, 55000, 1, 1)
+     Sale(Audi Q5, Maier, 60000, 1, 2)
+     Sale(VW Golf, Maier, 18000, 2, 1)
+     Sale(VW Golf, Maier, 18000, 2, 2)
+     Sale(VW Golf, Maier, 18000, 1, 3)
+     Sale(VW Golf, Huber, 18000, 3, 2)
+     Sale(VW Golf, Müller, 18000, 2, 2)
+     Sale(VW Golf, Müller, 18000, 2, 1)
+     Sale(BMW X6, Kaiser, 120000, 1, 2)
+     Sale(BMW 5GT, König, 80000, 2, 3)
+     Sale(BMW 5GT, König, 80000, 2, 3)
+     Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+     Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+     Sale(Honda Civic, Sandmann, 28000, 2, 3)
+     Sale(Honda Civic, Dorfer, 28000, 2, 1)
+     Sale(Honda Civic, Dorfer, 28000, 1, 3)
+	 #+end_src
+
+  8. Erweitere das Programm so, dass die Daten vor der Ausgabe zuerst
+     nach Artikel und je Artikel nach Verkäufer sortiert werden.
+
+	 Zur Erinnerung: Listen lassen sich leicht nach einem beliebigen
+	 Kriterium sortieren, wenn eine eigene Funktion geschrieben
+	 wird, die einen Wert zurückliefert nach dem sortiert werden
+	 soll.
+
+	 Schreibe also eine Funktion =sortkey_product=, die sich eine Instanz
+	 der Klasse =Sale= erwartet und das Produkt als "Key" zurückliefert.
+	 Jetzt kann die Liste nach dem Produkt sortiert werden.
+
+	 Schreibe weiters eine Funktion =sortkey_salesclerk=, die analog
+	 dazu funktioniert, jedoch den Verkäufer als "Key" zurückliefert.
+
+	 Denke daran, dass die =sort= Methode einen optionalen Keyword-Parameter
+	 =key= erwartet, den man eine "sortkey" Funktion übergeben soll.
+
+	 Jetzt kann die gewünschte Sortierung hergestellt werden. Allerdings
+	 in welcher Reihenfolge sind den die beiden Sortieroperationen
+	 durchzuführen? 
+
+     - Zuerst nach Produkt und dann nach Verkäufer?
+	 - Zuerst nach Verkäufer und dann nach Produkt?
+
+	 Gut, dass die =sort= Methode einen stabilen Sortieralgorithmus
+	 implementiert! Wer erinnert sich noch an die erste Klasse was
+	 das bedeutet?
+
+  9. Wir gehen in weiterer Folge davon aus, dass bei der Ausgabe keine
+     Umlaute in den Verkäufernamen (und auch sonst nicht) vorhanden
+     sein dürfen (wie z.B. auch noch heutzutage auf der Master
+     Card). D.h. ersetze alle Umlaute durch entsprechende
+     Buchstabenkombinationen.
+    
+     Ersetzen von Substrings (Teilzeichenketten) innerhalb eines Strings
+	 kann man mit der Methode =replace=, z.B.:
+    
+     #+begin_src python
+     >>> "ich nähme eine Maschinä".replace("ä", "e")
+     'ich nehme eine Maschine'
+     #+end_src
+
+	 Wo ist das einzubauen? Da die Anforderung gestellt wurde, nur die
+	 Ausgabe zu verändern, muss diese Funktionalität beim =print=
+	 vorgenommen werden. Stellen wir uns vor, wir haben mehrere Orte
+	 im Programm, wo wir Umsätze ausgeben wollen, dann müssen wir
+	 diese Funktionalität an jedem von diesem Ort einbauen. Das
+	 ist nicht sinnvoll.
+
+	 Deshalb gehe folgendermaßen vor:
+
+	 a. Schreibe dazu eine Funktion =convert_umlauts=, die einen String
+	    bekommt und alle Konversionen vornimmt und das Ergebnis zurückliefert.
+
+		Ersetze =ä, Ä, ü, Ü, ö, Ö, ß= durch =ae, Ae, ue, Ue, oe, Oe, ss=.
+	 b. Baue diese Funktion in die =__str__= Methode der Klasse =Sale=
+		ein!
+    
+	 Damit sollte die Ausgabe bis jetzt folgendermaßen aussehen:
+
+	 #+begin_src sh
+     Sale(Audi A6, Maier, 55000, 1, 1)
+     Sale(Audi Q5, Maier, 60000, 1, 2)
+     Sale(BMW 5GT, Koenig, 80000, 2, 3)
+     Sale(BMW 5GT, Koenig, 80000, 2, 3)
+     Sale(BMW X6, Kaiser, 120000, 1, 2)
+     Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+     Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+     Sale(Honda Civic, Dorfer, 28000, 2, 1)
+     Sale(Honda Civic, Dorfer, 28000, 1, 3)
+     Sale(Honda Civic, Sandmann, 28000, 2, 3)
+     Sale(VW Golf, Huber, 18000, 3, 2)
+     Sale(VW Golf, Maier, 18000, 2, 1)
+     Sale(VW Golf, Maier, 18000, 2, 2)
+     Sale(VW Golf, Maier, 18000, 1, 3)
+     Sale(VW Golf, Mueller, 18000, 2, 2)
+     Sale(VW Golf, Mueller, 18000, 2, 1)
+	 #+end_src
+
+  10. Jetzt muss noch in =process= einiges getan werden!
+
+	  - Wenn von der Standardeingabe gelesen wird, dann gehen wir
+        davon aus, dass diese Daten unsortiert sind und wir diese
+        vorher zu sortieren haben. D.h. =process_file= wird mit
+        =sys.stdin= und dem Keywordparameter ~sortit=True~ aufgerufen.
+
+		Das ist deshalb so, da wir von der Standardeingabe gelesene
+		Daten einfach als unsortiert interpretieren und auf den
+		Standardeingabekanal nicht schreiben können.
+
+	  - Anderenfalls:
+		- Wenn ~sortit == True~, dann wird die Datei (richtig)
+		  zum Lesen und Schreiben geöffnet und die Funktion
+          =process_file= mit der geöffneten Datei, dem
+          Keywordparameter ~sortit=True~ und dem Keywordparameter
+          ~writeback=True~ aufgerufen.
+
+		  Wie soll die Datei geöffnet werden (abgesehen von =with=...)
+          und wie kann man eine Datei zuerst lesen und dann neu
+          befüllen? So geht's:
+		  
+		  #+begin_src python
+          >>> # Öffnen zum Lesen und Schreiben; Datei wird nicht abgeschnitten
+		  >>> f = open("xxx.csv", "r+")
+          #+end_src
+
+		  So, was kann man allerdings damit machen? Wie kann man zuerst
+		  lesen und /dann/ die Datei wieder neu schreiben. D.h. den
+		  alten Inhalt ersetzen. So geht's:
+
+		  #+begin_src python
+		  >>> content = f.read()  # hier: ALLES lesen (im Beispiel: zeilenweise)
+          >>> f.seek(0)  # Dateipointer an den Anfang setzen
+		  >>> f.truncate()  # Datei leeren (jetzt: abschneiden an der Position 0)
+          >>> f.write("abc")
+          >>> f.close()
+          #+end_src
+
+		  Das benötigt man aber erst in der Funktion =process_file=. D.h.
+		  merken!
+
+		  Hier gehen wir von folgendender Überlegung aus: Sind die
+		  Daten zu sortieren und /nicht/ vom Standardeingabekanal, dann
+		  werden diese sortiert und sortiert wieder in die
+		  Datei zurückgeschrieben.
+
+		- Anderenfalls wird die Datei (richtig) zum Lesen geöffnet
+          und die Funktion =process_file= nur mit der
+		  geöffneten Datei aufgerufen.
+
+		  D.h., es wird davon ausgegangen, dass die Daten sortiert
+		  sind und daher weder sortiert werden müssen und daher auch
+		  nicht zurückgeschrieben werden müssen.
+
+  11. Jetzt ist noch die Funktion =process_file= weiter zu bearbeiten!
+
+	  Wenn der Parameter =sortit= auf =True= gesetzt ist
+
+	  - dann muss sortiert werden. Ok, das haben wir ja schon. Wie gewohnt
+		geben wir zur Sicherheit noch alle sortierten Umsätze wie
+		schon gehabt aus und dann wird die Datei wieder mit CSV Daten
+		beschrieben (wenn ~writeback == True~).
+
+		Und das geht so:
+
+		#+begin_src python
+		writer = csv.writer(f)
+        writer.writerows([(1, 2, 3), (4, 5, 6)])  # testweise 2 Datensätze
+		#+end_src
+
+		D.h. analog zu einem CSV-Reader gibt es auch einen CSV-Writer.
+		Diesen bekommt man durch Aufruf der Funktion =writer= aus
+		dem Modul =csv=. Die eigentlichen Datensätze werden wieder
+		zeilenweise in die Datei geschrieben.
+
+		Derzeit haben wir eine Liste von =Sale= - Objekte, die schon
+		hübsch sortiert sind. 
+
+		Wenn die Daten nun auch noch zurückzuschreiben sind, dann
+		stellt sich die Frage wie man von diesen Objekten zu einer
+		Liste von Tupel kommen soll, sodass diese mit der =writerows=
+		Methode in die Datei geschrieben werden können?
+		
+	  - anderenfalls ist nicht zu sortieren. Demzufolge ist auch nichts
+		in eine Datei zu schreiben. Alles bleibt beim Alten.
+
+	  Bist jetzt sollte das Programm folgendermaßen funktionieren. Unsortierte
+	  Ausgabe:
+
+	  #+begin_src sh
+      $ report sales_statistics.csv
+      Sale(Audi A6, Maier, 55000, 1, 1)
+      Sale(Audi Q5, Maier, 60000, 1, 2)
+      Sale(VW Golf, Maier, 18000, 2, 1)
+      Sale(VW Golf, Maier, 18000, 2, 2)
+      Sale(VW Golf, Maier, 18000, 1, 3)
+      Sale(VW Golf, Huber, 18000, 3, 2)
+      Sale(VW Golf, Mueller, 18000, 2, 2)
+      Sale(VW Golf, Mueller, 18000, 2, 1)
+      Sale(BMW X6, Kaiser, 120000, 1, 2)
+      Sale(BMW 5GT, Koenig, 80000, 2, 3)
+      Sale(BMW 5GT, Koenig, 80000, 2, 3)
+      Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+      Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+      Sale(Honda Civic, Sandmann, 28000, 2, 3)
+      Sale(Honda Civic, Dorfer, 28000, 2, 1)
+      Sale(Honda Civic, Dorfer, 28000, 1, 3)
+	  #+end_src
+
+	  Und hier die sortierte Ausgabe:
+	  
+	  #+begin_src sh
+      $ report -s sales_statistics.csv
+      Sale(Audi A6, Maier, 55000, 1, 1)
+      Sale(Audi Q5, Maier, 60000, 1, 2)
+      Sale(BMW 5GT, Koenig, 80000, 2, 3)
+      Sale(BMW 5GT, Koenig, 80000, 2, 3)
+      Sale(BMW X6, Kaiser, 120000, 1, 2)
+      Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+      Sale(Dodge Challenger, Sandmann, 35000, 1, 1)
+      Sale(Honda Civic, Dorfer, 28000, 2, 1)
+      Sale(Honda Civic, Dorfer, 28000, 1, 3)
+      Sale(Honda Civic, Sandmann, 28000, 2, 3)
+      Sale(VW Golf, Huber, 18000, 3, 2)
+      Sale(VW Golf, Maier, 18000, 2, 1)
+      Sale(VW Golf, Maier, 18000, 2, 2)
+      Sale(VW Golf, Maier, 18000, 1, 3)
+      Sale(VW Golf, Mueller, 18000, 2, 2)
+      Sale(VW Golf, Mueller, 18000, 2, 1)
+	  #+end_src
+
+	  Die Datei hat sich nach dem Sortieren auch geändert:
+
+	  #+begin_src sh
+	  $ cat sales_statistics.csv
+      Audi A6,Maier,55000,1,1
+      Audi Q5,Maier,60000,1,2
+      BMW 5GT,König,80000,2,3
+      BMW 5GT,König,80000,2,3
+      BMW X6,Kaiser,120000,1,2
+      Dodge Challenger,Sandmann,35000,1,1
+      Dodge Challenger,Sandmann,35000,1,1
+      Honda Civic,Dorfer,28000,2,1
+      Honda Civic,Dorfer,28000,1,3
+      Honda Civic,Sandmann,28000,2,3
+      VW Golf,Huber,18000,3,2
+      VW Golf,Maier,18000,2,1
+      VW Golf,Maier,18000,2,2
+      VW Golf,Maier,18000,1,3
+      VW Golf,Müller,18000,2,2
+      VW Golf,Müller,18000,2,1
+	  #+end_src
+	  
+	  Nicht so schlecht, oder?
+
+  12. Von wegen einen Report erstellen. Davon haben wir bis jetzt noch
+	  gar nichts implementiert.
+
+      Schreibe jetzt einen zweistufigen Gruppenwechsel!
+
+	  Der Algorithmus geht folgendermaßen:
+
+	  [[./gruppenwechsel.png]]
+	 
+	  Bei dieser Darstellung handelt es sich um ein sogenanntes
+      Struktogramm (auch Nassi Schneiderman Diagramm genannt). Der
+      Programmname (Gruppenwechsel) steht ganz oben. Danach folgen die
+      einzelnen Schritte.
+
+	  Der erste Schritt, der mit "Programmvorbereitung" überschrieben
+	  ist, sagt aus, dass die Gesamtfelder auf 0 zu setzen sind.
+	  D.h. es handelt sich um eine verbale Beschreibung der Aktion,
+	  die im Programm durchgeführt werden soll. Danach folgt eine
+	  =while= Schleife, deren Bedingung im ("nicht EOF") anzeigt,
+	  dass das Dateiende (End Of File) noch nicht erreicht ist.
+	  Die umschließende Klammer gibt an, wie weit der Inhalt der =while=
+	  Schleife reicht.
+
+	  Dieses Struktogramm gibt den allgemeinen Ablauf eines zweistufigen
+	  Gruppenwechsels an.
+
+	  Wie kann man dieses Struktogramm aber jetzt umsetzen? Weiter
+	  zum nächsten Punkt!
+
+  13. Los geht's!
+
+	  Sieht man sich das Struktogramm genauer an, dann erkennt man, dass
+	  mehrere verschachtelte Schleifen enthalten sind und weiters erkennt
+	  man, dass dieses Struktogramm offensichtlich auf die Verarbeitung
+	  von Dateien ausgerichtet ist ("nicht EOF" bzw. "Datensatz lesen").
+
+	  Außerdem haben wir in =process= auch eine =if= Anweisung: Im einen
+	  Zweig haben wir als zugrundeliegende Datenstruktur eine Liste
+	  (da wir die Daten schon sortiert haben) und im anderen Zweig
+	  haben wir (derzeit fast nichts) zu ein =Reader= Objekt, das
+	  es uns erlaubt die Datei zeilenweise (je ein Datensatz) durchzugehen.
+	  
+	  Jetzt haben wir prinzipiell zwei Möglichkeiten:
+
+	  - Entweder wir implementieren den Gruppenwechselalgorithmus zweimal
+		(d.h. einmal für den listeweisen Zugriff und einmal für den
+		Dateizugriff)
+	  - oder wir schreiben eine weitere Funktion, die den Gruppenwechsel
+		durchführt und die von beiden Zweigen der =if= Anweisung aufgerufen
+		werden kann. Dazu muss lediglich eine Abstraktion gefunden werden,
+		wie sowohl jeweils der nächste Datensatz gelesen werden kann.
+
+	  Eh klar, wir setzen auf die zweite Möglichkeit. Es stellt sich nur
+	  die Frage wie diese Abstraktion aussehen soll.
+
+	  Hier kommen wir zu dem Konzept /Iterator/. Ein Iterator ist ein
+      Objekt, das es uns erlaubt über eine Collection (und in Python
+      auch über eine Datei) zu iterieren.  D.h. alle Objekte der
+      Collection durchzugehen.
+
+	  In Python sieht die Funktionalität (das Protokoll) eines Iterators
+	  so aus:
+
+	  #+begin_src python
+	  >>> a = [1, 2, 3]
+	  >>> it = iter(a)
+	  >>> it
+	  <list_iterator object at 0x954cf6c>
+	  >>> next(it)
+      1
+      >>> next(it)
+      2
+      >>> next(it)
+      3
+      >>> next(it)
+      Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+      StopIteration
+	  #+end_src
+
+	  D.h. mittels der Funktion =iter= bekommt man ein Iteratorobjekt
+	  für eine bestimmte Collection bzw. allgemein von jedem Objekt,
+	  das eine =__iter__= Methode besitzt.
+
+	  Mittels der Funktion =next= kann man solange ein weiteres Objekt
+	  bekommen bis kein weiteres Objekt vorhanden ist. Dann wird
+	  eine =StopIteration= Exception geworfen.
+
+	  Das schöne ist, dass nicht nur Listen (auch =dict=, =set=, =tuple=,...)
+	  fähig sind jeweils eine Iterator-Objekt zurückzuliefern, sondern
+	  auch Dateiobjekte bzw. Reader-Objekte. Bei diesen ist es sogar
+	  noch eine Spur einfacher, da man einfach diese direkt als Iterator
+	  verwenden kann:
+
+	  #+begin_src python
+	  >>> f = open("sales_statistics.csv")
+      >>> next(f)
+      'Audi A6,Maier,55000,1,1\n'
+	  #+end_src
+
+	  Schreibe daher einmal eine Funktion =control_break(sale_iter)=
+      (control break für Gruppenwechsel), die ein Iteratorobjekt
+      bekommt und den eigentlichen Gruppenwechsel für unsere
+      Aufgabenstellung /später/ durchführen soll. /Vorerst/ soll die
+      Funktion aber nur einfach die Umsätze auf der Konsole ausgeben
+      wie bisher. D.h. das Programm soll wieder einmal unverändert
+      funktionieren.
+
+	  Was ist dabei zu beachten: In der (sortierten) Liste sind schon
+	  direkt =Sale=-Objekte enthalten während mittels des Reader-Objektes
+	  aus dem =csv= Modules die Datensätze als =list= Objekt vorliegen.
+
+	  D.h. die Funktion =control_break= soll überprüfen, um welchen
+	  Typ es sich handelt und u.U. =Sale= Objekte anlegen und vorerst
+	  diese mittels =print= ausgeben.
+
+	  Die Schleife soll einfach als =while True:= Schleife implementiert
+	  werden, wobei der nächste Datensatz einfach durch =next(it)= geholt
+	  wird. Vergiss aber nicht auf =try:= und =except StopIteration:=!
+
+  14. So jetzt gehen wir den eigentlichen Algorithmus an:
+	  a. Im Schritt PROGRAMMVORBEREITUNG steht, dass man die Gesamtfelder
+		 auf 0 setzen soll. Welche Gesamtfelder? Bei uns ist das einfach
+		 der Gesamtumsatz. Nennen wir diesen =total_sales=.
+	  b. Der nächste Schritt "Datensatz lesen" ist an sich ganz einfach.
+		 Aber wir benötigen einerseits das Lesen mehrmals und andererseits
+		 sollen wir ja doch auf das EOF überprüfen.
+
+		 Schreibe deshalb eine neue Funktion =next_sale(sales_iter)=,
+		 die ein =try= ... =except= enthält. Innerhalb des =try= Blockes
+		 soll der nächste Datensatz mittels =next= gelesen und, wenn
+		 notwendig, in ein =Sale= Objekt gewandelt und danach zurückgeliefert
+		 werden (wie im vorhergehenden Punkt). Im =except= Block wird
+		 einfach =None= zurückgeliefert.
+
+		 Rufe diese Funktion auf und speichere das Ergebnis in einer
+		 Varialbe =sale= ab.
+	  c. Jetzt kommt schon die erste große Schleife. In dieser steht
+		 im Schleifenkopf "not EOF". Noch nicht am Ende sind wir,
+		 wenn in der Variable =sale= nicht =None= steht.
+	  d. Der nächste Schritt ist mit "GRUPPENVORBEREITUNG" betitelt.
+		 - Hier sollen zuerst die Summenfelder der Gruppe auf 0 gesetzt
+		   werden. Die Gruppe nach der wir den Gruppenwechsel durchführen
+		   ist für uns die Umsätze je Produkt. Wir nennen daher die
+		   Variable =product_sales= und setzen diese brav auf 0.
+		 - Weiters sollen wir die Ausgabebereiche aufbereiten. In unserem
+		   speziellen Fall reicht einfach die Ausgabe einer Leerzeile.
+		 - Und den Gruppenbegriff in eine Variable legen. Der
+           Gruppenbegriff ist für uns das Produkt, das wir gerade im
+           Datensatz haben.  Nennen wir die Variable =curr_product=
+           (für aktuelles Produkt) und speichern wir uns hier das
+           Produkt von unseren eingelesenen =Sale= Objekt ab.
+	  e. Im nächsten Schritt kommen wir wieder zu einer Schleife. Für
+         uns bedeutet das, dass wir wieder eine =while= Schleife
+         benötigen.  Wie =nicht EOF= zu behandeln ist, ist eh
+         klar. Bzgl. Gruppenwechsel: ein Gruppenwechsel ist eine
+         Änderung im Gruppenbegriff. Wie erkennen wir diesen? Indem
+         wir in unserem Fall nachsehen, ob das Produkt des aktuellen
+         Datensatzes verschieden zu dem in der Variable =curr_product=
+         ist.
+	  f. Wir kommen beim nächsten Schritt zur "UNTERGRUPPENVORBEREITUNG".
+		 Dieser Schritt ist analog zum Schritt "GRUPPENVORBEREITUNG".
+		 - Das Summenfeld der Untergruppe nennen wir =salesclerk_sales=.
+		 - Die Aufbereitung der Ausgabe ist noch einfacher: es ist in
+		   unserem Fall gar nichts zu tun.
+		 - Die Variable für den aktuellen Verkäufer nennen wir
+           =curr_salesclerk=.
+	  g. Auf zur nächsten Schleife: Ein Untergruppenwechsel liegt bei uns
+		 vor, wenn sich der Verkäufer geändert hat. Ansonsten wie gehabt.
+	  h. "EINZELSATZVERARBEITUNG": Einfach den Preis mit der Anzahl
+         multipliziert zu =salesclerk_sales= addieren.
+	  i. Datensatz lesen ist wieder besonders einfach, denn da müssen
+		 wir nur unsere Funktion =next_sale= aufrufen und das Ergebnis
+		 in der Variable =sale= ablegen.
+  15. Endlich fertig! Nur noch die Ausgabe unter Umständen hübscher machen.
+  16. Super, da ist ordentlich etwas weitergegangen!
+
+* Übungszweck dieses Beispiels:
+  - Umgang mit Dateien üben.
+  - Klassen kennenlernen
+  - Sortieren nach mehreren Kriterien
+  - einfache Stringverarbeitung (ersetzen)
+  - Gruppenwechsel kennenlernen
+  - Iteratorkonzept kennenlernen
+  - 2 stufigen Gruppenwechsel programmieren
+
+#+HTML: {{{license}}}
